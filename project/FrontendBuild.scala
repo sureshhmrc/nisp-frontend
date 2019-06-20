@@ -9,7 +9,7 @@ object FrontendBuild extends Build with MicroService {
 
 private object AppDependencies {
 
-  private val frontendBootstrapVersion = "12.4.0"
+  private val frontendBootstrapVersion = "12.9.0"
   private val playLanguageVersion = "3.4.0"
   private val httpCachingClientVersion = "8.1.0"
   private val cspClientVersion = "3.1.0"
@@ -26,7 +26,8 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "csp-client" % cspClientVersion,
     "uk.gov.hmrc" %% "play-conditional-form-mapping" % playConditionalFormMappingVersion,
     "uk.gov.hmrc" %% "local-template-renderer"  % localTemplateRendererVersion,
-    "uk.gov.hmrc" %% "play-breadcrumb"  %  playBreadCrumbVersion
+    "uk.gov.hmrc" %% "play-breadcrumb"  %  playBreadCrumbVersion,
+    "uk.gov.hmrc" %% "auth-client"  %  "2.22.0-play-25"
   )
 
   trait TestDependencies {

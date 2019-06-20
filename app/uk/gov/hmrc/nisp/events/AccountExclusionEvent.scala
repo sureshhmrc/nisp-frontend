@@ -16,12 +16,16 @@
 
 package uk.gov.hmrc.nisp.events
 
+import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.nisp.models.enums.Exclusion.Exclusion
 import uk.gov.hmrc.http.HeaderCarrier
 
 object AccountExclusionEvent {
-  def apply(nino: String, name: Option[String], spExclusion: Exclusion)(implicit hc: HeaderCarrier): AccountExclusionEvent =
-    new AccountExclusionEvent(nino,name.getOrElse("N/A"), spExclusion)
+  def apply(nino: String, name: Option[Name], spExclusion: Exclusion)(implicit hc: HeaderCarrier): AccountExclusionEvent = {
+    val fullName = name.map(x => x.name + " " + x.lastName)
+    new AccountExclusionEvent(nino, fullName.getOrElse("N/A"), spExclusion)
+  }
+
 }
 class AccountExclusionEvent(nino: String, name: String, spExclusion: Exclusion)(implicit hc: HeaderCarrier)
   extends NispBusinessEvent("Exclusion",
