@@ -53,7 +53,7 @@ trait StatePensionConnector extends BackendConnector {
 object StatePensionConnector extends StatePensionConnector with ServicesConfig {
   override val serviceUrl = baseUrl("state-pension")
   override def http: HttpGet = WSHttp
-  override def sessionCache: SessionCache = NispSessionCache
+  override def sessionCache: SessionCache = new NispSessionCache(WSHttp, Play.current.configuration)
   override val metricsService: MetricsService = MetricsService
   override protected def mode: Mode = Play.current.mode
   override protected def runModeConfiguration: Configuration = Play.current.configuration

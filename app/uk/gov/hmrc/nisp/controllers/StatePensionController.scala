@@ -16,11 +16,14 @@
 
 package uk.gov.hmrc.nisp.controllers
 
+import javax.inject.Inject
 import org.joda.time.{LocalDate, Period}
+import play.api.Play.current
+import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent, Request, Session}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.nisp.config.ApplicationConfig
-import uk.gov.hmrc.nisp.config.wiring.NispSessionCache
 import uk.gov.hmrc.nisp.controllers.auth.{AuthorisedForNisp, NispUser}
 import uk.gov.hmrc.nisp.controllers.connectors.{AuthenticationConnectors, CustomAuditConnector}
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
@@ -33,30 +36,19 @@ import uk.gov.hmrc.nisp.utils.Constants
 import uk.gov.hmrc.nisp.utils.Constants._
 import uk.gov.hmrc.nisp.views.html._
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
-import uk.gov.hmrc.http.HeaderCarrier
 
-object StatePensionController extends StatePensionController {
-
-  override val sessionCache: SessionCache = NispSessionCache
-  override val customAuditConnector = CustomAuditConnector
-  override val applicationConfig: ApplicationConfig = ApplicationConfig
-  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
-  override val metricsService: MetricsService = MetricsService
-  override val statePensionService: StatePensionService = StatePensionService
-  override val nationalInsuranceService: NationalInsuranceService = NationalInsuranceService
-}
-
-trait StatePensionController extends NispFrontendController with AuthorisedForNisp with PertaxHelper with AuthenticationConnectors with PartialRetriever {
-
-  import play.api.Play.current
-  import play.api.i18n.Messages.Implicits._
-
-  def statePensionService: StatePensionService
-
-  def nationalInsuranceService: NationalInsuranceService
-
-  val customAuditConnector: CustomAuditConnector
-  val applicationConfig: ApplicationConfig
+class StatePensionController @Inject()(val sessionCache: SessionCache,
+                                       val customAuditConnector: CustomAuditConnector,
+                                       val applicationConfig: ApplicationConfig,
+                                       val citizenDetailsService: CitizenDetailsService,
+                                       val metricsService: MetricsService,
+                                       val statePensionService: StatePensionService,
+                                       val nationalInsuranceService: NationalInsuranceService
+                                      ) extends NispFrontendController
+                                        with AuthorisedForNisp
+                                        with PertaxHelper
+                                        with AuthenticationConnectors
+                                        with PartialRetriever {
 
   def showCope: Action[AnyContent] = AuthorisedByAny.async { implicit user =>
     implicit request =>
@@ -74,7 +66,7 @@ trait StatePensionController extends NispFrontendController with AuthorisedForNi
       }
   }
 
-  private def sendAuditEvent(statePension: StatePension, user: NispUser)(implicit hc: HeaderCarrier) = {
+  private def sendAuditEvent(statePension: StatePension, user: NispUser)(implicit hc: HeaderCarrier): Unit = {
     customAuditConnector.sendEvent(AccountAccessEvent(
       user.nino.nino,
       statePension.pensionDate,
@@ -143,7 +135,7 @@ trait StatePensionController extends NispFrontendController with AuthorisedForNi
                   yearsToContributeUntilPensionAge
                 )).withSession(storeUserInfoInSession(user, statePension.contractedOut))
 
-              }  else if (statePension.abroadAutoCredit) {
+              } else if (statePension.abroadAutoCredit) {
                 customAuditConnector.sendEvent(AccountExclusionEvent(
                   user.nino.nino,
                   user.name,

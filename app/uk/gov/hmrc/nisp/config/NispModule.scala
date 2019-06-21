@@ -18,7 +18,8 @@ package uk.gov.hmrc.nisp.config
 
 import play.api.inject.{Binding, Module}
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.nisp.config.wiring.{NispCachedStaticHtmlPartialRetriever, WSHttp}
+import uk.gov.hmrc.http.cache.client.SessionCache
+import uk.gov.hmrc.nisp.config.wiring.{NispCachedStaticHtmlPartialRetriever, NispSessionCache, WSHttp}
 import uk.gov.hmrc.nisp.controllers.ExclusionController
 import uk.gov.hmrc.nisp.services.{CitizenDetailsService, NationalInsuranceService, StatePensionService}
 import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
@@ -30,6 +31,7 @@ class NispModule extends Module{
       bind[ApplicationConfig].toInstance(ApplicationConfig),
       bind[CitizenDetailsService].toInstance(CitizenDetailsService),
       bind[NationalInsuranceService].toInstance(NationalInsuranceService),
+//      bind[SessionCache].to(classOf[NispSessionCache]),
       bind[StatePensionService].toInstance(StatePensionService),
       bind[WSHttp].toInstance(WSHttp),
       bind[ExclusionController].toSelf.eagerly()

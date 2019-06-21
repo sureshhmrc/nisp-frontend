@@ -16,8 +16,10 @@
 
 package uk.gov.hmrc.nisp.connectors
 
+import play.api.Play
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.cache.client.SessionCache
+import uk.gov.hmrc.http.{HeaderCarrier, HttpGet}
 import uk.gov.hmrc.nisp.config.wiring.{NispSessionCache, WSHttp}
 import uk.gov.hmrc.nisp.connectors.StatePensionConnector.baseUrl
 import uk.gov.hmrc.nisp.models.NationalInsuranceRecord
@@ -25,7 +27,6 @@ import uk.gov.hmrc.nisp.models.enums.APIType
 import uk.gov.hmrc.nisp.services.MetricsService
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet }
 
 trait NationalInsuranceConnector extends BackendConnector {
 
@@ -42,6 +43,6 @@ trait NationalInsuranceConnector extends BackendConnector {
 object NationalInsuranceConnector extends NationalInsuranceConnector {
   override val serviceUrl: String = baseUrl("national-insurance")
   override def http: HttpGet = WSHttp
-  override def sessionCache: SessionCache = NispSessionCache
+  override def sessionCache: SessionCache = new NispSessionCache(WSHttp, Play.current.configuration)
   override val metricsService: MetricsService = MetricsService
 }
