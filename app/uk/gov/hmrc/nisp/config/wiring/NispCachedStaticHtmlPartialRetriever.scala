@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.nisp.config.wiring
 
+import javax.inject.Inject
 import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 
-object NispCachedStaticHtmlPartialRetriever extends CachedStaticHtmlPartialRetriever {
-  override val httpGet = WSHttp
-}
+class NispCachedStaticHtmlPartialRetriever @Inject()(val httpGet : WSHttp) extends CachedStaticHtmlPartialRetriever
+
+object NispCachedStaticHtmlPartialRetriever extends NispCachedStaticHtmlPartialRetriever(WSHttp)
