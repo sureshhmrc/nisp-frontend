@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.nisp.auth
 
+import javax.inject.Inject
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
 import uk.gov.hmrc.nisp.config.ApplicationConfig
@@ -24,12 +25,12 @@ import uk.gov.hmrc.play.frontend.auth.GovernmentGateway
 
 import scala.concurrent.Future
 
-object GovernmentGatewayProvider extends GovernmentGateway {
+class GovernmentGatewayProvider @Inject()(applicationConfig: ApplicationConfig) extends GovernmentGateway {
   override def handleSessionTimeout(implicit request: Request[_]): Future[FailureResult] =
     Future.successful(Redirect(routes.StatePensionController.timeout().url))
 
   override val additionalLoginParameters: Map[String, Seq[String]] = Map("accountType" -> Seq("individual"))
-  override val continueURL: String = ApplicationConfig.postSignInRedirectUrl
-  override val loginURL: String = ApplicationConfig.ggSignInUrl
+  override val continueURL: String = applicationConfig.postSignInRedirectUrl
+  override val loginURL: String = applicationConfig.ggSignInUrl
 
 }

@@ -16,15 +16,16 @@
 
 package uk.gov.hmrc.nisp.auth
 
+import javax.inject.Inject
 import play.api.mvc.Request
 import uk.gov.hmrc.play.frontend.auth.{AnyAuthenticationProvider, GovernmentGateway, Verify}
 
 import scala.concurrent.Future
 
-object NispAuthProvider extends AnyAuthenticationProvider {
-  override def ggwAuthenticationProvider: GovernmentGateway = GovernmentGatewayProvider
-  override def verifyAuthenticationProvider: Verify = VerifyProvider
+class NispAuthProvider @Inject()(governmentGatewayProvider: GovernmentGatewayProvider, verifyProvider: VerifyProvider) extends AnyAuthenticationProvider {
+  override def ggwAuthenticationProvider: GovernmentGateway = governmentGatewayProvider
+  override def verifyAuthenticationProvider: Verify = verifyProvider
   override def login: String = ??? // Default is GG. Unable to use this based on library, just override redirectToLogin.
-  override def redirectToLogin(implicit request: Request[_]): Future[FailureResult] = GovernmentGatewayProvider.redirectToLogin
-  override def handleSessionTimeout(implicit request: Request[_]): Future[FailureResult] = GovernmentGatewayProvider.handleSessionTimeout
+  override def redirectToLogin(implicit request: Request[_]): Future[FailureResult] = governmentGatewayProvider.redirectToLogin
+  override def handleSessionTimeout(implicit request: Request[_]): Future[FailureResult] = governmentGatewayProvider.handleSessionTimeout
 }

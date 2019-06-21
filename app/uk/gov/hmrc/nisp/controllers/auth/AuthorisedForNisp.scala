@@ -44,9 +44,10 @@ trait AuthorisedForNisp extends Actions {
   implicit private def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
   class AuthorisedBy(regime: TaxRegime) {
+    val nispCompositePageVisibilityPredicate: NispCompositePageVisibilityPredicate = ???
     val authedBy: AuthenticatedBy = {
       if (applicationConfig.identityVerification) {
-        AuthorisedFor(regime, NispCompositePageVisibilityPredicate)
+        AuthorisedFor(regime, nispCompositePageVisibilityPredicate)
       } else {
         AuthorisedFor(NispVerifyRegime, VerifyConfidence)
       }
@@ -89,13 +90,13 @@ trait AuthorisedForNisp extends Actions {
   trait NispRegime extends TaxRegime {
     override def isAuthorised(accounts: Accounts): Boolean = true
 
-    override def authenticationType: AuthenticationProvider = NispAuthProvider
+    override def authenticationType: AuthenticationProvider = ???
   }
 
   object NispAnyRegime extends NispRegime
 
   object NispVerifyRegime extends NispRegime {
-    override def authenticationType: AuthenticationProvider = VerifyProvider
+    override def authenticationType: AuthenticationProvider = ???
   }
 
   def getAuthenticationProvider(confidenceLevel: ConfidenceLevel): String = {

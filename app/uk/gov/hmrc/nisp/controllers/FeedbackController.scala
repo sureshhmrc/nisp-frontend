@@ -18,7 +18,6 @@ package uk.gov.hmrc.nisp.controllers
 
 import java.net.URLEncoder
 
-import play.api.http.HeaderNames._
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.Play.current
@@ -26,30 +25,29 @@ import play.api.http.{Status => HttpStatus}
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent, Request}
 import play.twirl.api.Html
-import uk.gov.hmrc.nisp.config.ApplicationConfig
-import uk.gov.hmrc.nisp.config.wiring.{NispFormPartialRetriever, NispHeaderCarrierForPartialsConverter, WSHttp}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
+import uk.gov.hmrc.nisp.config.wiring.{NispHeaderCarrierForPartialsConverter, WSHttp}
+import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobal, LocalTemplateRenderer}
 import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
 import uk.gov.hmrc.nisp.controllers.connectors.AuthenticationConnectors
-import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
 import uk.gov.hmrc.nisp.services.CitizenDetailsService
 import uk.gov.hmrc.nisp.views.html.feedback_thankyou
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 
-import scala.concurrent.Future
-import uk.gov.hmrc.http.{HeaderCarrier, HttpPost, HttpReads, HttpResponse}
-import uk.gov.hmrc.renderer.TemplateRenderer
-
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class FeedbackController @Inject()(val httpPost: WSHttp,
                                    val citizenDetailsService: CitizenDetailsService,
                                    val applicationConfig: ApplicationConfig)(implicit formPartialRetriever: FormPartialRetriever,
-                                                                             implicit override val templateRenderer: TemplateRenderer,
-                                                                             implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever)
-  extends NispFrontendController with AuthenticationConnectors with Actions with AuthorisedForNisp {
+                                                                                  implicit val templateRenderer: LocalTemplateRenderer,
+                                                                                  implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever)
+  extends NispFrontendController(cachedStaticHtmlPartialRetriever,
+    formPartialRetriever,
+    templateRenderer) with AuthenticationConnectors with Actions with AuthorisedForNisp {
 
   def contactFormReferer(implicit request: Request[AnyContent]): String = request.headers.get(REFERER).getOrElse("")
 

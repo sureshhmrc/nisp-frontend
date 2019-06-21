@@ -18,18 +18,19 @@ package uk.gov.hmrc.nisp.auth
 
 import java.net.{URI, URLEncoder}
 
+import javax.inject.Inject
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L200
 import uk.gov.hmrc.play.frontend.auth.{CompositePageVisibilityPredicate, PageVisibilityPredicate, UpliftingIdentityConfidencePredicate}
 
-object NispCompositePageVisibilityPredicate extends CompositePageVisibilityPredicate {
+class NispCompositePageVisibilityPredicate @Inject()(applicationConfig: ApplicationConfig) extends CompositePageVisibilityPredicate {
   override def children: Seq[PageVisibilityPredicate] = Seq(
     new UpliftingIdentityConfidencePredicate(L200, ivUpliftURI)
   )
 
   private val ivUpliftURI: URI =
-    new URI(s"${ApplicationConfig.ivUpliftUrl}?origin=NISP&" +
-      s"completionURL=${URLEncoder.encode(ApplicationConfig.postSignInRedirectUrl, "UTF-8")}&" +
-      s"failureURL=${URLEncoder.encode(ApplicationConfig.notAuthorisedRedirectUrl, "UTF-8")}" +
+    new URI(s"${applicationConfig.ivUpliftUrl}?origin=NISP&" +
+      s"completionURL=${URLEncoder.encode(applicationConfig.postSignInRedirectUrl, "UTF-8")}&" +
+      s"failureURL=${URLEncoder.encode(applicationConfig.notAuthorisedRedirectUrl, "UTF-8")}" +
       s"&confidenceLevel=200")
 }

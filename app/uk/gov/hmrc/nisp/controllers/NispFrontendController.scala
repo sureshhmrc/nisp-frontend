@@ -16,35 +16,36 @@
 
 package uk.gov.hmrc.nisp.controllers
 
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Request, Result}
 import play.api.{Logger, PlayException}
-import uk.gov.hmrc.nisp.config.wiring.NispFormPartialRetriever
-import uk.gov.hmrc.nisp.config.{ApplicationGlobal, ApplicationGlobalTrait, LocalTemplateRenderer}
+import uk.gov.hmrc.nisp.config.{ApplicationGlobal, LocalTemplateRenderer}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
-import uk.gov.hmrc.renderer.TemplateRenderer
+import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 
-trait NispFrontendController extends FrontendController {
+@Singleton
+class NispFrontendController @Inject()(cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
+                                      formPartialRetriever: FormPartialRetriever,
+                                      templateRenderer: LocalTemplateRenderer) extends FrontendController {
+
   val logger: Logger = Logger(this.getClass)
 
-  implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever
-  implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever
-  implicit val templateRenderer: TemplateRenderer = LocalTemplateRenderer
+//  def onError(ex: Exception)(implicit request: Request[_]): Result = {
+//    logger.error(
+//      """
+//        |
+//        |! %sInternal server error, for (%s) [%s] ->
+//        | """.stripMargin.format(ex match {
+//        case p: PlayException => "@" + p.id + " - "
+//        case _ => ""
+//      }, request.method, request.uri),
+//      ex
+//    )
+//    //TODO: delete?
+////    InternalServerError(applicationGlobal.internalServerErrorTemplate)
+//    InternalServerError(???)
+//  }
 
-  val applicationGlobal: ApplicationGlobalTrait = ApplicationGlobal
-
-  def onError(ex: Exception)(implicit request: Request[_]): Result = {
-    logger.error(
-      """
-        |
-        |! %sInternal server error, for (%s) [%s] ->
-        | """.stripMargin.format(ex match {
-        case p: PlayException => "@" + p.id + " - "
-        case _ => ""
-      }, request.method, request.uri),
-      ex
-    )
-    InternalServerError(applicationGlobal.internalServerErrorTemplate)
-  }
+    def onError(ex: Exception)(implicit request: Request[_]): Result = ???
 
 }

@@ -16,22 +16,18 @@
 
 package uk.gov.hmrc.nisp.services
 
+import javax.inject.Inject
 import play.api.Logger
 import play.api.http.Status
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, Upstream4xxResponse}
 import uk.gov.hmrc.nisp.connectors.CitizenDetailsConnector
-import uk.gov.hmrc.nisp.models.citizen.{Address, Citizen, CitizenDetailsResponse}
+import uk.gov.hmrc.nisp.models.citizen.CitizenDetailsResponse
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier, NotFoundException, Upstream4xxResponse }
 
-object CitizenDetailsService extends CitizenDetailsService {
-  override val citizenDetailsConnector = CitizenDetailsConnector
-}
-
-trait CitizenDetailsService {
-  val citizenDetailsConnector: CitizenDetailsConnector
+class CitizenDetailsService @Inject()(citizenDetailsConnector: CitizenDetailsConnector) {
 
   def retrievePerson(nino: Nino)(implicit hc: HeaderCarrier): Future[Option[CitizenDetailsResponse]] = {
     citizenDetailsConnector.connectToGetPersonDetails(nino) map ( citizen => Some(citizen)) recover {

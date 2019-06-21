@@ -18,6 +18,7 @@ package uk.gov.hmrc.nisp.auth
 
 import java.net.URLEncoder
 
+import javax.inject.Inject
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
 import uk.gov.hmrc.nisp.config.ApplicationConfig
@@ -26,20 +27,20 @@ import uk.gov.hmrc.play.frontend.auth.Verify
 import scala.concurrent.Future
 import uk.gov.hmrc.http.SessionKeys
 
-object VerifyProvider extends Verify {
+class VerifyProvider @Inject()(applicationConfig: ApplicationConfig) extends Verify {
   override def redirectToLogin(implicit request: Request[_]): Future[FailureResult] = {
     Future.successful(Redirect(login).withSession(
-      SessionKeys.redirect -> ApplicationConfig.postSignInRedirectUrl,
+      SessionKeys.redirect -> applicationConfig.postSignInRedirectUrl,
       SessionKeys.loginOrigin -> "YSP"
     ))
   }
 
   override def login: String = {
 
-    var url = ApplicationConfig.verifySignIn
+    var url = applicationConfig.verifySignIn
 
-    if (ApplicationConfig.verifySignInContinue) {
-      url += s"?continue=${URLEncoder.encode(ApplicationConfig.postSignInRedirectUrl, "UTF-8")}"
+    if (applicationConfig.verifySignInContinue) {
+      url += s"?continue=${URLEncoder.encode(applicationConfig.postSignInRedirectUrl, "UTF-8")}"
     }
 
     url
