@@ -13,8 +13,8 @@ GET         /account/cope                          uk.gov.hmrc.nisp.controllers.
 GET         /sign-out                              uk.gov.hmrc.nisp.controllers.StatePensionController.signOut
 GET         /timeout                               uk.gov.hmrc.nisp.controllers.StatePensionController.timeout
 
-GET         /exclusion                             uk.gov.hmrc.nisp.controllers.ExclusionController.showSP
-GET         /exclusionni                           uk.gov.hmrc.nisp.controllers.ExclusionController.showNI
+GET         /exclusion                             @uk.gov.hmrc.nisp.controllers.ExclusionController.showSP
+GET         /exclusionni                           @uk.gov.hmrc.nisp.controllers.ExclusionController.showNI
 
 GET         /account/nirecord                      uk.gov.hmrc.nisp.controllers.NIRecordController.showFull
 GET         /account/nirecord/pta                  uk.gov.hmrc.nisp.controllers.NIRecordController.pta

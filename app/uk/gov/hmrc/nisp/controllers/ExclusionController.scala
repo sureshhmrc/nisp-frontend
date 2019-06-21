@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.nisp.controllers
 
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
@@ -27,18 +28,18 @@ import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
 import uk.gov.hmrc.nisp.models.enums.Exclusion
 import uk.gov.hmrc.nisp.services._
 import uk.gov.hmrc.nisp.views.html._
+import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 
-object ExclusionController extends ExclusionController with AuthenticationConnectors with PartialRetriever with NispFrontendController {
-  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
-  override val applicationConfig: ApplicationConfig = ApplicationConfig
-  override val statePensionService: StatePensionService = StatePensionService
-  override val nationalInsuranceService: NationalInsuranceService = NationalInsuranceService
-}
-
-trait ExclusionController extends NispFrontendController with AuthorisedForNisp {
-
-  val statePensionService: StatePensionService
-  val nationalInsuranceService: NationalInsuranceService
+@Singleton
+class ExclusionController @Inject()(
+                                   implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
+                                     val citizenDetailsService: CitizenDetailsService,
+                                     val applicationConfig: ApplicationConfig,
+                                     statePensionService: StatePensionService,
+                                     nationalInsuranceService: NationalInsuranceService
+                                   ) extends NispFrontendController
+                                      with AuthorisedForNisp
+                                      with AuthenticationConnectors {
 
   def showSP: Action[AnyContent] = AuthorisedByAny.async { implicit user =>
     implicit request =>
