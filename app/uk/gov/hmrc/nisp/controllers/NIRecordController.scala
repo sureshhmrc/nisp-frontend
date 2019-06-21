@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.nisp.controllers
 
+import javax.inject.Inject
 import org.joda.time.{DateTimeZone, LocalDate}
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.cache.client.SessionCache
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.config.wiring.NispSessionCache
 import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
@@ -34,28 +35,22 @@ import uk.gov.hmrc.nisp.services._
 import uk.gov.hmrc.nisp.utils.{Constants, Formatting}
 import uk.gov.hmrc.nisp.views.html.{nirecordGapsAndHowToCheckThem, nirecordVoluntaryContributions, nirecordpage}
 import uk.gov.hmrc.time.TaxYear
-import uk.gov.hmrc.http.HeaderCarrier
 
-object NIRecordController extends NIRecordController with AuthenticationConnectors with PartialRetriever {
-  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
-  override val applicationConfig: ApplicationConfig = ApplicationConfig
-  override val customAuditConnector: CustomAuditConnector = CustomAuditConnector
-  override val sessionCache: SessionCache = NispSessionCache
-  override val showFullNI: Boolean = ApplicationConfig.showFullNI
-  override val currentDate = new LocalDate(DateTimeZone.forID("Europe/London"))
-  override val metricsService: MetricsService = MetricsService
-  override val nationalInsuranceService: NationalInsuranceService = NationalInsuranceService
-  override val statePensionService: StatePensionService = StatePensionService
-}
+class NIRecordController @Inject()(val citizenDetailsService: CitizenDetailsService,
+                                   val applicationConfig: ApplicationConfig,
+                                   customAuditConnector: CustomAuditConnector,
+                                   val sessionCache: NispSessionCache,
+                                   val metricsService: MetricsService,
+                                   nationalInsuranceService: NationalInsuranceService,
+                                   statePensionService: StatePensionService
+                                  ) extends AuthenticationConnectors
+  with PartialRetriever
+  with NispFrontendController
+  with AuthorisedForNisp
+  with PertaxHelper {
 
-trait NIRecordController extends NispFrontendController with AuthorisedForNisp with PertaxHelper {
-  val customAuditConnector: CustomAuditConnector
-  val showFullNI: Boolean
-  val currentDate: LocalDate
-
-  def nationalInsuranceService: NationalInsuranceService
-
-  def statePensionService: StatePensionService
+  val showFullNI: Boolean = ApplicationConfig.showFullNI
+  val currentDate = new LocalDate(DateTimeZone.forID("Europe/London"))
 
   def showFull: Action[AnyContent] = show(gapsOnlyView = false)
 
@@ -67,7 +62,7 @@ trait NIRecordController extends NispFrontendController with AuthorisedForNisp w
       Redirect(routes.NIRecordController.showFull())
   }
 
-  private def sendAuditEvent(nino: Nino, niRecord: NationalInsuranceRecord, yearsToContribute: Int)(implicit hc: HeaderCarrier) = {
+  private def sendAuditEvent(nino: Nino, niRecord: NationalInsuranceRecord, yearsToContribute: Int)(implicit hc: HeaderCarrier): Unit = {
     customAuditConnector.sendEvent(NIRecordEvent(
       nino.nino,
       yearsToContribute,
@@ -130,8 +125,8 @@ trait NIRecordController extends NispFrontendController with AuthorisedForNisp w
                   if (recordHasEnded) Formatting.startYearToTaxYear(finalRelevantStartYear)
                   else Formatting.startYearToTaxYear(niRecord.earningsIncludedUpTo.getYear)
                 val tableEnd: String = niRecord.taxYears match {
-                  case Nil  => tableStart
-                  case _    => niRecord.taxYears.last.taxYear
+                  case Nil => tableStart
+                  case _ => niRecord.taxYears.last.taxYear
                 }
 
                 sendAuditEvent(user.nino, niRecord, yearsToContribute)

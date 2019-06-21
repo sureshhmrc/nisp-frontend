@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.nisp.controllers
 
+import javax.inject.Inject
 import play.api.Logger
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
@@ -33,14 +34,14 @@ import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
 
 import scala.concurrent.Future
 
-object LandingController extends LandingController with AuthenticationConnectors with PartialRetriever {
-  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
-  override val applicationConfig: ApplicationConfig = ApplicationConfig
-  override val identityVerificationConnector: IdentityVerificationConnector = IdentityVerificationConnector
-}
-
-trait LandingController extends NispFrontendController with Actions with AuthorisedForNisp {
-  val identityVerificationConnector: IdentityVerificationConnector
+class LandingController @Inject()(val citizenDetailsService: CitizenDetailsService,
+                                  val applicationConfig: ApplicationConfig,
+                                  identityVerificationConnector: IdentityVerificationConnector
+                                 ) extends AuthenticationConnectors
+                                    with PartialRetriever
+                                    with NispFrontendController
+                                    with Actions
+                                    with AuthorisedForNisp {
 
   def show: Action[AnyContent] = UnauthorisedAction(
     implicit request =>
