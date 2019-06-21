@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.nisp.services
 
+import javax.inject.Inject
 import org.joda.time.{DateTime, LocalDate}
 import play.api.http.Status._
 import uk.gov.hmrc.domain.Nino
@@ -27,17 +28,17 @@ import uk.gov.hmrc.nisp.models.enums.Exclusion._
 import scala.concurrent.Future
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.time.CurrentTaxYear
-import uk.gov.hmrc.http.{ HeaderCarrier, Upstream4xxResponse }
+import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse}
 
 
-trait StatePensionService extends CurrentTaxYear {
-  def getSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[StatePensionExclusionFiltered, StatePension]]
+class StatePensionService @Inject()(statePensionConnector: StatePensionConnector) extends CurrentTaxYear {
+  override def now: () => DateTime = () => DateTime.now(ukTime)
 
   def yearsToContributeUntilPensionAge(earningsIncludedUpTo: LocalDate, finalRelevantYearStart: Int): Int = {
     finalRelevantYearStart - taxYearFor(earningsIncludedUpTo).startYear
   }
 
-  private[services] def filterExclusions(exclusions: List[Exclusion]): Exclusion = {
+   def filterExclusions(exclusions: List[Exclusion]): Exclusion = {
     if (exclusions.contains(Exclusion.Dead)) {
       Exclusion.Dead
     } else if (exclusions.contains(Exclusion.ManualCorrespondenceIndicator)) {
@@ -58,8 +59,8 @@ trait StatePensionService extends CurrentTaxYear {
   }
 }
 
-trait StatePensionConnection extends StatePensionService {
-  val statePensionConnector: StatePensionConnector
+class StatePensionConnection @Inject()(statePensionConnector: StatePensionConnector,
+                                       statePensionService: StatePensionService)  {
 
   final val exclusionCodeDead = "EXCLUSION_DEAD"
   final val exclusionCodeManualCorrespondence = "EXCLUSION_MANUAL_CORRESPONDENCE"
@@ -70,7 +71,7 @@ trait StatePensionConnection extends StatePensionService {
         case Right(statePension) => Right(statePension)
 
         case Left(spExclusion) => Left(StatePensionExclusionFiltered(
-            filterExclusions(spExclusion.exclusionReasons),
+            statePensionService.filterExclusions(spExclusion.exclusionReasons),
             spExclusion.pensionAge,
             spExclusion.pensionDate,
             spExclusion.statePensionAgeUnderConsideration
@@ -85,7 +86,4 @@ trait StatePensionConnection extends StatePensionService {
   }
 }
 
-object StatePensionService extends StatePensionService with StatePensionConnection {
-  override def now: () => DateTime = () => DateTime.now(ukTime)
-  override val statePensionConnector: StatePensionConnector = StatePensionConnector
-}
+

@@ -23,8 +23,8 @@ import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.config.wiring.NispSessionCache
+import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobal, LocalTemplateRenderer}
 import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
 import uk.gov.hmrc.nisp.controllers.connectors.{AuthenticationConnectors, CustomAuditConnector}
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
@@ -34,6 +34,7 @@ import uk.gov.hmrc.nisp.models._
 import uk.gov.hmrc.nisp.services._
 import uk.gov.hmrc.nisp.utils.{Constants, Formatting}
 import uk.gov.hmrc.nisp.views.html.{nirecordGapsAndHowToCheckThem, nirecordVoluntaryContributions, nirecordpage}
+import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.time.TaxYear
 
 class NIRecordController @Inject()(val citizenDetailsService: CitizenDetailsService,
@@ -42,14 +43,21 @@ class NIRecordController @Inject()(val citizenDetailsService: CitizenDetailsServ
                                    val sessionCache: NispSessionCache,
                                    val metricsService: MetricsService,
                                    nationalInsuranceService: NationalInsuranceService,
-                                   statePensionService: StatePensionService
-                                  ) extends AuthenticationConnectors
-  with PartialRetriever
-  with NispFrontendController
-  with AuthorisedForNisp
-  with PertaxHelper {
+                                   statePensionService: StatePensionService,
+                                   statePensionConnection: StatePensionConnection
+                                   )
+                                  (implicit override val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
+                                  implicit val formPartialRetriever: FormPartialRetriever,
+                                  implicit val templateRenderer: LocalTemplateRenderer)
+                                  extends NispFrontendController(cachedStaticHtmlPartialRetriever,
+                                    formPartialRetriever,
+                                    templateRenderer)
+                                  with AuthenticationConnectors
+                                  with PartialRetriever
+                                  with AuthorisedForNisp
+                                  with PertaxHelper {
 
-  val showFullNI: Boolean = ApplicationConfig.showFullNI
+  val showFullNI: Boolean = applicationConfig.showFullNI
   val currentDate = new LocalDate(DateTimeZone.forID("Europe/London"))
 
   def showFull: Action[AnyContent] = show(gapsOnlyView = false)
@@ -104,7 +112,7 @@ class NIRecordController @Inject()(val citizenDetailsService: CitizenDetailsServ
     implicit user =>
       implicit request =>
         val nationalInsuranceResponseF = nationalInsuranceService.getSummary(user.nino)
-        val statePensionResponseF = statePensionService.getSummary(user.nino)
+        val statePensionResponseF = statePensionConnection.getSummary(user.nino)
         (for (
           nationalInsuranceRecordResponse <- nationalInsuranceResponseF;
           statePensionResponse <- statePensionResponseF

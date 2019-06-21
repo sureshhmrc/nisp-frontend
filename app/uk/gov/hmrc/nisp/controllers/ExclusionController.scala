@@ -21,71 +21,75 @@ import play.api.Logger
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.hmrc.nisp.config.ApplicationConfig
+import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobal, LocalTemplateRenderer}
+import uk.gov.hmrc.nisp.connectors.StatePensionConnector
 import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
 import uk.gov.hmrc.nisp.controllers.connectors.AuthenticationConnectors
-import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
 import uk.gov.hmrc.nisp.models.enums.Exclusion
 import uk.gov.hmrc.nisp.services._
 import uk.gov.hmrc.nisp.views.html._
-import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
+import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 
 @Singleton
-class ExclusionController @Inject()(
-                                     val citizenDetailsService: CitizenDetailsService,
-                                     val applicationConfig: ApplicationConfig,
-                                     statePensionService: StatePensionService,
-                                     nationalInsuranceService: NationalInsuranceService
-                                   ) (implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever)
-                                      extends NispFrontendController
-                                      with AuthorisedForNisp
-                                      with AuthenticationConnectors {
+class ExclusionController @Inject()(val citizenDetailsService: CitizenDetailsService,
+                                    val applicationConfig: ApplicationConfig,
+                                    statePensionConnection: StatePensionConnection,
+                                    nationalInsuranceService: NationalInsuranceService)(implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
+                                     implicit val formPartialRetriever: FormPartialRetriever,
+                                     implicit val templateRenderer: LocalTemplateRenderer)
+                                    extends NispFrontendController(cachedStaticHtmlPartialRetriever,
+                                      formPartialRetriever,
+                                      templateRenderer)
+                                    with AuthorisedForNisp
+                                    with AuthenticationConnectors {
 
-  def showSP: Action[AnyContent] = AuthorisedByAny.async { implicit user =>
-    implicit request =>
+  def showSP: Action[AnyContent] = AuthorisedByAny.async {
+    implicit user =>
+      implicit request =>
 
-      val statePensionF = statePensionService.getSummary(user.nino)
-      val nationalInsuranceF = nationalInsuranceService.getSummary(user.nino)
+        val statePensionF = statePensionConnection.getSummary(user.nino)
+        val nationalInsuranceF = nationalInsuranceService.getSummary(user.nino)
 
-      for (
-        statePension <- statePensionF;
-        nationalInsurance <- nationalInsuranceF
-      ) yield {
-        statePension match {
-          case Right(sp) if sp.reducedRateElection =>
-            Ok(excluded_sp(Exclusion.MarriedWomenReducedRateElection, Some(sp.pensionAge), Some(sp.pensionDate), false, None))
-          case Right(sp) if sp.abroadAutoCredit =>
-            Ok(excluded_sp(Exclusion.Abroad, Some(sp.pensionAge), Some(sp.pensionDate), nationalInsurance.isRight, None))
-          case Left(exclusion) =>
-            if (exclusion.exclusion == Exclusion.Dead)
-              Ok(excluded_dead(Exclusion.Dead, exclusion.pensionAge))
-            else if (exclusion.exclusion == Exclusion.ManualCorrespondenceIndicator)
-              Ok(excluded_mci(Exclusion.ManualCorrespondenceIndicator, exclusion.pensionAge))
-            else {
-              Ok(excluded_sp(exclusion.exclusion, exclusion.pensionAge, exclusion.pensionDate, nationalInsurance.isRight, exclusion.statePensionAgeUnderConsideration))
-            }
-          case _ =>
-            Logger.warn("User accessed /exclusion as non-excluded user")
-            Redirect(routes.StatePensionController.show())
+        for (
+          statePension <- statePensionF;
+          nationalInsurance <- nationalInsuranceF
+        ) yield {
+          statePension match {
+            case Right(sp) if sp.reducedRateElection =>
+              Ok(excluded_sp(Exclusion.MarriedWomenReducedRateElection, Some(sp.pensionAge), Some(sp.pensionDate), false, None))
+            case Right(sp) if sp.abroadAutoCredit =>
+              Ok(excluded_sp(Exclusion.Abroad, Some(sp.pensionAge), Some(sp.pensionDate), nationalInsurance.isRight, None))
+            case Left(exclusion) =>
+              if (exclusion.exclusion == Exclusion.Dead)
+                Ok(excluded_dead(Exclusion.Dead, exclusion.pensionAge))
+              else if (exclusion.exclusion == Exclusion.ManualCorrespondenceIndicator)
+                Ok(excluded_mci(Exclusion.ManualCorrespondenceIndicator, exclusion.pensionAge))
+              else {
+                Ok(excluded_sp(exclusion.exclusion, exclusion.pensionAge, exclusion.pensionDate, nationalInsurance.isRight, exclusion.statePensionAgeUnderConsideration))
+              }
+            case _ =>
+              Logger.warn("User accessed /exclusion as non-excluded user")
+              Redirect(routes.StatePensionController.show())
+          }
         }
-      }
   }
 
-  def showNI: Action[AnyContent] = AuthorisedByAny.async { implicit user =>
-    implicit request =>
-      nationalInsuranceService.getSummary(user.nino).map {
-        case Left(exclusion) =>
-          if (exclusion == Exclusion.Dead) {
-            Ok(excluded_dead(Exclusion.Dead, None))
-          }
-          else if (exclusion == Exclusion.ManualCorrespondenceIndicator) {
-            Ok(excluded_mci(Exclusion.ManualCorrespondenceIndicator, None))
-          } else {
-            Ok(excluded_ni(exclusion))
-          }
-        case _ =>
-          Logger.warn("User accessed /exclusion/nirecord as non-excluded user")
-          Redirect(routes.NIRecordController.showGaps())
-      }
+  def showNI: Action[AnyContent] = AuthorisedByAny.async {
+    implicit user =>
+      implicit request =>
+        nationalInsuranceService.getSummary(user.nino).map {
+          case Left(exclusion) =>
+            if (exclusion == Exclusion.Dead) {
+              Ok(excluded_dead(Exclusion.Dead, None))
+            }
+            else if (exclusion == Exclusion.ManualCorrespondenceIndicator) {
+              Ok(excluded_mci(Exclusion.ManualCorrespondenceIndicator, None))
+            } else {
+              Ok(excluded_ni(exclusion))
+            }
+          case _ =>
+            Logger.warn("User accessed /exclusion/nirecord as non-excluded user")
+            Redirect(routes.NIRecordController.showGaps())
+        }
   }
 }

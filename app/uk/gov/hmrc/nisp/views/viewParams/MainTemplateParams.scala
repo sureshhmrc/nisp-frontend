@@ -26,7 +26,6 @@ case class MainTemplateParams(
   sidebarLinks: Option[Html] = None,
   sidebarClasses: Option[String] = None,
   userLoggedIn: Boolean = false,
-  applicationConfig: ApplicationConfig = ApplicationConfig,
   showTitleHeaderNav: Boolean = true,
   showBetaBanner: Boolean = false,
   pageScripts: Option[Html] = None,

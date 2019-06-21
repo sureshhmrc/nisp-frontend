@@ -23,7 +23,7 @@ import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent, Request, Session}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.SessionCache
-import uk.gov.hmrc.nisp.config.ApplicationConfig
+import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobal, LocalTemplateRenderer}
 import uk.gov.hmrc.nisp.controllers.auth.{AuthorisedForNisp, NispUser}
 import uk.gov.hmrc.nisp.controllers.connectors.{AuthenticationConnectors, CustomAuditConnector}
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
@@ -36,6 +36,7 @@ import uk.gov.hmrc.nisp.utils.Constants
 import uk.gov.hmrc.nisp.utils.Constants._
 import uk.gov.hmrc.nisp.views.html._
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
+import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 
 class StatePensionController @Inject()(val sessionCache: SessionCache,
                                        val customAuditConnector: CustomAuditConnector,
@@ -43,8 +44,14 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
                                        val citizenDetailsService: CitizenDetailsService,
                                        val metricsService: MetricsService,
                                        val statePensionService: StatePensionService,
-                                       val nationalInsuranceService: NationalInsuranceService
-                                      ) extends NispFrontendController
+                                       val statePensionConnection: StatePensionConnection,
+                                       val nationalInsuranceService: NationalInsuranceService)
+                                      (implicit override val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
+                                       implicit val formPartialRetriever: FormPartialRetriever,
+                                       implicit val templateRenderer: LocalTemplateRenderer)
+                                      extends NispFrontendController(cachedStaticHtmlPartialRetriever,
+                                        formPartialRetriever,
+                                        templateRenderer)
                                         with AuthorisedForNisp
                                         with PertaxHelper
                                         with AuthenticationConnectors
@@ -54,7 +61,7 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
     implicit request =>
       isFromPertax.flatMap { isPertax =>
 
-        statePensionService.getSummary(user.nino) map {
+        statePensionConnection.getSummary(user.nino) map {
           case Right(statePension) if statePension.contractedOut => {
             Ok(statepension_cope(
               statePension.amounts.cope.weeklyAmount,
@@ -86,7 +93,7 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
     implicit request =>
       isFromPertax.flatMap { isPertax =>
 
-        val statePensionResponseF = statePensionService.getSummary(user.nino)
+        val statePensionResponseF = statePensionConnection.getSummary(user.nino)
         val nationalInsuranceResponseF = nationalInsuranceService.getSummary(user.nino)
 
         (for (

@@ -16,24 +16,25 @@
 
 package uk.gov.hmrc.nisp.services
 
+import javax.inject.Inject
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse}
 import uk.gov.hmrc.nisp.connectors.NationalInsuranceConnector
+import uk.gov.hmrc.nisp.models.NationalInsuranceRecord
 import uk.gov.hmrc.nisp.models.enums.Exclusion
 import uk.gov.hmrc.nisp.models.enums.Exclusion.Exclusion
-import uk.gov.hmrc.nisp.models.{NationalInsuranceRecord, NationalInsuranceTaxYear}
-import uk.gov.hmrc.nisp.utils.Constants
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import uk.gov.hmrc.time.TaxYear
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse}
 
-trait NationalInsuranceService {
-  def getSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[Exclusion, NationalInsuranceRecord]]
-}
+//TODO: only for testing?
+//trait NationalInsuranceService {
+//  def getSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[Exclusion, NationalInsuranceRecord]]
+//}
 
+class NationalInsuranceService @Inject()(nationalInsuranceConnector: NationalInsuranceConnector) extends NationalInsuranceConnection(nationalInsuranceConnector)
 
-trait NationalInsuranceConnection {
+class NationalInsuranceConnection @Inject()(nationalInsuranceConnector: NationalInsuranceConnector) {
 
   final val ExclusionCodeDead = "EXCLUSION_DEAD"
   final val ExclusionCodeManualCorrespondence = "EXCLUSION_MANUAL_CORRESPONDENCE"
@@ -41,8 +42,6 @@ trait NationalInsuranceConnection {
   final val ExclusionCodeMarriedWomen = "EXCLUSION_MARRIED_WOMENS_REDUCED_RATE"
 
   final val ExclusionErrorCode = 403
-
-  val nationalInsuranceConnector: NationalInsuranceConnector
 
   def getSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[Exclusion, NationalInsuranceRecord]] = {
     nationalInsuranceConnector.getNationalInsurance(nino)
@@ -66,8 +65,4 @@ trait NationalInsuranceConnection {
           Left(Exclusion.MarriedWomenReducedRateElection)
       }
   }
-}
-
-object NationalInsuranceService extends NationalInsuranceService with NationalInsuranceConnection {
-  override val nationalInsuranceConnector: NationalInsuranceConnector = NationalInsuranceConnector
 }

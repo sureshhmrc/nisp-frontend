@@ -17,11 +17,11 @@
 package uk.gov.hmrc.nisp.controllers
 
 import javax.inject.Inject
-import play.api.Logger
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.Messages
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.hmrc.nisp.config.ApplicationConfig
+import play.api.{Application, Logger}
+import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobal, LocalTemplateRenderer}
+import uk.gov.hmrc.nisp.connectors.IdentityVerificationSuccessResponse._
 import uk.gov.hmrc.nisp.connectors.{IdentityVerificationConnector, IdentityVerificationSuccessResponse}
 import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
 import uk.gov.hmrc.nisp.controllers.connectors.AuthenticationConnectors
@@ -31,17 +31,25 @@ import uk.gov.hmrc.nisp.views.html.iv.failurepages.{locked_out, not_authorised, 
 import uk.gov.hmrc.nisp.views.html.{identity_verification_landing, landing}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
+import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 
 import scala.concurrent.Future
 
 class LandingController @Inject()(val citizenDetailsService: CitizenDetailsService,
                                   val applicationConfig: ApplicationConfig,
-                                  identityVerificationConnector: IdentityVerificationConnector
-                                 ) extends AuthenticationConnectors
-                                    with PartialRetriever
-                                    with NispFrontendController
-                                    with Actions
-                                    with AuthorisedForNisp {
+                                  identityVerificationConnector: IdentityVerificationConnector)
+                                 (implicit override val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
+                                  implicit val formPartialRetriever: FormPartialRetriever,
+                                  implicit val templateRenderer: LocalTemplateRenderer,
+                                  implicit val messages: Messages,
+                                  implicit val application: Application)
+                                  extends NispFrontendController(cachedStaticHtmlPartialRetriever,
+                                    formPartialRetriever,
+                                    templateRenderer)
+                                  with AuthenticationConnectors
+                                  with PartialRetriever
+                                  with Actions
+                                  with AuthorisedForNisp {
 
   def show: Action[AnyContent] = UnauthorisedAction(
     implicit request =>
@@ -52,33 +60,35 @@ class LandingController @Inject()(val citizenDetailsService: CitizenDetailsServi
       }
   )
 
-  def verifySignIn: Action[AnyContent] = AuthorisedByVerify { implicit user =>
-    implicit request =>
-      Redirect(routes.StatePensionController.show())
+  def verifySignIn: Action[AnyContent] = AuthorisedByVerify {
+    implicit user =>
+      implicit request =>
+        Redirect(routes.StatePensionController.show())
   }
 
-  def showNotAuthorised(journeyId: Option[String]): Action[AnyContent] = UnauthorisedAction.async { implicit request =>
-    val result = journeyId map { id =>
+  def showNotAuthorised(journeyId: Option[String]): Action[AnyContent] = UnauthorisedAction.async {
+    implicit request =>
+      val result = journeyId map {
+        id =>
 
-      import IdentityVerificationSuccessResponse._
+          val identityVerificationResult = identityVerificationConnector.identityVerificationResponse(id)
+          identityVerificationResult map {
+            case IdentityVerificationSuccessResponse(FailedMatching) => not_authorised()
+            case IdentityVerificationSuccessResponse(InsufficientEvidence) => not_authorised()
+            case IdentityVerificationSuccessResponse(TechnicalIssue) => technical_issue()
+            case IdentityVerificationSuccessResponse(LockedOut) => locked_out()
+            case IdentityVerificationSuccessResponse(Timeout) => timeout()
+            case IdentityVerificationSuccessResponse(Incomplete) => not_authorised()
+            case IdentityVerificationSuccessResponse(IdentityVerificationSuccessResponse.PreconditionFailed) => not_authorised()
+            case IdentityVerificationSuccessResponse(UserAborted) => not_authorised()
+            case IdentityVerificationSuccessResponse(FailedIV) => not_authorised()
+            case response => Logger.warn(s"Unhandled Response from Identity Verification: $response");
+              technical_issue()
+          }
+      } getOrElse Future.successful(not_authorised(showFirstParagraph = false)) // 2FA returns no journeyId
 
-      val identityVerificationResult = identityVerificationConnector.identityVerificationResponse(id)
-      identityVerificationResult map {
-        case IdentityVerificationSuccessResponse(FailedMatching) => not_authorised()
-        case IdentityVerificationSuccessResponse(InsufficientEvidence) => not_authorised()
-        case IdentityVerificationSuccessResponse(TechnicalIssue) => technical_issue()
-        case IdentityVerificationSuccessResponse(LockedOut) => locked_out()
-        case IdentityVerificationSuccessResponse(Timeout) => timeout()
-        case IdentityVerificationSuccessResponse(Incomplete) => not_authorised()
-        case IdentityVerificationSuccessResponse(IdentityVerificationSuccessResponse.PreconditionFailed) => not_authorised()
-        case IdentityVerificationSuccessResponse(UserAborted) => not_authorised()
-        case IdentityVerificationSuccessResponse(FailedIV) => not_authorised()
-        case response => Logger.warn(s"Unhandled Response from Identity Verification: $response"); technical_issue()
+      result.map {
+        Ok(_).withNewSession
       }
-    } getOrElse Future.successful(not_authorised(showFirstParagraph = false)) // 2FA returns no journeyId
-
-    result.map {
-      Ok(_).withNewSession
-    }
   }
 }

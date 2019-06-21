@@ -25,22 +25,31 @@ import play.api.mvc.Request
 import play.api.{Application, Configuration, Play}
 import play.twirl.api.Html
 import uk.gov.hmrc.crypto.ApplicationCrypto
-import uk.gov.hmrc.nisp.config.wiring.NispAuditConnector
+import uk.gov.hmrc.http.CoreGet
+import uk.gov.hmrc.nisp.config.wiring.{NispAuditConnector, NispCachedStaticHtmlPartialRetriever, WSHttp}
 import uk.gov.hmrc.nisp.controllers.NispFrontendController
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
 import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
 import uk.gov.hmrc.play.frontend.bootstrap.DefaultFrontendGlobal
 import uk.gov.hmrc.play.frontend.filters.{FrontendAuditFilter, FrontendLoggingFilter, MicroserviceFilterSupport}
+import uk.gov.hmrc.play.partials.FormPartialRetriever
 
 object ApplicationGlobal extends ApplicationGlobalTrait {
   override protected def mode: Mode = Play.current.mode
   override protected def runModeConfiguration: Configuration = Play.current.configuration
 }
+object NispFormPartialRetriever extends FormPartialRetriever {
+  override def crypto: String => String = ApplicationGlobal.sessionCookieCryptoFilter.encrypt
+  override def httpGet: CoreGet = WSHttp
+}
 
-trait ApplicationGlobalTrait extends DefaultFrontendGlobal with RunMode with PartialRetriever with NispFrontendController {
+trait ApplicationGlobalTrait extends DefaultFrontendGlobal with RunMode with PartialRetriever {
   override val auditConnector = NispAuditConnector
   override val loggingFilter = NispLoggingFilter
   override val frontendAuditFilter = NispFrontendAuditFilter
+
+  implicit val partialRetriever = NispFormPartialRetriever
+  implicit val templateRenderer = LocalTemplateRenderer
 
   override def onStart(app: Application) {
     super.onStart(app)

@@ -17,10 +17,11 @@
 @import play.api.Play.current
 @import uk.gov.hmrc.nisp.config.ApplicationConfig
 @import uk.gov.hmrc.nisp.controllers.routes
-
 @import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
 
-@(pageTitle: String, heading: String, message: String, applicationConfig: ApplicationConfig = ApplicationConfig)(implicit messages: Messages, formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever, templateRenderer: uk.gov.hmrc.renderer.TemplateRenderer)
+@this(applicationConfig: ApplicationConfig)
+
+@(pageTitle: String, heading: String, message: String)(implicit messages: Messages, formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever, templateRenderer: uk.gov.hmrc.renderer.TemplateRenderer)
 
 @mainContent = {
 <h1 class="heading-large">@heading</h1>
