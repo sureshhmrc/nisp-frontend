@@ -18,6 +18,8 @@ package uk.gov.hmrc.nisp.controllers
 
 import java.net.URLEncoder
 
+import play.api.http.HeaderNames._
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.Play.current
 import play.api.http.{Status => HttpStatus}
@@ -33,34 +35,25 @@ import uk.gov.hmrc.nisp.services.CitizenDetailsService
 import uk.gov.hmrc.nisp.views.html.feedback_thankyou
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
-import uk.gov.hmrc.play.partials.FormPartialRetriever
+import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpPost, HttpReads, HttpResponse }
+import uk.gov.hmrc.http.{HeaderCarrier, HttpPost, HttpReads, HttpResponse}
+import uk.gov.hmrc.renderer.TemplateRenderer
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object FeedbackController extends FeedbackController with AuthenticationConnectors with PartialRetriever {
+@Singleton
+class FeedbackController @Inject()(val httpPost: WSHttp,
+                                   val citizenDetailsService: CitizenDetailsService,
+                                   val applicationConfig: ApplicationConfig)(implicit formPartialRetriever: FormPartialRetriever,
+                                                                             implicit val templateRenderer: TemplateRenderer,
+                                                                             implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever)
+  extends AuthenticationConnectors with Actions with AuthorisedForNisp {
 
-  override implicit val formPartialRetriever: FormPartialRetriever = NispFormPartialRetriever
+  def contactFormReferer(implicit request: Request[AnyContent]): String = request.headers.get(REFERER).getOrElse("")
 
-  override val httpPost = WSHttp
-
-  override def contactFormReferer(implicit request: Request[AnyContent]): String = request.headers.get(REFERER).getOrElse("")
-
-  override def localSubmitUrl(implicit request: Request[AnyContent]): String = routes.FeedbackController.submit().url
-
-  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
-  override val applicationConfig: ApplicationConfig = ApplicationConfig
-}
-
-trait FeedbackController extends NispFrontendController with Actions with AuthorisedForNisp {
-  implicit val formPartialRetriever: FormPartialRetriever
-
-  def httpPost: HttpPost
-
-  def contactFormReferer(implicit request: Request[AnyContent]): String
-
-  def localSubmitUrl(implicit request: Request[AnyContent]): String
+  def localSubmitUrl(implicit request: Request[AnyContent]): String = routes.FeedbackController.submit().url
 
   private val TICKET_ID = "ticketId"
 
@@ -87,7 +80,7 @@ trait FeedbackController extends NispFrontendController with Actions with Author
   def submit: Action[AnyContent] = UnauthorisedAction.async {
     implicit request =>
       request.body.asFormUrlEncoded.map { formData =>
-        httpPost.POSTForm[HttpResponse](feedbackHmrcSubmitPartialUrl, formData)(rds = PartialsFormReads.readPartialsForm, hc = partialsReadyHeaderCarrier,ec=global).map {
+        httpPost.POSTForm[HttpResponse](feedbackHmrcSubmitPartialUrl, formData)(rds = PartialsFormReads.readPartialsForm, hc = partialsReadyHeaderCarrier, ec = global).map {
           resp =>
             resp.status match {
               case HttpStatus.OK => Redirect(routes.FeedbackController.showThankYou()).withSession(request.session + (TICKET_ID -> resp.body))

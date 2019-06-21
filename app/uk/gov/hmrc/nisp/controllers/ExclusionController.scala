@@ -32,12 +32,12 @@ import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 
 @Singleton
 class ExclusionController @Inject()(
-                                   implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
                                      val citizenDetailsService: CitizenDetailsService,
                                      val applicationConfig: ApplicationConfig,
                                      statePensionService: StatePensionService,
                                      nationalInsuranceService: NationalInsuranceService
-                                   ) extends NispFrontendController
+                                   ) (implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever)
+                                      extends NispFrontendController
                                       with AuthorisedForNisp
                                       with AuthenticationConnectors {
 
