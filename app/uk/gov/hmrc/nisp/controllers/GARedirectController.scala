@@ -16,28 +16,23 @@
 
 package uk.gov.hmrc.nisp.controllers
 
-import play.api.Logger
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.nisp.config.ApplicationConfig
-import uk.gov.hmrc.nisp.connectors.{IdentityVerificationConnector, IdentityVerificationSuccessResponse}
+import uk.gov.hmrc.nisp.connectors.IdentityVerificationConnector
 import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
 import uk.gov.hmrc.nisp.controllers.connectors.AuthenticationConnectors
-import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
 import uk.gov.hmrc.nisp.services.CitizenDetailsService
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
-import scala.concurrent.Future
+import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 
-object GARedirectController extends GARedirectController with AuthenticationConnectors with PartialRetriever {
-  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
-  override val applicationConfig: ApplicationConfig = ApplicationConfig
-  override val identityVerificationConnector: IdentityVerificationConnector = IdentityVerificationConnector
-}
-
-trait GARedirectController extends NispFrontendController with Actions with AuthorisedForNisp {
-  val identityVerificationConnector: IdentityVerificationConnector
+@Singleton
+class GARedirectController @Inject()(val citizenDetailsService: CitizenDetailsService,
+                                     val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
+                                     val applicationConfig: ApplicationConfig = ApplicationConfig,
+                                     identityVerificationConnector: IdentityVerificationConnector)
+  extends NispFrontendController with AuthenticationConnectors with Actions with AuthorisedForNisp {
 
   def show: Action[AnyContent] = UnauthorisedAction(
     implicit request =>

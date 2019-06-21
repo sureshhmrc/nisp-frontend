@@ -47,9 +47,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class FeedbackController @Inject()(val httpPost: WSHttp,
                                    val citizenDetailsService: CitizenDetailsService,
                                    val applicationConfig: ApplicationConfig)(implicit formPartialRetriever: FormPartialRetriever,
-                                                                             implicit val templateRenderer: TemplateRenderer,
+                                                                             implicit override val templateRenderer: TemplateRenderer,
                                                                              implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever)
-  extends AuthenticationConnectors with Actions with AuthorisedForNisp {
+  extends NispFrontendController with AuthenticationConnectors with Actions with AuthorisedForNisp {
 
   def contactFormReferer(implicit request: Request[AnyContent]): String = request.headers.get(REFERER).getOrElse("")
 
