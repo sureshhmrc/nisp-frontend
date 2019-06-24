@@ -15,13 +15,13 @@
  *@
 
 @import play.api.Play.current
-@import uk.gov.hmrc.nisp.config.ApplicationConfig
 @import uk.gov.hmrc.nisp.controllers.routes
+@import uk.gov.hmrc.nisp.config.GlobalErrorParams
 @import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
 
-@this(applicationConfig: ApplicationConfig)
-
-@(pageTitle: String, heading: String, message: String)(implicit messages: Messages, formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever, templateRenderer: uk.gov.hmrc.renderer.TemplateRenderer)
+@(pageTitle: String, heading: String, message: String, params: GlobalErrorParams)(implicit messages: Messages,
+                                                            formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever,
+                                                            templateRenderer: uk.gov.hmrc.renderer.TemplateRenderer)
 
 @mainContent = {
 <h1 class="heading-large">@heading</h1>
@@ -31,8 +31,8 @@
 
 @googleAnalytics = @{
  Map[String, Any](
- "trackingId" -> applicationConfig.analyticsToken,
- "cookieDomain" -> applicationConfig.analyticsHost
+ "trackingId" -> params.analyticsToken,
+ "cookieDomain" -> params.analyticsHost
  )
 }
 @sidebar = {
@@ -43,7 +43,7 @@
 
 
 @{
-templateRenderer.renderDefaultTemplate(applicationConfig.frontendTemplatePath, uiLayouts.article(mainContent, false, None), Map[String, Any](
+templateRenderer.renderDefaultTemplate(params.frontendTemplatePath, uiLayouts.article(mainContent, false, None), Map[String, Any](
 "pageTitle" -> pageTitle,
 "linkElems" -> None,
 "scriptElems" -> None,

@@ -19,23 +19,26 @@ package uk.gov.hmrc.nisp.config
 import play.api.inject.{Binding, Module}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.HttpGet
-import uk.gov.hmrc.nisp.config.wiring.{NispAuditConnector, NispCachedStaticHtmlPartialRetriever, WSHttp}
+import uk.gov.hmrc.http.cache.client.SessionCache
+import uk.gov.hmrc.nisp.config.wiring.{NispAuditConnector, NispCachedStaticHtmlPartialRetriever, NispSessionCache, WSHttp}
 import uk.gov.hmrc.nisp.controllers.ExclusionController
 import uk.gov.hmrc.nisp.services.{CitizenDetailsService, StatePensionService}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.frontend.filters.{FrontendAuditFilter, FrontendLoggingFilter}
-import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
+import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
+import uk.gov.hmrc.renderer.TemplateRenderer
 
 class NispModule extends Module {
 
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = Seq(
       bind[CachedStaticHtmlPartialRetriever].to[NispCachedStaticHtmlPartialRetriever],
-      bind[CitizenDetailsService].toSelf,
       bind[AuditConnector].toInstance(NispAuditConnector),
       bind[FrontendLoggingFilter].toInstance(NispLoggingFilter),
+      bind[FormPartialRetriever].toInstance(NispFormPartialRetriever),
       bind[FrontendAuditFilter].toInstance(NispFrontendAuditFilter),
       bind[HttpGet].toInstance(WSHttp),
       bind[WSHttp].toInstance(WSHttp),
-      bind[ExclusionController].toSelf.eagerly()
+     bind[TemplateRenderer].toInstance(LocalTemplateRenderer),
+      bind[SessionCache].to(classOf[NispSessionCache])
   )
 }

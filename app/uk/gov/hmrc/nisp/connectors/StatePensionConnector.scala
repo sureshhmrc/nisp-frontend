@@ -16,11 +16,13 @@
 
 package uk.gov.hmrc.nisp.connectors
 
-import play.api.{Configuration, Play}
+import javax.inject.Inject
 import play.api.Mode.Mode
 import play.api.libs.json.{Format, Json, Writes}
+import play.api.{Configuration, Play}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.cache.client.SessionCache
+import uk.gov.hmrc.http.{HeaderCarrier, HttpGet}
 import uk.gov.hmrc.nisp.config.wiring.{NispSessionCache, WSHttp}
 import uk.gov.hmrc.nisp.models.enums.APIType
 import uk.gov.hmrc.nisp.models.{StatePension, StatePensionExclusion}
@@ -29,9 +31,15 @@ import uk.gov.hmrc.nisp.utils.EitherReads.eitherReads
 import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet}
 
-trait StatePensionConnector extends BackendConnector {
+class StatePensionConnector @Inject()( val http: HttpGet, val metricsService: MetricsService) extends BackendConnector with ServicesConfig {
+
+  override protected def mode: Mode = Play.current.mode
+  override protected def runModeConfiguration: Configuration = Play.current.configuration
+
+  val serviceUrl = baseUrl("state-pension")
+  override def sessionCache: SessionCache = new NispSessionCache(WSHttp, Play.current.configuration)
+
   implicit val reads = eitherReads[StatePensionExclusion, StatePension]
 
   implicit val writes = Writes[Either[StatePensionExclusion, StatePension]] {
@@ -50,11 +58,3 @@ trait StatePensionConnector extends BackendConnector {
   }
 }
 
-object StatePensionConnector extends StatePensionConnector with ServicesConfig {
-  override val serviceUrl = baseUrl("state-pension")
-  override def http: HttpGet = WSHttp
-  override def sessionCache: SessionCache = new NispSessionCache(WSHttp, Play.current.configuration)
-  override val metricsService: MetricsService = MetricsService
-  override protected def mode: Mode = Play.current.mode
-  override protected def runModeConfiguration: Configuration = Play.current.configuration
-}

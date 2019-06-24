@@ -19,7 +19,7 @@ package uk.gov.hmrc.nisp.config
 import com.typesafe.config.Config
 import net.ceedubs.ficus.Ficus._
 import play.api.Mode.Mode
-import play.api.Play.current
+import play.api.Play.{configuration, current}
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.Request
 import play.api.{Application, Configuration, Play}
@@ -38,10 +38,13 @@ object ApplicationGlobal extends ApplicationGlobalTrait {
   override protected def mode: Mode = Play.current.mode
   override protected def runModeConfiguration: Configuration = Play.current.configuration
 }
+
 object NispFormPartialRetriever extends FormPartialRetriever {
   override def crypto: String => String = ApplicationGlobal.sessionCookieCryptoFilter.encrypt
   override def httpGet: CoreGet = WSHttp
 }
+
+case class GlobalErrorParams(frontendTemplatePath: String, analyticsHost: String, analyticsToken: Option[String])
 
 trait ApplicationGlobalTrait extends DefaultFrontendGlobal with RunMode with PartialRetriever {
   override val auditConnector = NispAuditConnector
@@ -56,8 +59,19 @@ trait ApplicationGlobalTrait extends DefaultFrontendGlobal with RunMode with Par
     new ApplicationCrypto (Play.current.configuration.underlying).verifyConfiguration()
   }
 
-  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): Html =
-    uk.gov.hmrc.nisp.views.html.global_error(pageTitle, heading, message)
+  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): Html = {
+
+    lazy val analyticsToken: Option[String] = configuration.getString(s"google-analytics.token")
+    lazy val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
+    lazy val analyticsHost: String = configuration.getString(s"google-analytics.host").getOrElse("auto")
+
+    val params = GlobalErrorParams(
+      frontendTemplatePath,
+      analyticsHost,
+      analyticsToken)
+
+    uk.gov.hmrc.nisp.views.html.global_error(pageTitle, heading, message, params)
+  }
 
   override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig(s"microservice.metrics")
 }

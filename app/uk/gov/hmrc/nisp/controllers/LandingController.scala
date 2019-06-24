@@ -20,6 +20,7 @@ import javax.inject.Inject
 import play.api.i18n.Messages
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Application, Logger}
+import uk.gov.hmrc.nisp.auth.GovernmentGatewayProvider
 import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobal, LocalTemplateRenderer}
 import uk.gov.hmrc.nisp.connectors.IdentityVerificationSuccessResponse._
 import uk.gov.hmrc.nisp.connectors.{IdentityVerificationConnector, IdentityVerificationSuccessResponse}
@@ -32,15 +33,17 @@ import uk.gov.hmrc.nisp.views.html.{identity_verification_landing, landing}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
+import uk.gov.hmrc.renderer.TemplateRenderer
 
 import scala.concurrent.Future
 
 class LandingController @Inject()(val citizenDetailsService: CitizenDetailsService,
                                   val applicationConfig: ApplicationConfig,
-                                  identityVerificationConnector: IdentityVerificationConnector)
+                                  identityVerificationConnector: IdentityVerificationConnector,
+                                  governmentGatewayProvider: GovernmentGatewayProvider)
                                  (implicit override val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
                                   implicit val formPartialRetriever: FormPartialRetriever,
-                                  implicit val templateRenderer: LocalTemplateRenderer,
+                                  implicit val templateRenderer: TemplateRenderer,
                                   implicit val messages: Messages,
                                   implicit val application: Application)
                                   extends NispFrontendController(cachedStaticHtmlPartialRetriever,
@@ -54,9 +57,9 @@ class LandingController @Inject()(val citizenDetailsService: CitizenDetailsServi
   def show: Action[AnyContent] = UnauthorisedAction(
     implicit request =>
       if (applicationConfig.identityVerification) {
-        Ok(identity_verification_landing()).withNewSession
+        Ok(identity_verification_landing(applicationConfig)).withNewSession
       } else {
-        Ok(landing()).withNewSession
+        Ok(landing(applicationConfig)).withNewSession
       }
   )
 
@@ -73,19 +76,19 @@ class LandingController @Inject()(val citizenDetailsService: CitizenDetailsServi
 
           val identityVerificationResult = identityVerificationConnector.identityVerificationResponse(id)
           identityVerificationResult map {
-            case IdentityVerificationSuccessResponse(FailedMatching) => not_authorised()
-            case IdentityVerificationSuccessResponse(InsufficientEvidence) => not_authorised()
-            case IdentityVerificationSuccessResponse(TechnicalIssue) => technical_issue()
-            case IdentityVerificationSuccessResponse(LockedOut) => locked_out()
-            case IdentityVerificationSuccessResponse(Timeout) => timeout()
-            case IdentityVerificationSuccessResponse(Incomplete) => not_authorised()
-            case IdentityVerificationSuccessResponse(IdentityVerificationSuccessResponse.PreconditionFailed) => not_authorised()
-            case IdentityVerificationSuccessResponse(UserAborted) => not_authorised()
-            case IdentityVerificationSuccessResponse(FailedIV) => not_authorised()
+            case IdentityVerificationSuccessResponse(FailedMatching) => not_authorised(applicationConfig, governmentGatewayProvider.continueURL)
+            case IdentityVerificationSuccessResponse(InsufficientEvidence) => not_authorised(applicationConfig, governmentGatewayProvider.continueURL)
+            case IdentityVerificationSuccessResponse(TechnicalIssue) => technical_issue(applicationConfig)
+            case IdentityVerificationSuccessResponse(LockedOut) => locked_out(applicationConfig)
+            case IdentityVerificationSuccessResponse(Timeout) => timeout(applicationConfig)
+            case IdentityVerificationSuccessResponse(Incomplete) => not_authorised(applicationConfig, governmentGatewayProvider.continueURL)
+            case IdentityVerificationSuccessResponse(IdentityVerificationSuccessResponse.PreconditionFailed) => not_authorised(applicationConfig, governmentGatewayProvider.continueURL)
+            case IdentityVerificationSuccessResponse(UserAborted) => not_authorised(applicationConfig, governmentGatewayProvider.continueURL)
+            case IdentityVerificationSuccessResponse(FailedIV) => not_authorised(applicationConfig, governmentGatewayProvider.continueURL)
             case response => Logger.warn(s"Unhandled Response from Identity Verification: $response");
-              technical_issue()
+              technical_issue(applicationConfig)
           }
-      } getOrElse Future.successful(not_authorised(showFirstParagraph = false)) // 2FA returns no journeyId
+      } getOrElse Future.successful(not_authorised(applicationConfig, governmentGatewayProvider.continueURL, showFirstParagraph = false)) // 2FA returns no journeyId
 
       result.map {
         Ok(_).withNewSession

@@ -16,19 +16,13 @@
 
 package uk.gov.hmrc.nisp.controllers.connectors
 
-import uk.gov.hmrc.nisp.config.wiring.NispAuditConnector
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import uk.gov.hmrc.play.audit.model.DataEvent
+import javax.inject.Inject
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.model.DataEvent
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-object CustomAuditConnector extends CustomAuditConnector {
-  override lazy val auditConnector = NispAuditConnector
-}
-
-trait CustomAuditConnector {
-
-  val auditConnector: AuditConnector
+class CustomAuditConnector @Inject()(auditConnector: AuditConnector) {
 
   def sendEvent(event: DataEvent)(implicit hc: HeaderCarrier): Unit =
     auditConnector.sendEvent(event)
