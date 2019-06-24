@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.nisp.config.ApplicationConfig
 @import uk.gov.hmrc.nisp.controllers.auth.NispUser
 @import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 @import uk.gov.hmrc.nisp.models.enums.Exclusion
@@ -23,7 +24,8 @@
 
 @import uk.gov.hmrc.nisp.views.viewParams.MainTemplateParams
 @(exclusion: Exclusion,
-statePensionAge: Option[Int])(implicit messages: Messages, request: Request[_], user: NispUser,
+statePensionAge: Option[Int],
+applicationConfig:ApplicationConfig)(implicit messages: Messages, request: Request[_], user: NispUser,
 partialRetriever: CachedStaticHtmlPartialRetriever, application: Application, formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever, templateRenderer: uk.gov.hmrc.renderer.TemplateRenderer)
 
 
@@ -46,7 +48,7 @@ partialRetriever: CachedStaticHtmlPartialRetriever, application: Application, fo
             articleClasses = Some("mainpage"),
             gaDimensions = Some(analyticsAdditionalJs),
             hideBreadcrumb = true
-    )) {
+    ), applicationConfig) {
         <p class="lede">@Html(Messages("nisp.excluded.mci.info"))</p>
         <h2 class="heading-medium">@Html(Messages("nisp.excluded.mci.howToFix"))</h2>
         <ul class="list-bullet">

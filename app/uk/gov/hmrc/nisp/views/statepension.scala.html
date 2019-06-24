@@ -23,8 +23,9 @@
 @import uk.gov.hmrc.play.language.LanguageUtils.Dates
 @import play.api.Application
 @import uk.gov.hmrc.nisp.controllers.routes
-
+@import uk.gov.hmrc.nisp.config.ApplicationConfig
 @import uk.gov.hmrc.nisp.views.viewParams.MainTemplateParams
+
 @(
     statePension: StatePension,
     numberOfGaps: Int,
@@ -36,9 +37,15 @@
     hidePersonalMaxYears: Boolean,
     customerAge: Option[Int],
     isAbroad: Boolean,
-    yearsToContributeUntilPensionAge: Int
-)(implicit request: Request[_], user: NispUser, partialRetriever: CachedStaticHtmlPartialRetriever, messages: Messages,
-application: Application, formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever, templateRenderer: uk.gov.hmrc.renderer.TemplateRenderer)
+    yearsToContributeUntilPensionAge: Int,
+    applicationConfig: ApplicationConfig
+)(implicit request: Request[_],
+user: NispUser,
+partialRetriever: CachedStaticHtmlPartialRetriever,
+messages: Messages,
+application: Application,
+formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever,
+templateRenderer: uk.gov.hmrc.renderer.TemplateRenderer)
 
 @sidebar = {
 <div class="helpline-sidebar" >
@@ -81,7 +88,7 @@ application: Application, formPartialRetriever: uk.gov.hmrc.play.partials.FormPa
         sidebarLinks = Some(sidebar),
         articleClasses = Some("mainpage"),
         gaDimensions = Some(analyticsAdditionalJs)
-    )) {
+    ), applicationConfig) {
 
     <div class="highlighted-event govuk-box-highlight">
         <p>@Messages("nisp.main.basedOn") <span class="nowrap">@Dates.formatDate(statePension.pensionDate). </span>

@@ -20,21 +20,22 @@ import javax.inject.Inject
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.hmrc.nisp.config.LocalTemplateRenderer
+import uk.gov.hmrc.nisp.config.{ApplicationConfig, LocalTemplateRenderer}
 import uk.gov.hmrc.nisp.controllers.connectors.AuthenticationConnectors
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
 import uk.gov.hmrc.nisp.views.html.termsAndConditions
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
 import uk.gov.hmrc.play.partials.FormPartialRetriever
+import uk.gov.hmrc.renderer.TemplateRenderer
 
-class TermsConditionsController @Inject()()(implicit formPartialRetriever: FormPartialRetriever,
-                                            implicit val templateRenderer: LocalTemplateRenderer)
+class TermsConditionsController @Inject()(applicationConfig: ApplicationConfig)(implicit formPartialRetriever: FormPartialRetriever,
+                                            implicit val templateRenderer: TemplateRenderer)
   extends AuthenticationConnectors with PartialRetriever with Actions {
 
   def show: Action[AnyContent] = UnauthorisedAction {
     implicit request =>
       val showBackLink = request.queryString.get("showBackLink").fold(false)(_.head.toBoolean)
-      Ok(termsAndConditions(showBackLink))
+      Ok(termsAndConditions(showBackLink, applicationConfig))
   }
 }

@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.nisp.connectors
 
+import javax.inject.Inject
 import play.api.Mode.Mode
 import play.api.{Configuration, Play}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse}
-import uk.gov.hmrc.nisp.config.wiring.WSHttp
 import uk.gov.hmrc.nisp.models.citizen.CitizenDetailsResponse
 import uk.gov.hmrc.nisp.services.MetricsService
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -28,18 +28,11 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
-object CitizenDetailsConnector extends CitizenDetailsConnector with ServicesConfig {
-  override val serviceUrl = baseUrl("citizen-details")
-  override val metricsService: MetricsService = MetricsService
-  override def http: HttpGet = WSHttp
+class CitizenDetailsConnector @Inject()(metricsService: MetricsService, http: HttpGet) extends ServicesConfig {
   override protected def mode: Mode = Play.current.mode
   override protected def runModeConfiguration: Configuration = Play.current.configuration
-}
 
-trait CitizenDetailsConnector {
-  val serviceUrl: String
-  val metricsService: MetricsService
-  def http: HttpGet
+  val serviceUrl = baseUrl("citizen-details")
 
   def connectToGetPersonDetails(nino: Nino)(implicit hc: HeaderCarrier): Future[CitizenDetailsResponse] = {
 

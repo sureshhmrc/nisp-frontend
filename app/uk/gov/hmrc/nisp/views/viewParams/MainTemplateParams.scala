@@ -35,5 +35,4 @@ case class MainTemplateParams(
   articleEnabled: Boolean = true,
   hideBreadcrumb: Boolean = false,
   showUrBanner: Boolean = false,
-  hideNavBar: Boolean = false
-)
+  hideNavBar: Boolean = false)

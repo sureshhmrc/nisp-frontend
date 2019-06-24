@@ -18,9 +18,10 @@
 @import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 @import uk.gov.hmrc.nisp.controllers.routes
 @import play.api.Application
-
+@import uk.gov.hmrc.nisp.config.ApplicationConfig
 @import uk.gov.hmrc.nisp.views.viewParams.MainTemplateParams
-@()(implicit messages: Messages, request: Request[_], user: NispUser, partialRetriever: CachedStaticHtmlPartialRetriever,
+
+@(applicationConfig: ApplicationConfig)(implicit messages: Messages, request: Request[_], user: NispUser, partialRetriever: CachedStaticHtmlPartialRetriever,
 application: Application, formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever, templateRenderer: uk.gov.hmrc.renderer.TemplateRenderer)
 
 @defining(Some(user)) { implicit userOption =>
@@ -28,7 +29,7 @@ application: Application, formPartialRetriever: uk.gov.hmrc.play.partials.FormPa
     browserTitle = Some(Messages("nisp.nirecord.voluntarycontributions.title")),
     pageTitle = Some(Messages("nisp.nirecord.voluntarycontributions.heading")),
     userLoggedIn = true,
-    sidebarLinks = None)
+    sidebarLinks = None), applicationConfig
 ) {
 
 <p class="lede">@Messages("nisp.nirecord.voluntarycontributions.title.message")</p>

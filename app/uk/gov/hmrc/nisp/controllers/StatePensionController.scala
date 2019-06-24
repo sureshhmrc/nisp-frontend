@@ -37,6 +37,7 @@ import uk.gov.hmrc.nisp.utils.Constants._
 import uk.gov.hmrc.nisp.views.html._
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
+import uk.gov.hmrc.renderer.TemplateRenderer
 
 class StatePensionController @Inject()(val sessionCache: SessionCache,
                                        val customAuditConnector: CustomAuditConnector,
@@ -48,7 +49,7 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
                                        val nationalInsuranceService: NationalInsuranceService)
                                       (implicit override val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
                                        implicit val formPartialRetriever: FormPartialRetriever,
-                                       implicit val templateRenderer: LocalTemplateRenderer)
+                                       implicit val templateRenderer: TemplateRenderer)
                                       extends NispFrontendController(cachedStaticHtmlPartialRetriever,
                                         formPartialRetriever,
                                         templateRenderer)
@@ -65,7 +66,8 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
           case Right(statePension) if statePension.contractedOut => {
             Ok(statepension_cope(
               statePension.amounts.cope.weeklyAmount,
-              isPertax
+              isPertax,
+              applicationConfig
             ))
           }
           case _ => Redirect(routes.StatePensionController.show())
@@ -128,7 +130,8 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
                   user.livesAbroad,
                   user.dateOfBirth.map(calculateAge(_, now().toLocalDate)),
                   isPertax,
-                  yearsToContributeUntilPensionAge
+                  yearsToContributeUntilPensionAge,
+                  applicationConfig
                 )).withSession(storeUserInfoInSession(user, statePension.contractedOut))
               } else if (statePension.forecastScenario.equals(Scenario.ForecastOnly)) {
 
@@ -139,7 +142,8 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
                   user.dateOfBirth.map(calculateAge(_, now().toLocalDate)),
                   user.livesAbroad,
                   isPertax,
-                  yearsToContributeUntilPensionAge
+                  yearsToContributeUntilPensionAge,
+                  applicationConfig
                 )).withSession(storeUserInfoInSession(user, statePension.contractedOut))
 
               } else if (statePension.abroadAutoCredit) {
@@ -168,7 +172,8 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
                   hidePersonalMaxYears = applicationConfig.futureProofPersonalMax,
                   user.dateOfBirth.map(calculateAge(_, now().toLocalDate)),
                   user.livesAbroad,
-                  yearsToContributeUntilPensionAge
+                  yearsToContributeUntilPensionAge,
+                  applicationConfig
                 )).withSession(storeUserInfoInSession(user, statePension.contractedOut))
               }
 
@@ -230,6 +235,6 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
   }
 
   def timeout = UnauthorisedAction { implicit request =>
-    Ok(sessionTimeout())
+    Ok(sessionTimeout(applicationConfig))
   }
 }

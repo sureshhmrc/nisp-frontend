@@ -35,6 +35,7 @@ import uk.gov.hmrc.nisp.services._
 import uk.gov.hmrc.nisp.utils.{Constants, Formatting}
 import uk.gov.hmrc.nisp.views.html.{nirecordGapsAndHowToCheckThem, nirecordVoluntaryContributions, nirecordpage}
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
+import uk.gov.hmrc.renderer.TemplateRenderer
 import uk.gov.hmrc.time.TaxYear
 
 class NIRecordController @Inject()(val citizenDetailsService: CitizenDetailsService,
@@ -48,7 +49,7 @@ class NIRecordController @Inject()(val citizenDetailsService: CitizenDetailsServ
                                    )
                                   (implicit override val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
                                   implicit val formPartialRetriever: FormPartialRetriever,
-                                  implicit val templateRenderer: LocalTemplateRenderer)
+                                  implicit val templateRenderer: TemplateRenderer)
                                   extends NispFrontendController(cachedStaticHtmlPartialRetriever,
                                     formPartialRetriever,
                                     templateRenderer)
@@ -149,7 +150,8 @@ class NIRecordController @Inject()(val citizenDetailsService: CitizenDetailsServ
                   showPre1975Years = showPre1975Years(niRecord.dateOfEntry, user.dateOfBirth, niRecord.qualifyingYearsPriorTo1975),
                   authenticationProvider = getAuthenticationProvider(user.authContext.user.confidenceLevel),
                   showFullNI = showFullNI,
-                  currentDate = currentDate))
+                  currentDate = currentDate,
+                  applicationConfig = applicationConfig))
               }
             case Left(exclusion) =>
               customAuditConnector.sendEvent(AccountExclusionEvent(
@@ -168,7 +170,7 @@ class NIRecordController @Inject()(val citizenDetailsService: CitizenDetailsServ
     implicit request =>
       nationalInsuranceService.getSummary(user.nino) map {
         case Right(niRecord) =>
-          Ok(nirecordGapsAndHowToCheckThem(niRecord.homeResponsibilitiesProtection))
+          Ok(nirecordGapsAndHowToCheckThem(niRecord.homeResponsibilitiesProtection, applicationConfig))
         case Left(_) =>
           Redirect(routes.ExclusionController.showNI())
       }
@@ -176,7 +178,7 @@ class NIRecordController @Inject()(val citizenDetailsService: CitizenDetailsServ
 
   def showVoluntaryContributions: Action[AnyContent] = AuthorisedByAny { implicit user =>
     implicit request =>
-      Ok(nirecordVoluntaryContributions())
+      Ok(nirecordVoluntaryContributions(applicationConfig))
   }
 
 }

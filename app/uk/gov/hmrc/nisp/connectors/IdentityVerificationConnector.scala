@@ -16,19 +16,17 @@
 
 package uk.gov.hmrc.nisp.connectors
 
-import play.api.{Configuration, Play}
+import javax.inject.Inject
 import play.api.Mode.Mode
-import play.api.data.validation.ValidationError
 import play.api.http.Status._
-import play.api.libs.json.{JsPath, JsValue}
+import play.api.{Configuration, Play}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.nisp.config.wiring.WSHttp
 import uk.gov.hmrc.nisp.services.MetricsService
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse, NotFoundException, Upstream4xxResponse}
 
 sealed trait IdentityVerificationResponse
 case object IdentityVerificationForbiddenResponse extends IdentityVerificationResponse
@@ -48,18 +46,10 @@ object IdentityVerificationSuccessResponse {
   val FailedIV = "FailedIV"
 }
 
-object IdentityVerificationConnector extends IdentityVerificationConnector with ServicesConfig {
-  override val serviceUrl = baseUrl("identity-verification")
-  override def http: HttpGet = WSHttp
-  override val metricsService: MetricsService = MetricsService
-  override protected def mode: Mode = Play.current.mode
-  override protected def runModeConfiguration: Configuration = Play.current.configuration
-}
-
-trait IdentityVerificationConnector {
-  val serviceUrl: String
-  def http: HttpGet
-  val metricsService: MetricsService
+class IdentityVerificationConnector @Inject()(metricsService: MetricsService, http: WSHttp) extends ServicesConfig{
+  val serviceUrl = baseUrl("identity-verification")
+  protected def mode: Mode = Play.current.mode
+  protected def runModeConfiguration: Configuration = Play.current.configuration
 
   private def url(journeyId: String) = s"$serviceUrl/mdtp/journey/journeyId/$journeyId"
 

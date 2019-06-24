@@ -15,11 +15,12 @@
  *@
 
 @import uk.gov.hmrc.play.partials.FormPartialRetriever
+@import uk.gov.hmrc.nisp.config.ApplicationConfig
 @import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 @import play.api.Application
 
 @import uk.gov.hmrc.nisp.views.viewParams.MainTemplateParams
-@(partialUrl: String, formBody: Option[Html])(implicit messages: Messages, request: Request[_],
+@(partialUrl: String, formBody: Option[Html], applicationConfig: ApplicationConfig)(implicit messages: Messages, request: Request[_],
 formPartialRetriever: FormPartialRetriever, partialRetriever: CachedStaticHtmlPartialRetriever, application: Application, templateRenderer: uk.gov.hmrc.renderer.TemplateRenderer)
 
 
@@ -27,7 +28,7 @@ formPartialRetriever: FormPartialRetriever, partialRetriever: CachedStaticHtmlPa
         document.title = "@messages("nisp.feedback.title")"
 </script>
 
-@main(MainTemplateParams(showBetaBanner = false)) {
+@main(MainTemplateParams(showBetaBanner = false), applicationConfig) {
     @formBody.getOrElse(formPartialRetriever.getPartialContent(partialUrl))
 }
 

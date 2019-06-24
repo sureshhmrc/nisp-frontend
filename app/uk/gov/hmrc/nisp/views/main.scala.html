@@ -33,7 +33,8 @@
 @import java.util.NoSuchElementException
 @import uk.gov.hmrc.domain.Nino
 @(
-    mainTemplateParams: MainTemplateParams
+    mainTemplateParams: MainTemplateParams,
+    applicationConfig: ApplicationConfig
 )(
     mainContent: Html
 )(
@@ -115,7 +116,7 @@
 }
 
 @getHelpForm = {
-    @formPartialRetriever.getPartialContent(s"${mainTemplateParams.applicationConfig.contactFrontendPartialBaseUrl}/contact/problem_reports")
+    @formPartialRetriever.getPartialContent(s"${applicationConfig.contactFrontendPartialBaseUrl}/contact/problem_reports")
 }
 
 @sidebar = {
@@ -132,19 +133,19 @@
 
 
 @mainContentHeader = {
- @if(mainTemplateParams.applicationConfig.isWelshEnabled){
+ @if(applicationConfig.isWelshEnabled){
      @language_selection(clc.languageMap, clc.langToCall, Some("align-right"), Some("checkmystatepension"))
     }
 
 }
 
 @urBanner = @{
-    if(mainTemplateParams.showUrBanner && ApplicationConfig.showUrBanner && checkForUrCookie){
+    if(mainTemplateParams.showUrBanner && applicationConfig.showUrBanner && checkForUrCookie){
         Map("fullWidthBannerTitle" -> messages("nisp.home.banner.recruitment.title"),
             "fullWidthBannerText" -> messages("nisp.home.banner.recruitment.link"),
             "fullWidthBannerLink" -> messages("nisp.home.banner.recruitment.linkURL"),
             "fullWidthBannerDismissText" -> messages("nisp.home.banner.recruitment.reject"),
-            "fullWidthBannerGaAction" -> ApplicationConfig.GaEventAction)
+            "fullWidthBannerGaAction" -> applicationConfig.GaEventAction)
     }else{Map()}
 }
 
@@ -169,8 +170,8 @@ if(mainTemplateParams.articleEnabled) {
 
 @googleAnalytics = @{
     Map[String, Any](
-        "trackingId" -> mainTemplateParams.applicationConfig.analyticsToken,
-        "cookieDomain" -> mainTemplateParams.applicationConfig.analyticsHost
+        "trackingId" -> applicationConfig.analyticsToken,
+        "cookieDomain" -> applicationConfig.analyticsHost
     ) ++ mainTemplateParams.gaDimensions.getOrElse(Map.empty)
 }
 @showLastLogInStatus = @{
@@ -207,11 +208,11 @@ if(mainTemplateParams.articleEnabled) {
 }
 
 @{
-    templateRenderer.renderDefaultTemplate(ApplicationConfig.frontendTemplatePath, article, Map[String, Any](
+    templateRenderer.renderDefaultTemplate(applicationConfig.frontendTemplatePath, article, Map[String, Any](
         "pageTitle" -> mainTemplateParams.pageTitle.map{x => x + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk")},
         "linkElems" -> linkElems,
         "scriptElems" -> scriptElement,
-        "assetsPath" -> mainTemplateParams.applicationConfig.assetsPrefix,
+        "assetsPath" -> applicationConfig.assetsPrefix,
 
         "mainContentHeader" -> mainContentHeader,
 
@@ -222,10 +223,10 @@ if(mainTemplateParams.articleEnabled) {
         "hideAccountMenu" -> mainTemplateParams.hideNavBar,
 
         "googleAnalytics" -> googleAnalytics,
-        "ssoUrl" -> mainTemplateParams.applicationConfig.ssoUrl,
+        "ssoUrl" -> applicationConfig.ssoUrl,
 
         "betaBanner" -> betaHeaderEnable,
-        "feedbackIdentifier" -> mainTemplateParams.applicationConfig.contactFormServiceIdentifier,
+        "feedbackIdentifier" -> applicationConfig.contactFormServiceIdentifier,
         "includeHMRCBranding" -> true,
 
         "showLastLogInStatus" ->  showLastLogInStatus,

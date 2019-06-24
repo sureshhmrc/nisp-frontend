@@ -21,14 +21,14 @@ import play.api.Logger
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobal, LocalTemplateRenderer}
-import uk.gov.hmrc.nisp.connectors.StatePensionConnector
+import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
 import uk.gov.hmrc.nisp.controllers.connectors.AuthenticationConnectors
 import uk.gov.hmrc.nisp.models.enums.Exclusion
 import uk.gov.hmrc.nisp.services._
 import uk.gov.hmrc.nisp.views.html._
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
+import uk.gov.hmrc.renderer.TemplateRenderer
 
 @Singleton
 class ExclusionController @Inject()(val citizenDetailsService: CitizenDetailsService,
@@ -36,7 +36,7 @@ class ExclusionController @Inject()(val citizenDetailsService: CitizenDetailsSer
                                     statePensionConnection: StatePensionConnection,
                                     nationalInsuranceService: NationalInsuranceService)(implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
                                      implicit val formPartialRetriever: FormPartialRetriever,
-                                     implicit val templateRenderer: LocalTemplateRenderer)
+                                     implicit val templateRenderer: TemplateRenderer)
                                     extends NispFrontendController(cachedStaticHtmlPartialRetriever,
                                       formPartialRetriever,
                                       templateRenderer)
@@ -56,16 +56,16 @@ class ExclusionController @Inject()(val citizenDetailsService: CitizenDetailsSer
         ) yield {
           statePension match {
             case Right(sp) if sp.reducedRateElection =>
-              Ok(excluded_sp(Exclusion.MarriedWomenReducedRateElection, Some(sp.pensionAge), Some(sp.pensionDate), false, None))
+              Ok(excluded_sp(Exclusion.MarriedWomenReducedRateElection, Some(sp.pensionAge), Some(sp.pensionDate), false, None, applicationConfig))
             case Right(sp) if sp.abroadAutoCredit =>
-              Ok(excluded_sp(Exclusion.Abroad, Some(sp.pensionAge), Some(sp.pensionDate), nationalInsurance.isRight, None))
+              Ok(excluded_sp(Exclusion.Abroad, Some(sp.pensionAge), Some(sp.pensionDate), nationalInsurance.isRight, None, applicationConfig))
             case Left(exclusion) =>
               if (exclusion.exclusion == Exclusion.Dead)
-                Ok(excluded_dead(Exclusion.Dead, exclusion.pensionAge))
+                Ok(excluded_dead(Exclusion.Dead, exclusion.pensionAge, applicationConfig))
               else if (exclusion.exclusion == Exclusion.ManualCorrespondenceIndicator)
-                Ok(excluded_mci(Exclusion.ManualCorrespondenceIndicator, exclusion.pensionAge))
+                Ok(excluded_mci(Exclusion.ManualCorrespondenceIndicator, exclusion.pensionAge, applicationConfig))
               else {
-                Ok(excluded_sp(exclusion.exclusion, exclusion.pensionAge, exclusion.pensionDate, nationalInsurance.isRight, exclusion.statePensionAgeUnderConsideration))
+                Ok(excluded_sp(exclusion.exclusion, exclusion.pensionAge, exclusion.pensionDate, nationalInsurance.isRight, exclusion.statePensionAgeUnderConsideration, applicationConfig))
               }
             case _ =>
               Logger.warn("User accessed /exclusion as non-excluded user")
@@ -80,12 +80,12 @@ class ExclusionController @Inject()(val citizenDetailsService: CitizenDetailsSer
         nationalInsuranceService.getSummary(user.nino).map {
           case Left(exclusion) =>
             if (exclusion == Exclusion.Dead) {
-              Ok(excluded_dead(Exclusion.Dead, None))
+              Ok(excluded_dead(Exclusion.Dead, None, applicationConfig))
             }
             else if (exclusion == Exclusion.ManualCorrespondenceIndicator) {
-              Ok(excluded_mci(Exclusion.ManualCorrespondenceIndicator, None))
+              Ok(excluded_mci(Exclusion.ManualCorrespondenceIndicator, None, applicationConfig))
             } else {
-              Ok(excluded_ni(exclusion))
+              Ok(excluded_ni(exclusion, applicationConfig))
             }
           case _ =>
             Logger.warn("User accessed /exclusion/nirecord as non-excluded user")
