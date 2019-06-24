@@ -21,46 +21,50 @@ import java.util.UUID
 import org.mockito.Mockito
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import play.api.Application
 import play.api.http._
 import play.api.i18n.{I18nSupport, Lang, Messages, MessagesApi}
-import play.api.i18n.Messages.Implicits._
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
+import uk.gov.hmrc.http.SessionKeys
+import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.config.wiring.NispFormPartialRetriever
-import uk.gov.hmrc.nisp.config.{ApplicationConfig}
 import uk.gov.hmrc.nisp.connectors.IdentityVerificationConnector
+import uk.gov.hmrc.nisp.fixtures.MockApplicationConfig
 import uk.gov.hmrc.nisp.helpers.{MockAuthConnector, MockCachedStaticHtmlPartialRetriever, MockCitizenDetailsService, MockIdentityVerificationConnector}
 import uk.gov.hmrc.nisp.services.CitizenDetailsService
+import uk.gov.hmrc.nisp.utils.MockTemplateRenderer
 import uk.gov.hmrc.nisp.views.html.{identity_verification_landing, landing}
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
-import uk.gov.hmrc.time.DateTimeUtils._
 import uk.gov.hmrc.renderer.TemplateRenderer
-import uk.gov.hmrc.nisp.utils.MockTemplateRenderer
-import uk.gov.hmrc.http.SessionKeys
+import uk.gov.hmrc.time.DateTimeUtils._
 
-class LandingControllerSpec  extends PlaySpec with MockitoSugar with OneAppPerSuite {
+class LandingControllerSpec  extends PlaySpec with MockitoSugar with OneAppPerSuite with I18nSupport {
 
+  override val app: Application = GuiceApplicationBuilder()
+    .overrides(bind[CitizenDetailsService].toInstance(MockCitizenDetailsService))
+    .overrides(bind[ApplicationConfig].toInstance(mock[ApplicationConfig]))
+    .overrides(bind[IdentityVerificationConnector].toInstance(MockIdentityVerificationConnector))
+    .overrides(bind[AuthConnector].toInstance(MockAuthConnector))
+    .overrides(bind[CachedStaticHtmlPartialRetriever].toInstance(MockCachedStaticHtmlPartialRetriever))
+    .overrides(bind[TemplateRenderer].toInstance(MockTemplateRenderer))
+    .build()
+
+  val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
   private implicit val fakeRequest = FakeRequest("GET", "/")
-  private implicit val lang = Lang("en")
   val fakeRequestWelsh = FakeRequest("GET", "/cymraeg")
-  private implicit val retriever = MockCachedStaticHtmlPartialRetriever
   implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever
   implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
 
-  val testLandingController = new LandingController {
-    override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
+  val testLandingController = app.injector.instanceOf[LandingController]
 
-    override val applicationConfig: ApplicationConfig = mock[ApplicationConfig]
 
-    override val identityVerificationConnector: IdentityVerificationConnector = MockIdentityVerificationConnector
-
-    override protected def authConnector: AuthConnector = MockAuthConnector
-
-    override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = retriever
-
-    override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
-  }
+  val applicationConfig = MockApplicationConfig
+  implicit val partialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
+  implicit val application:Application = app
 
   "GET /" should {
     "return 200" in {
@@ -88,9 +92,7 @@ class LandingControllerSpec  extends PlaySpec with MockitoSugar with OneAppPerSu
     "return IVLanding page" in {
       Mockito.when(testLandingController.applicationConfig.isWelshEnabled).thenReturn(false)
       val result = testLandingController.show(fakeRequest)
-      val messagesApi = app.injector.instanceOf[MessagesApi]
-      val messages = new Messages(new Lang("en"), messagesApi)
-      contentAsString(result) must include(contentAsString(landing()))
+      contentAsString(result) must include(contentAsString(landing(applicationConfig)))
     }
 
     "return non-IV landing page when switched on" in {
@@ -98,7 +100,7 @@ class LandingControllerSpec  extends PlaySpec with MockitoSugar with OneAppPerSu
       Mockito.when(testLandingController.applicationConfig.isWelshEnabled).thenReturn(false)
       Mockito.when(testLandingController.applicationConfig.identityVerification).thenReturn(true)
       val result = testLandingController.show(fakeRequest)
-      contentAsString(result) must include(contentAsString(identity_verification_landing()))
+      contentAsString(result) must include(contentAsString(identity_verification_landing(applicationConfig)))
     }
   }
 
@@ -172,7 +174,7 @@ class LandingControllerSpec  extends PlaySpec with MockitoSugar with OneAppPerSu
   }
 
   "GET /cymraeg" must {
-     implicit val lang = Lang("cy")
+     implicit val lang: Lang = Lang("cy")
     "return 200" in {
       val result = testLandingController.show(fakeRequestWelsh)
       status(result) mustBe Status.OK

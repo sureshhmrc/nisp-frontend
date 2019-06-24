@@ -16,30 +16,35 @@
 
 package uk.gov.hmrc.nisp.controllers
 
-import java.util.UUID
-
-import org.mockito.Mockito
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import play.api.Application
 import play.api.http._
-import play.api.i18n.Messages.Implicits._
-import play.api.i18n.{Lang, Messages, MessagesApi}
+import play.api.i18n.Lang
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.api.test.{FakeRequest, Helpers}
-import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.config.wiring.NispFormPartialRetriever
 import uk.gov.hmrc.nisp.connectors.IdentityVerificationConnector
 import uk.gov.hmrc.nisp.helpers.{MockAuthConnector, MockCachedStaticHtmlPartialRetriever, MockCitizenDetailsService, MockIdentityVerificationConnector}
 import uk.gov.hmrc.nisp.services.CitizenDetailsService
 import uk.gov.hmrc.nisp.utils.MockTemplateRenderer
-import uk.gov.hmrc.nisp.views.html.{identity_verification_landing, landing}
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.renderer.TemplateRenderer
-import uk.gov.hmrc.time.DateTimeUtils._
 
 class GARedirectControllerSpec  extends PlaySpec with MockitoSugar with OneAppPerSuite {
+
+  override val app: Application = GuiceApplicationBuilder()
+    .overrides(bind[CitizenDetailsService].toInstance(MockCitizenDetailsService))
+    .overrides(bind[ApplicationConfig].toInstance(mock[ApplicationConfig]))
+    .overrides(bind[IdentityVerificationConnector].toInstance(MockIdentityVerificationConnector))
+    .overrides(bind[AuthConnector].toInstance(MockAuthConnector))
+    .overrides(bind[CachedStaticHtmlPartialRetriever].toInstance(MockCachedStaticHtmlPartialRetriever))
+    .overrides(bind[TemplateRenderer].toInstance(MockTemplateRenderer))
+    .build()
 
   private implicit val fakeRequest = FakeRequest("GET", "/redirect")
   private implicit val lang = Lang("en")
@@ -47,19 +52,7 @@ class GARedirectControllerSpec  extends PlaySpec with MockitoSugar with OneAppPe
   implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever
   implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
 
-  val testGARedirectController = new GARedirectController {
-    override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
-
-    override val applicationConfig: ApplicationConfig = mock[ApplicationConfig]
-
-    override val identityVerificationConnector: IdentityVerificationConnector = MockIdentityVerificationConnector
-
-    override protected def authConnector: AuthConnector = MockAuthConnector
-
-    override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = retriever
-
-    override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
-  }
+  val testGARedirectController: GARedirectController = app.injector.instanceOf[GARedirectController]
 
   "GET /redirect" should {
     "return 200" in {
