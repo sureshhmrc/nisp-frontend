@@ -29,3 +29,5 @@ class NispAuthProvider @Inject()(governmentGatewayProvider: GovernmentGatewayPro
   override def redirectToLogin(implicit request: Request[_]): Future[FailureResult] = governmentGatewayProvider.redirectToLogin
   override def handleSessionTimeout(implicit request: Request[_]): Future[FailureResult] = governmentGatewayProvider.handleSessionTimeout
 }
+
+object NispAuthProvider extends NispAuthProvider(GovernmentGatewayProvider, VerifyProvider)

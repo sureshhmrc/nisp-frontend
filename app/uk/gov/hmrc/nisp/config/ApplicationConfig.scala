@@ -67,3 +67,5 @@ class ApplicationConfig @Inject()() extends ServicesConfig {
   protected def mode: Mode = Play.current.mode
   protected def runModeConfiguration: Configuration = Play.current.configuration
 }
+
+object ApplicationConfig extends ApplicationConfig

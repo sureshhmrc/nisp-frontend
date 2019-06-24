@@ -17,7 +17,8 @@
 package uk.gov.hmrc.nisp.controllers
 
 import javax.inject.Inject
-import play.api.i18n.Messages
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Application, Logger}
 import uk.gov.hmrc.nisp.auth.GovernmentGatewayProvider
@@ -40,12 +41,12 @@ import scala.concurrent.Future
 class LandingController @Inject()(val citizenDetailsService: CitizenDetailsService,
                                   val applicationConfig: ApplicationConfig,
                                   identityVerificationConnector: IdentityVerificationConnector,
-                                  governmentGatewayProvider: GovernmentGatewayProvider)
+                                  governmentGatewayProvider: GovernmentGatewayProvider,
+                                  messagesApi: MessagesApi)
                                  (implicit override val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
-                                  implicit val formPartialRetriever: FormPartialRetriever,
-                                  implicit val templateRenderer: TemplateRenderer,
-                                  implicit val messages: Messages,
-                                  implicit val application: Application)
+                                  val formPartialRetriever: FormPartialRetriever,
+                                  val templateRenderer: TemplateRenderer,
+                                  val application: Application)
                                   extends NispFrontendController(cachedStaticHtmlPartialRetriever,
                                     formPartialRetriever,
                                     templateRenderer)
