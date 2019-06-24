@@ -47,3 +47,5 @@ class VerifyProvider @Inject()(applicationConfig: ApplicationConfig) extends Ver
 
   }
 }
+
+object VerifyProvider extends VerifyProvider(ApplicationConfig)

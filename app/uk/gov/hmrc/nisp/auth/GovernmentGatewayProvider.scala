@@ -34,3 +34,5 @@ class GovernmentGatewayProvider @Inject()(applicationConfig: ApplicationConfig) 
   override val loginURL: String = applicationConfig.ggSignInUrl
 
 }
+
+object GovernmentGatewayProvider extends GovernmentGatewayProvider(ApplicationConfig)

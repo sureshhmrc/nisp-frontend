@@ -34,3 +34,5 @@ class NispCompositePageVisibilityPredicate @Inject()(applicationConfig: Applicat
       s"failureURL=${URLEncoder.encode(applicationConfig.notAuthorisedRedirectUrl, "UTF-8")}" +
       s"&confidenceLevel=200")
 }
+
+object NispCompositePageVisibilityPredicate extends NispCompositePageVisibilityPredicate(ApplicationConfig)
