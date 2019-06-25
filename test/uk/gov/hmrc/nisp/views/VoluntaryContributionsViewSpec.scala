@@ -20,30 +20,33 @@ import org.scalatest._
 import org.scalatest.mock.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.config.wiring.NispFormPartialRetriever
-import uk.gov.hmrc.nisp.controllers.NispFrontendController
+import uk.gov.hmrc.nisp.fixtures.MockApplicationConfig
 import uk.gov.hmrc.nisp.helpers.{MockCachedStaticHtmlPartialRetriever, TestAccountBuilder}
 import uk.gov.hmrc.nisp.utils.{Constants, MockTemplateRenderer}
 import uk.gov.hmrc.renderer.TemplateRenderer
 
-class VoluntaryContributionsViewSpec extends HtmlSpec with NispFrontendController with MockitoSugar with BeforeAndAfter {
+class VoluntaryContributionsViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
 
-  implicit val cachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
-  override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
+  implicit val cachedStaticHtmlPartialRetriever: MockCachedStaticHtmlPartialRetriever.type = MockCachedStaticHtmlPartialRetriever
+  implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
 
-  val mockUserNino = TestAccountBuilder.regularNino;
+  val mockUserNino: Nino = TestAccountBuilder.regularNino
   val mockUserIdForecastOnly = "/auth/oid/mockforecastonly"
   val mockUsername = "mockuser"
-  val mockUserId = "/auth/oid/" + mockUsername
+  val mockUserId: String = "/auth/oid/" + mockUsername
+  val appConfig: ApplicationConfig = MockApplicationConfig
 
-  lazy val fakeRequest = FakeRequest();
-  override implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever
+  lazy val fakeRequest = FakeRequest()
+  implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever
 
   val expectedMoneyServiceLink = "https://www.moneyadviceservice.org.uk/en"
   val expectedCitizensAdviceLink = "https://www.citizensadvice.org.uk/"
 
   "Voluntary contributions view" should {
-    lazy val sResult = html.nirecordVoluntaryContributions()
+    lazy val sResult = html.nirecordVoluntaryContributions(appConfig)
     lazy val htmlAccountDoc = asDocument(contentAsString(sResult))
 
     "render with correct page title" in {

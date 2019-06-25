@@ -25,15 +25,17 @@ import uk.gov.hmrc.nisp.config.wiring.{NispSessionCache, WSHttp}
 import uk.gov.hmrc.nisp.models.NationalInsuranceRecord
 import uk.gov.hmrc.nisp.models.enums.APIType
 import uk.gov.hmrc.nisp.services.MetricsService
+import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.Future
 
 class NationalInsuranceConnector @Inject()(val http: HttpGet,
                                            val metricsService: MetricsService,
-                                           statePensionConnector: StatePensionConnector
+                                           statePensionConnector: StatePensionConnector,
+                                           servicesConfig: ServicesConfig
 ) extends BackendConnector {
 
-  val serviceUrl: String = statePensionConnector.baseUrl("national-insurance")
+  val serviceUrl: String = servicesConfig.baseUrl("national-insurance")
   override def sessionCache: SessionCache = new NispSessionCache(WSHttp, Play.current.configuration)
 
   private val apiHeader = "Accept" -> "application/vnd.hmrc.1.0+json"

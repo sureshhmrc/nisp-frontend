@@ -16,34 +16,59 @@
 
 package uk.gov.hmrc.nisp.helpers
 
+
+
 import com.codahale.metrics.Timer.Context
 import com.codahale.metrics.{Counter, Timer}
 import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.nisp.models.enums.APIType.APIType
 import uk.gov.hmrc.nisp.services.MetricsService
 
-object MockMetricsService extends MetricsService with MockitoSugar {
+object MockMetricsService extends MockitoSugar {
 
-
+  val metrics = mock[MetricsService]
   val fakeTimerContext = mock[Timer.Context]
   val fakeTimer = new Timer()
   val fakeCounter = mock[Counter]
+  def startTimer(api: APIType): Context = fakeTimerContext
 
-  override def startTimer(api: APIType): Context = fakeTimerContext
+  def incrementFailedCounter(api: APIType): Unit = {}
 
-  override def incrementFailedCounter(api: APIType): Unit = {}
-
-  override val keystoreReadTimer: Timer = fakeTimer
-  override val keystoreWriteTimer: Timer = fakeTimer
-  override val keystoreReadFailed: Counter = fakeCounter
-  override val keystoreWriteFailed: Counter = fakeCounter
-  override val keystoreHitCounter: Counter = fakeCounter
-  override val keystoreMissCounter: Counter = fakeCounter
-  override val identityVerificationTimer: Timer = fakeTimer
-  override val identityVerificationFailedCounter: Counter = fakeCounter
-  override val citizenDetailsTimer: Timer = fakeTimer
-  override val citizenDetailsFailedCounter: Counter = fakeCounter
-
-
+  val keystoreReadTimer: Timer = fakeTimer
+  val keystoreWriteTimer: Timer = fakeTimer
+  val keystoreReadFailed: Counter = fakeCounter
+  val keystoreWriteFailed: Counter = fakeCounter
+  val keystoreHitCounter: Counter = fakeCounter
+  val keystoreMissCounter: Counter = fakeCounter
+  val identityVerificationTimer: Timer = fakeTimer
+  val identityVerificationFailedCounter: Counter = fakeCounter
+  val citizenDetailsTimer: Timer = fakeTimer
+  val citizenDetailsFailedCounter: Counter = fakeCounter
 
 }
+
+//
+//object MockMetricsService extends MetricsService with MockitoSugar {
+//
+//  val fakeTimerContext = mock[Timer.Context]
+//  val fakeTimer = new Timer()
+//  val fakeCounter = mock[Counter]
+//
+//  override def startTimer(api: APIType): Context = fakeTimerContext
+//
+//  override def incrementFailedCounter(api: APIType): Unit = {}
+//
+//  override val keystoreReadTimer: Timer = fakeTimer
+//  override val keystoreWriteTimer: Timer = fakeTimer
+//  override val keystoreReadFailed: Counter = fakeCounter
+//  override val keystoreWriteFailed: Counter = fakeCounter
+//  override val keystoreHitCounter: Counter = fakeCounter
+//  override val keystoreMissCounter: Counter = fakeCounter
+//  override val identityVerificationTimer: Timer = fakeTimer
+//  override val identityVerificationFailedCounter: Counter = fakeCounter
+//  override val citizenDetailsTimer: Timer = fakeTimer
+//  override val citizenDetailsFailedCounter: Counter = fakeCounter
+//
+//
+//
+//}

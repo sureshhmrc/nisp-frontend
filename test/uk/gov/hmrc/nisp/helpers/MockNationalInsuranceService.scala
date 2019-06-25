@@ -19,6 +19,4 @@ package uk.gov.hmrc.nisp.helpers
 import uk.gov.hmrc.nisp.connectors.NationalInsuranceConnector
 import uk.gov.hmrc.nisp.services.{NationalInsuranceConnection, NationalInsuranceService}
 
-object MockNationalInsuranceServiceViaNationalInsurance extends NationalInsuranceService with NationalInsuranceConnection {
-  override val nationalInsuranceConnector: NationalInsuranceConnector = MockNationalInsuranceConnector
-}
+object MockNationalInsuranceServiceViaNationalInsurance extends NationalInsuranceService(MockNationalInsuranceConnector)

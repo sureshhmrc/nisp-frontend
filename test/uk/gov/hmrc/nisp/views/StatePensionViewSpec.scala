@@ -60,17 +60,7 @@ class StatePensionViewSpec extends HtmlSpec with MockitoSugar {
     SessionKeys.authProvider -> AuthenticationProviderIds.VerifyProviderId
   )
 
-  def createStatePensionController = {
-    new MockStatePensionController {
-      override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
-      override val applicationConfig: ApplicationConfig = ApplicationConfigBuilder()
-      override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
-      override val statePensionService: StatePensionService = mock[StatePensionService]
-      override val nationalInsuranceService: NationalInsuranceService = mock[NationalInsuranceService]
-      override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
-    }
-  }
-
+  def createStatePensionController = MockStatePensionController
 
   "The State Pension page" when {
 
@@ -82,7 +72,7 @@ class StatePensionViewSpec extends HtmlSpec with MockitoSugar {
 
           lazy val controller = createStatePensionController
 
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -312,7 +302,7 @@ class StatePensionViewSpec extends HtmlSpec with MockitoSugar {
 
           lazy val controller = createStatePensionController
 
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -394,7 +384,7 @@ class StatePensionViewSpec extends HtmlSpec with MockitoSugar {
 
           lazy val controller = createStatePensionController
 
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -589,7 +579,7 @@ class StatePensionViewSpec extends HtmlSpec with MockitoSugar {
 
           lazy val controller = createStatePensionController
 
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -671,7 +661,7 @@ class StatePensionViewSpec extends HtmlSpec with MockitoSugar {
 
           lazy val controller = createStatePensionController
 
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -842,7 +832,7 @@ class StatePensionViewSpec extends HtmlSpec with MockitoSugar {
 
           lazy val controller = createStatePensionController
 
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -927,7 +917,7 @@ class StatePensionViewSpec extends HtmlSpec with MockitoSugar {
         "State Pension view with NON-MQP :  No Gaps || Full Rate & Personal Max" should {
 
           lazy val controller = createStatePensionController
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -1085,7 +1075,7 @@ class StatePensionViewSpec extends HtmlSpec with MockitoSugar {
         "State Pension view with NON-MQP :  No Gapss || Full Rate & Personal Max: With State Pension age under consideration message" should {
 
           lazy val controller = createStatePensionController
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -1166,7 +1156,7 @@ class StatePensionViewSpec extends HtmlSpec with MockitoSugar {
         "State Pension view with NON-MQP :  No need to fill gaps || Full Rate and Personal Max: when some one has more years left" should {
 
           lazy val controller = createStatePensionController
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -1321,7 +1311,7 @@ class StatePensionViewSpec extends HtmlSpec with MockitoSugar {
         "State Pension view with NON-MQP :  No need to fill gaps || Full Rate and Personal Max: when some one has more years left: With State Pension age under consideration message" should {
 
           lazy val controller = createStatePensionController
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -1404,7 +1394,7 @@ class StatePensionViewSpec extends HtmlSpec with MockitoSugar {
 
         lazy val controller = createStatePensionController
 
-        when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Right(StatePension(
             new LocalDate(2016, 4, 5),
             amounts = StatePensionAmounts(
@@ -1545,7 +1535,7 @@ class StatePensionViewSpec extends HtmlSpec with MockitoSugar {
 
         lazy val controller = createStatePensionController
 
-        when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Right(StatePension(
             new LocalDate(2016, 4, 5),
             amounts = StatePensionAmounts(

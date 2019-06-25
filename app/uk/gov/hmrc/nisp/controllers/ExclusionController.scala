@@ -34,9 +34,10 @@ import uk.gov.hmrc.renderer.TemplateRenderer
 class ExclusionController @Inject()(val citizenDetailsService: CitizenDetailsService,
                                     val applicationConfig: ApplicationConfig,
                                     statePensionConnection: StatePensionConnection,
-                                    nationalInsuranceService: NationalInsuranceService)(implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
-                                     implicit val formPartialRetriever: FormPartialRetriever,
-                                     implicit val templateRenderer: TemplateRenderer)
+                                    nationalInsuranceService: NationalInsuranceService)
+                                   (implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
+                                     val formPartialRetriever: FormPartialRetriever,
+                                     val templateRenderer: TemplateRenderer)
                                     extends NispFrontendController(cachedStaticHtmlPartialRetriever,
                                       formPartialRetriever,
                                       templateRenderer)

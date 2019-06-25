@@ -16,6 +16,11 @@
 
 package uk.gov.hmrc.nisp.helpers
 
-import uk.gov.hmrc.nisp.services.CitizenDetailsService
+import org.scalatest.mock.MockitoSugar
+import uk.gov.hmrc.play.config.ServicesConfig
 
-object MockCitizenDetailsService extends CitizenDetailsService(MockCitizenDetailsConnector)
+object MockServiceConfig extends MockitoSugar {
+
+val servicesConfig: ServicesConfig = mock[ServicesConfig]
+
+}

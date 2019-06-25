@@ -28,16 +28,13 @@ import uk.gov.hmrc.nisp.models.enums.APIType
 import uk.gov.hmrc.nisp.models.{StatePension, StatePensionExclusion}
 import uk.gov.hmrc.nisp.services.MetricsService
 import uk.gov.hmrc.nisp.utils.EitherReads.eitherReads
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.config.{RunMode, ServicesConfig}
 
 import scala.concurrent.Future
 
-class StatePensionConnector @Inject()( val http: HttpGet, val metricsService: MetricsService) extends BackendConnector with ServicesConfig {
+class StatePensionConnector @Inject()( val http: HttpGet, val metricsService: MetricsService, servicesConfig: ServicesConfig) extends BackendConnector {
 
-  override protected def mode: Mode = Play.current.mode
-  override protected def runModeConfiguration: Configuration = Play.current.configuration
-
-  val serviceUrl = baseUrl("state-pension")
+  val serviceUrl = servicesConfig.baseUrl("state-pension")
   override def sessionCache: SessionCache = new NispSessionCache(WSHttp, Play.current.configuration)
 
   implicit val reads = eitherReads[StatePensionExclusion, StatePension]

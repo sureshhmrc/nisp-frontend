@@ -22,10 +22,10 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.http.HeaderCarrier
 
-object MockCustomAuditConnector extends CustomAuditConnector {
-  override val auditConnector: AuditConnector = new AuditConnector {
+object MockAuditConnector extends AuditConnector {
     override def auditingConfig: AuditingConfig = ???
   }
 
+object MockCustomAuditConnector extends CustomAuditConnector(MockAuditConnector) {
   override def sendEvent(event: DataEvent)(implicit hc: HeaderCarrier): Unit = ()
 }

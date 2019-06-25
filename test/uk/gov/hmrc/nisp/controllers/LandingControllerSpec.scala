@@ -44,7 +44,7 @@ import uk.gov.hmrc.time.DateTimeUtils._
 
 class LandingControllerSpec  extends PlaySpec with MockitoSugar with OneAppPerSuite with I18nSupport {
 
-  override val app: Application = GuiceApplicationBuilder()
+  override lazy val app: Application = GuiceApplicationBuilder()
     .overrides(bind[CitizenDetailsService].toInstance(MockCitizenDetailsService))
     .overrides(bind[ApplicationConfig].toInstance(mock[ApplicationConfig]))
     .overrides(bind[IdentityVerificationConnector].toInstance(MockIdentityVerificationConnector))

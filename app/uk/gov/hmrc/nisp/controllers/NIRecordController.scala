@@ -23,6 +23,7 @@ import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.nisp.config.wiring.NispSessionCache
 import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobal, LocalTemplateRenderer}
 import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
@@ -32,7 +33,7 @@ import uk.gov.hmrc.nisp.controllers.pertax.PertaxHelper
 import uk.gov.hmrc.nisp.events.{AccountExclusionEvent, NIRecordEvent}
 import uk.gov.hmrc.nisp.models._
 import uk.gov.hmrc.nisp.services._
-import uk.gov.hmrc.nisp.utils.{Constants, Formatting}
+import uk.gov.hmrc.nisp.utils.{Constants, DateUtil, Formatting}
 import uk.gov.hmrc.nisp.views.html.{nirecordGapsAndHowToCheckThem, nirecordVoluntaryContributions, nirecordpage}
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
@@ -41,11 +42,12 @@ import uk.gov.hmrc.time.TaxYear
 class NIRecordController @Inject()(val citizenDetailsService: CitizenDetailsService,
                                    val applicationConfig: ApplicationConfig,
                                    customAuditConnector: CustomAuditConnector,
-                                   val sessionCache: NispSessionCache,
+                                   val sessionCache: SessionCache,
                                    val metricsService: MetricsService,
                                    nationalInsuranceService: NationalInsuranceService,
                                    statePensionService: StatePensionService,
-                                   statePensionConnection: StatePensionConnection
+                                   statePensionConnection: StatePensionConnection,
+                                   val dateUtil: DateUtil
                                    )
                                   (implicit override val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
                                   implicit val formPartialRetriever: FormPartialRetriever,
@@ -59,7 +61,7 @@ class NIRecordController @Inject()(val citizenDetailsService: CitizenDetailsServ
                                   with PertaxHelper {
 
   val showFullNI: Boolean = applicationConfig.showFullNI
-  val currentDate = new LocalDate(DateTimeZone.forID("Europe/London"))
+  val currentDate = dateUtil.nowInEuropeTimeZone
 
   def showFull: Action[AnyContent] = show(gapsOnlyView = false)
 

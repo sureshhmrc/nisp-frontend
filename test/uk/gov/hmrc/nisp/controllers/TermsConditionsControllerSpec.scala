@@ -20,22 +20,28 @@ import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.http._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.helpers._
 import uk.gov.hmrc.nisp.utils.MockTemplateRenderer
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
+import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
 
 class TermsConditionsControllerSpec extends PlaySpec with OneAppPerSuite {
 
   val fakeRequest = FakeRequest("GET", "/")
+  implicit val formPartialRetriever: FormPartialRetriever = app.injector.instanceOf[FormPartialRetriever]
+  implicit val templateRenderer: TemplateRenderer = app.injector.instanceOf[TemplateRenderer]
+  val applicationConfig: ApplicationConfig = app.injector.instanceOf[ApplicationConfig]
 
-  val MockTermsConditionsController = new TermsConditionsController {
-    override protected def authConnector: AuthConnector = MockAuthConnector
+
+  val MockTermsConditionsController = new TermsConditionsController(applicationConfig) {
+    override def authConnector: AuthConnector = MockAuthConnector
 
     override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
 
     override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
+
   }
 
   "GET /" should {

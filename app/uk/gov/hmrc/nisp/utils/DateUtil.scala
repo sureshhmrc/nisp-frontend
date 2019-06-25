@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nisp.helpers
+package uk.gov.hmrc.nisp.utils
 
-import uk.gov.hmrc.nisp.services.CitizenDetailsService
+import org.joda.time.{DateTimeZone, LocalDate}
 
-object MockCitizenDetailsService extends CitizenDetailsService(MockCitizenDetailsConnector)
+class DateUtil {
+
+  def nowInEuropeTimeZone = new LocalDate(DateTimeZone.forID("Europe/London"))
+
+}

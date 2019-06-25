@@ -31,6 +31,7 @@ import uk.gov.hmrc.nisp.builders.ApplicationConfigBuilder
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.config.wiring.NispFormPartialRetriever
 import uk.gov.hmrc.nisp.controllers.NispFrontendController
+import uk.gov.hmrc.nisp.fixtures.MockApplicationConfig
 import uk.gov.hmrc.nisp.helpers._
 import uk.gov.hmrc.nisp.services.CitizenDetailsService
 import uk.gov.hmrc.nisp.utils.{Constants, MockTemplateRenderer}
@@ -40,10 +41,10 @@ import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.renderer.TemplateRenderer
 import uk.gov.hmrc.time.DateTimeUtils.now
 
-class StatePension_CopeViewSpec extends HtmlSpec with NispFrontendController with MockitoSugar with BeforeAndAfter {
+class StatePension_CopeViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
 
   implicit val cachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
-  override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
+  implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
 
   val mockUserNino = TestAccountBuilder.regularNino
   val mockUserNinoExcluded = TestAccountBuilder.excludedAll
@@ -67,7 +68,7 @@ class StatePension_CopeViewSpec extends HtmlSpec with NispFrontendController wit
 
   lazy val fakeRequest = FakeRequest()
 
-  override implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever
+  implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever
 
   def authenticatedFakeRequest(userId: String) = fakeRequest.withSession(
     SessionKeys.sessionId -> s"session-${UUID.randomUUID()}",
@@ -76,12 +77,8 @@ class StatePension_CopeViewSpec extends HtmlSpec with NispFrontendController wit
     SessionKeys.authProvider -> AuthenticationProviderIds.VerifyProviderId
   )
 
-  lazy val controller = new MockStatePensionController {
-    override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
-    override val applicationConfig: ApplicationConfig = ApplicationConfigBuilder()
-    override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
-    override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
-  }
+
+  lazy val controller = MockStatePensionController
 
   "Render State Pension view with Contracted out User" should {
     lazy val result = controller.show()(authenticatedFakeRequest(mockUserIdContractedOut).withCookies(lanCookie))
@@ -191,7 +188,8 @@ class StatePension_CopeViewSpec extends HtmlSpec with NispFrontendController wit
 
   "Render Contracted Out View" should {
 
-    lazy val sResult = html.statepension_cope(99.54, true)
+    val appConfig: ApplicationConfig = MockApplicationConfig
+    lazy val sResult = html.statepension_cope(99.54, isPertaxUrl = true, appConfig)
     lazy val htmlAccountDoc = asDocument(contentAsString(sResult))
 
     "render with correct page title" in {

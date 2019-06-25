@@ -19,9 +19,8 @@ package uk.gov.hmrc.nisp.helpers
 import uk.gov.hmrc.nisp.connectors.IdentityVerificationConnector
 import uk.gov.hmrc.nisp.services.MetricsService
 import uk.gov.hmrc.http.HttpGet
+import uk.gov.hmrc.nisp.config.wiring.WSHttp
 
-object MockIdentityVerificationConnector extends IdentityVerificationConnector {
+object MockIdentityVerificationConnector extends IdentityVerificationConnector(MockMetricsService.metrics,MockIdentityVerificationHttp.mockHttp.asInstanceOf[WSHttp]) {
   override val serviceUrl: String = ""
-  override def http: HttpGet = MockIdentityVerificationHttp.mockHttp
-  override val metricsService: MetricsService = MockMetricsService
 }
