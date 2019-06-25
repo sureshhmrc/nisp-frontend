@@ -37,7 +37,7 @@ import uk.gov.hmrc.renderer.TemplateRenderer
 
 class GARedirectControllerSpec  extends PlaySpec with MockitoSugar with OneAppPerSuite {
 
-  override val app: Application = GuiceApplicationBuilder()
+  override lazy val app: Application = GuiceApplicationBuilder()
     .overrides(bind[CitizenDetailsService].toInstance(MockCitizenDetailsService))
     .overrides(bind[ApplicationConfig].toInstance(mock[ApplicationConfig]))
     .overrides(bind[IdentityVerificationConnector].toInstance(MockIdentityVerificationConnector))

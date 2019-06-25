@@ -21,9 +21,7 @@ import uk.gov.hmrc.nisp.connectors.NationalInsuranceConnector
 import uk.gov.hmrc.nisp.services.MetricsService
 import uk.gov.hmrc.http.HttpGet
 
-object MockNationalInsuranceConnector extends NationalInsuranceConnector {
-  override def http: HttpGet = MockNispHttp.mockHttp
+object MockNationalInsuranceConnector extends NationalInsuranceConnector(MockNispHttp.mockHttp,MockMetricsService.metrics,MockStatePensionConnector,MockServiceConfig.servicesConfig){
   override def sessionCache: SessionCache = MockSessionCache
-  override def serviceUrl: String = "national-insurance"
-  override val metricsService: MetricsService = MockMetricsService
+  override val serviceUrl: String = "national-insurance"
 }

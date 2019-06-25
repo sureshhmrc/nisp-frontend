@@ -21,9 +21,9 @@ import uk.gov.hmrc.nisp.connectors.CitizenDetailsConnector
 import uk.gov.hmrc.nisp.services.MetricsService
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet }
 
-object MockCitizenDetailsConnector extends CitizenDetailsConnector with MockitoSugar{
+object MockCitizenDetailsConnector extends CitizenDetailsConnector(
+                                              http = MockCitizenDetailsHttp.mockHttp,
+                                              metricsService = MockMetricsService.metrics) with MockitoSugar{
   override val serviceUrl: String = ""
-  override val http: HttpGet = MockCitizenDetailsHttp.mockHttp
   implicit val hc = HeaderCarrier()
-  override val metricsService: MetricsService = MockMetricsService
 }

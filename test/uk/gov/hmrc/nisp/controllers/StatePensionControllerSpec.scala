@@ -21,19 +21,20 @@ import java.util.UUID
 import org.joda.time.{LocalDate, LocalDateTime}
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.Play.configuration
-import play.api.http.Status
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import play.api.{Application, Configuration}
+import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.helpers._
 import uk.gov.hmrc.nisp.models.StatePensionAmountRegular
-import uk.gov.hmrc.nisp.services.{CitizenDetailsService, NationalInsuranceService}
+import uk.gov.hmrc.nisp.services.{CitizenDetailsService, NationalInsuranceService, StatePensionConnection}
 import uk.gov.hmrc.play.frontend.auth.AuthenticationProviderIds
-import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
+import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils.now
-import uk.gov.hmrc.http.SessionKeys
 
 class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppPerSuite {
 
@@ -58,6 +59,12 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
 
   lazy val fakeRequest = FakeRequest()
 
+    override lazy val app: Application = GuiceApplicationBuilder()
+    .overrides(bind[CitizenDetailsService].toInstance(MockCitizenDetailsService))
+    .overrides(bind[CachedStaticHtmlPartialRetriever].toInstance(MockCachedStaticHtmlPartialRetriever))
+    .overrides(bind[NationalInsuranceService].toInstance(MockNationalInsuranceServiceViaNationalInsurance))
+    .build()
+
   private def authenticatedFakeRequest(userId: String = mockUserId) = FakeRequest().withSession(
     SessionKeys.sessionId -> s"session-${UUID.randomUUID()}",
     SessionKeys.lastRequestTimestamp -> now.getMillis.toString,
@@ -65,11 +72,9 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
     SessionKeys.authProvider -> AuthenticationProviderIds.VerifyProviderId
   )
 
-  def testAccountController(testNow: LocalDateTime): StatePensionController = new MockStatePensionController {
-    override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
-    override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
-    override val nationalInsuranceService: NationalInsuranceService = MockNationalInsuranceServiceViaNationalInsurance
-  }
+  val configuration = app.injector.instanceOf[Configuration]
+
+  def testAccountController(testNow: LocalDateTime): StatePensionController = MockStatePensionController
 
   "State Pension controller" should {
 
@@ -96,38 +101,7 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
       }
 
       "redirect to Verify with IV disabled" in {
-        val controller = new MockStatePensionController {
-          override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
-          override val applicationConfig: ApplicationConfig = new ApplicationConfig {
-            override val assetsPrefix: String = ""
-            override val reportAProblemNonJSUrl: String = ""
-            override val ssoUrl: Option[String] = None
-            override val betaFeedbackUnauthenticatedUrl: String = ""
-            override val contactFrontendPartialBaseUrl: String = ""
-            override val govUkFinishedPageUrl: String = "govukdone"
-            override val showGovUkDonePage: Boolean = false
-            override val analyticsHost: String = ""
-            override val analyticsToken: Option[String] = None
-            override val betaFeedbackUrl: String = ""
-            override val reportAProblemPartialUrl: String = ""
-            override val verifySignIn: String = ""
-            override val verifySignInContinue: Boolean = false
-            override val postSignInRedirectUrl: String = ""
-            override val notAuthorisedRedirectUrl: String = ""
-            override val identityVerification: Boolean = false
-            override val ivUpliftUrl: String = "ivuplift"
-            override val ggSignInUrl: String = "ggsignin"
-            override val pertaxFrontendUrl: String = ""
-            override val contactFormServiceIdentifier: String = ""
-            override val breadcrumbPartialUrl: String = ""
-            override val showFullNI: Boolean = false
-            override val futureProofPersonalMax: Boolean = false
-            override val isWelshEnabled = false
-            override val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
-            override val feedbackFrontendUrl: String = "/foo"
-          }
-          override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
-        }
+        val controller = MockStatePensionController
 
         val result = controller.show(fakeRequest)
         redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/verify-sign-in?continue=http%3A%2F%2Flocalhost%3A9234%2Fcheck-your-state-pension%2Faccount")
@@ -227,76 +201,16 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
 
     "GET /signout" should {
       "redirect to the questionnaire page when govuk done page is disabled" in {
-        val controller = new MockStatePensionController {
-          override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
-          override val applicationConfig: ApplicationConfig = new ApplicationConfig {
-            override val assetsPrefix: String = ""
-            override val reportAProblemNonJSUrl: String = ""
-            override val ssoUrl: Option[String] = None
-            override val betaFeedbackUnauthenticatedUrl: String = ""
-            override val contactFrontendPartialBaseUrl: String = ""
-            override val govUkFinishedPageUrl: String = "govukdone"
-            override val showGovUkDonePage: Boolean = false
-            override val analyticsHost: String = ""
-            override val analyticsToken: Option[String] = None
-            override val betaFeedbackUrl: String = ""
-            override val reportAProblemPartialUrl: String = ""
-            override val verifySignIn: String = ""
-            override val verifySignInContinue: Boolean = false
-            override val postSignInRedirectUrl: String = ""
-            override val notAuthorisedRedirectUrl: String = ""
-            override val identityVerification: Boolean = false
-            override val ivUpliftUrl: String = "ivuplift"
-            override val ggSignInUrl: String = "ggsignin"
-            override val pertaxFrontendUrl: String = ""
-            override val contactFormServiceIdentifier: String = ""
-            override val breadcrumbPartialUrl: String = ""
-            override val showFullNI: Boolean = false
-            override val futureProofPersonalMax: Boolean = false
-            override val isWelshEnabled = false
-            override val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
-            override val feedbackFrontendUrl: String = "/foo"
-          }
-          override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
-        }
+        val controller = MockStatePensionController
+
         val result = controller.signOut(fakeRequest)
 
         redirectLocation(result).get shouldBe "/foo"
       }
 
       "redirect to the gov.uk done page when govuk done page is enabled" in {
-        val controller = new MockStatePensionController {
-          override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
-          override val applicationConfig: ApplicationConfig = new ApplicationConfig {
-            override val assetsPrefix: String = ""
-            override val reportAProblemNonJSUrl: String = ""
-            override val ssoUrl: Option[String] = None
-            override val betaFeedbackUnauthenticatedUrl: String = ""
-            override val contactFrontendPartialBaseUrl: String = ""
-            override val govUkFinishedPageUrl: String = "govukdone"
-            override val showGovUkDonePage: Boolean = true
-            override val analyticsHost: String = ""
-            override val analyticsToken: Option[String] = None
-            override val betaFeedbackUrl: String = ""
-            override val reportAProblemPartialUrl: String = ""
-            override val verifySignIn: String = ""
-            override val verifySignInContinue: Boolean = false
-            override val postSignInRedirectUrl: String = ""
-            override val notAuthorisedRedirectUrl: String = ""
-            override val identityVerification: Boolean = false
-            override val ivUpliftUrl: String = "ivuplift"
-            override val ggSignInUrl: String = "ggsignin"
-            override val pertaxFrontendUrl: String = ""
-            override val contactFormServiceIdentifier: String = ""
-            override val breadcrumbPartialUrl: String = ""
-            override val showFullNI: Boolean = false
-            override val futureProofPersonalMax: Boolean = false
-            override val isWelshEnabled = false
-            override val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
-            override val feedbackFrontendUrl: String = "/foo"
-          }
-          override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
-        }
+        val controller = MockStatePensionController
+
         val result = controller.signOut(fakeRequest)
 
         redirectLocation(result).get shouldBe "/foo"
@@ -366,38 +280,8 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
       }
 
       "the future proof config is set to true" should {
-        val controller = new MockStatePensionController {
-          override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
-          override val applicationConfig: ApplicationConfig = new ApplicationConfig {
-            override val assetsPrefix: String = ""
-            override val reportAProblemNonJSUrl: String = ""
-            override val ssoUrl: Option[String] = None
-            override val betaFeedbackUnauthenticatedUrl: String = ""
-            override val contactFrontendPartialBaseUrl: String = ""
-            override val govUkFinishedPageUrl: String = "govukdone"
-            override val showGovUkDonePage: Boolean = true
-            override val analyticsHost: String = ""
-            override val analyticsToken: Option[String] = None
-            override val betaFeedbackUrl: String = ""
-            override val reportAProblemPartialUrl: String = ""
-            override val verifySignIn: String = ""
-            override val verifySignInContinue: Boolean = false
-            override val postSignInRedirectUrl: String = ""
-            override val notAuthorisedRedirectUrl: String = ""
-            override val identityVerification: Boolean = false
-            override val ivUpliftUrl: String = "ivuplift"
-            override val ggSignInUrl: String = "ggsignin"
-            override val pertaxFrontendUrl: String = ""
-            override val contactFormServiceIdentifier: String = ""
-            override val breadcrumbPartialUrl: String = ""
-            override val showFullNI: Boolean = false
-            override val futureProofPersonalMax: Boolean = true
-            override val isWelshEnabled = false
-            override val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
-            override val feedbackFrontendUrl: String = "/foo"
-          }
-          override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
-        }
+        val controller = MockStatePensionController
+
           "show new personal max text when there are multiple/single year" in {
           val result = controller.show()(authenticatedFakeRequest(mockUserIdFillGapsMultiple))
           contentAsString(result) should include("You have shortfalls in your National Insurance record that you can fill and make count towards your State Pension.")

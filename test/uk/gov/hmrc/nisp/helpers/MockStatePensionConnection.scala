@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.nisp.helpers
 
-import uk.gov.hmrc.nisp.services.CitizenDetailsService
+import uk.gov.hmrc.nisp.services.StatePensionConnection
 
-object MockCitizenDetailsService extends CitizenDetailsService(MockCitizenDetailsConnector)
+object MockStatePensionConnection extends StatePensionConnection(
+  statePensionConnector = MockStatePensionConnector,
+  statePensionService = MockStatePensionService)

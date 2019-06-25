@@ -17,12 +17,11 @@
 package uk.gov.hmrc.nisp.services
 
 import com.codahale.metrics.Timer.Context
-import com.codahale.metrics.{Counter, Timer}
+import javax.inject.Inject
 import uk.gov.hmrc.nisp.models.enums.APIType
 import uk.gov.hmrc.nisp.models.enums.APIType.APIType
-import uk.gov.hmrc.play.graphite.MicroserviceMetrics
 
-class MetricsService extends MicroserviceMetrics {
+class MetricsService @Inject()(metrics: com.kenshoo.play.metrics.Metrics) {
 
   val timers = Map(
     APIType.SP -> metrics.defaultRegistry.timer("sp-response-timer"),

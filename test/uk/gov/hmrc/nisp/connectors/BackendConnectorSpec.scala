@@ -41,7 +41,7 @@ class BackendConnectorSpec extends UnitSpec with MockitoSugar with ScalaFutures 
     override def http: HttpGet = mockHttp
     override def sessionCache: SessionCache = MockSessionCache
     override def serviceUrl: String = "national-insurance"
-    override val metricsService: MetricsService = MockMetricsService
+    override val metricsService: MetricsService = MockMetricsService.metrics
 
     def getNationalInsurance()(implicit headerCarrier: HeaderCarrier): Future[NationalInsuranceRecord] = {
       val urlToRead = s"$serviceUrl/ni"

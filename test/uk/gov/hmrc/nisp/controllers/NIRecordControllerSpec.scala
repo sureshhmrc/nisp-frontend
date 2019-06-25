@@ -19,6 +19,7 @@ package uk.gov.hmrc.nisp.controllers
 import java.util.UUID
 
 import org.joda.time.LocalDate
+import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Application
@@ -27,22 +28,20 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.http.cache.client.SessionCache
+import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobalTrait}
+import uk.gov.hmrc.nisp.connectors.IdentityVerificationConnector
 import uk.gov.hmrc.nisp.controllers.connectors.CustomAuditConnector
 import uk.gov.hmrc.nisp.helpers._
 import uk.gov.hmrc.nisp.services.{CitizenDetailsService, MetricsService, NationalInsuranceService, StatePensionService}
-import uk.gov.hmrc.nisp.utils.MockTemplateRenderer
+import uk.gov.hmrc.nisp.utils.{DateUtil, MockTemplateRenderer}
 import uk.gov.hmrc.play.frontend.auth.AuthenticationProviderIds
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.renderer.TemplateRenderer
 import uk.gov.hmrc.time.DateTimeUtils._
-import uk.gov.hmrc.http.SessionKeys
-import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobalTrait}
-import uk.gov.hmrc.nisp.connectors.IdentityVerificationConnector
-import uk.gov.hmrc.nisp.fixtures.FullNIWelshEnabledApplicationConfig
-import org.mockito.Mockito._
 
 class NIRecordControllerSpec extends UnitSpec with MockitoSugar with OneAppPerSuite {
   val mockUserId = "/auth/oid/mockuser"
@@ -57,7 +56,7 @@ class NIRecordControllerSpec extends UnitSpec with MockitoSugar with OneAppPerSu
   val ggSignInUrl = s"http://localhost:9949/auth-login-stub/gg-sign-in?continue=http%3A%2F%2Flocalhost%3A9234%2Fcheck-your-state-pension%2Faccount&origin=nisp-frontend&accountType=individual"
 
 
-  override val app: Application = GuiceApplicationBuilder()
+  override lazy val app: Application = GuiceApplicationBuilder()
     .overrides(bind[CitizenDetailsService].toInstance(MockCitizenDetailsService))
     .overrides(bind[ApplicationConfig].toInstance(mock[ApplicationConfig])) //FullNIWelshEnabledApplicationConfig
     .overrides(bind[IdentityVerificationConnector].toInstance(MockIdentityVerificationConnector))
@@ -65,11 +64,12 @@ class NIRecordControllerSpec extends UnitSpec with MockitoSugar with OneAppPerSu
     .overrides(bind[CachedStaticHtmlPartialRetriever].toInstance(MockCachedStaticHtmlPartialRetriever))
     .overrides(bind[TemplateRenderer].toInstance(MockTemplateRenderer))
     .overrides(bind[ApplicationGlobalTrait].toInstance(MockApplicationGlobal))
-    .overrides(bind[StatePensionService].toInstance(MockStatePensionServiceViaStatePension))
+    .overrides(bind[StatePensionService].toInstance(MockStatePensionService))
     .overrides(bind[NationalInsuranceService].toInstance(MockNationalInsuranceServiceViaNationalInsurance))
     .overrides(bind[CustomAuditConnector].toInstance(MockCustomAuditConnector))
     .overrides(bind[SessionCache].toInstance(MockSessionCache))
-    .overrides(bind[MetricsService].toInstance(MockMetricsService))
+    .overrides(bind[MetricsService].toInstance(MockMetricsService.metrics))
+    .overrides(bind[DateUtil].toInstance(mock[DateUtil]))
     .build()
 
 
@@ -193,10 +193,14 @@ class NIRecordControllerSpec extends UnitSpec with MockitoSugar with OneAppPerSu
 
   "GET /account/nirecord (full)" should {
     "return NI record page with details for full years - when showFullNI is true" in {
-      when(mockNIRecordController.applicationConfig.showFullNI).thenReturn(true)
-      val controller = new MockNIRecordController() {
-        currentDate = new LocalDate(2016, 9, 9)
-        override val showFullNI = true
+      val controller: NIRecordController = {
+        val nrc = app.injector.instanceOf[NIRecordController]
+        when(mockNIRecordController.applicationConfig.showFullNI)
+          .thenReturn(true)
+        when(mockNIRecordController.dateUtil.nowInEuropeTimeZone)
+          .thenReturn(new LocalDate(2016, 9, 9))
+
+        nrc
       }
 
       val result = controller.showFull(authenticatedFakeRequest(mockFullUserId))
@@ -204,20 +208,32 @@ class NIRecordControllerSpec extends UnitSpec with MockitoSugar with OneAppPerSu
     }
 
     "return NI record page with no details for full years - when showFullNI is false" in {
-      val controller = new MockNIRecordController {
-        override val currentDate = new LocalDate(2016, 9, 9)
-        override val showFullNI = false
+            val controller: NIRecordController = {
+        val nrc = app.injector.instanceOf[NIRecordController]
+        when(mockNIRecordController.applicationConfig.showFullNI)
+          .thenReturn(false)
+        when(mockNIRecordController.dateUtil.nowInEuropeTimeZone)
+          .thenReturn(new LocalDate(2016, 9, 9))
+
+        nrc
       }
+
       val result = controller.showFull(authenticatedFakeRequest(mockFullUserId))
       contentAsString(result) shouldNot include("52 weeks")
     }
 
     "return NI record when numner of qualifying years is 0" in {
       // Unit test for bug NISP-2436
-      val controller = new MockNIRecordController {
-        override val showFullNI = true
-        override val currentDate = new LocalDate(2016, 9, 9)
+            val controller: NIRecordController = {
+        val nrc = app.injector.instanceOf[NIRecordController]
+        when(mockNIRecordController.applicationConfig.showFullNI)
+          .thenReturn(true)
+        when(mockNIRecordController.dateUtil.nowInEuropeTimeZone)
+          .thenReturn(new LocalDate(2016, 9, 9))
+
+        nrc
       }
+
       val result = controller.showFull(authenticatedFakeRequest(mockNoQualifyingYearsUserId))
       result.header.status shouldBe 200
     }
@@ -225,28 +241,46 @@ class NIRecordControllerSpec extends UnitSpec with MockitoSugar with OneAppPerSu
 
   "GET /account/nirecord (Gaps)" should {
     "return NI record page - gap details should not show shortfall may increase messages - if current date is after 5 April 2019" in {
-      val controller = new MockNIRecordController {
-        override val showFullNI = false
-        override val currentDate = new LocalDate(2019, 4, 6)
+            val controller: NIRecordController = {
+        val nrc = app.injector.instanceOf[NIRecordController]
+        when(mockNIRecordController.applicationConfig.showFullNI)
+          .thenReturn(false)
+        when(mockNIRecordController.dateUtil.nowInEuropeTimeZone)
+          .thenReturn(new LocalDate(2016, 4, 6))
+
+        nrc
       }
+
       val result = controller.showGaps(authenticatedFakeRequest(mockUserWithGaps))
       contentAsString(result) should not include ("shortfall may increase")
     }
 
     "return NI record page - gap details should show shortfall may increase messages - if current date is before 5 April 2019" in {
-      val controller = new MockNIRecordController {
-        override val showFullNI = false
-        override val currentDate = new LocalDate(2019, 4, 4)
+            val controller: NIRecordController = {
+        val nrc = app.injector.instanceOf[NIRecordController]
+        when(mockNIRecordController.applicationConfig.showFullNI)
+          .thenReturn(false)
+        when(mockNIRecordController.dateUtil.nowInEuropeTimeZone)
+          .thenReturn(new LocalDate(2016, 4, 4))
+
+        nrc
       }
+
       val result = controller.showGaps(authenticatedFakeRequest(mockUserWithGaps))
       contentAsString(result) should include("shortfall may increase")
     }
 
     "return NI record page - gap details should show shortfall may increase messages - if current date is same 5 April 2019" in {
-      val controller = new MockNIRecordController {
-        override val showFullNI = false
-        override val currentDate = new LocalDate(2019, 4, 5)
+            val controller: NIRecordController = {
+        val nrc = app.injector.instanceOf[NIRecordController]
+        when(mockNIRecordController.applicationConfig.showFullNI)
+          .thenReturn(false)
+        when(mockNIRecordController.dateUtil.nowInEuropeTimeZone)
+          .thenReturn(new LocalDate(2016, 4, 5))
+
+        nrc
       }
+
       val result = controller.showGaps(authenticatedFakeRequest(mockUserWithGaps))
       contentAsString(result) should include("shortfall may increase")
     }

@@ -24,30 +24,25 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatest._
 import org.scalatest.mock.MockitoSugar
-
 import play.api.i18n.Messages
-
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
-import uk.gov.hmrc.nisp.builders.{ApplicationConfigBuilder, NationalInsuranceTaxYearBuilder}
-
-import uk.gov.hmrc.nisp.config.ApplicationConfig
+import uk.gov.hmrc.http.SessionKeys
+import uk.gov.hmrc.nisp.builders.NationalInsuranceTaxYearBuilder
 import uk.gov.hmrc.nisp.config.wiring.NispFormPartialRetriever
+import uk.gov.hmrc.nisp.controllers.StatePensionController
+import uk.gov.hmrc.nisp.fixtures.MockApplicationConfig
 import uk.gov.hmrc.nisp.helpers._
 import uk.gov.hmrc.nisp.models._
-import uk.gov.hmrc.nisp.services.{CitizenDetailsService, NationalInsuranceService, StatePensionService}
-import uk.gov.hmrc.nisp.utils.Constants
+import uk.gov.hmrc.nisp.utils.{Constants, MockTemplateRenderer}
 import uk.gov.hmrc.nisp.views.formatting.Time
 import uk.gov.hmrc.play.frontend.auth.AuthenticationProviderIds
 import uk.gov.hmrc.play.language.LanguageUtils.Dates
-import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.time.DateTimeUtils.now
-import uk.gov.hmrc.nisp.controllers.NispFrontendController
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.SessionKeys
 
-class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with MockitoSugar with BeforeAndAfter {
+class StatePension_MQPViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
 
   implicit val cachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
   lazy val fakeRequest = FakeRequest()
@@ -69,7 +64,7 @@ class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with
   val mockUserIdFillGapsMultiple = "/auth/oid/mockfillgapsmultiple"
   val ggSignInUrl = "http://localhost:9949/gg/sign-in?continue=http%3A%2F%2Flocalhost%3A9234%2Fcheck-your-state-pension%2Faccount&origin=nisp-frontend&accountType=individual"
   val twoFactorUrl = "http://localhost:9949/coafe/two-step-verification/register/?continue=http%3A%2F%2Flocalhost%3A9234%2Fcheck-your-state-pension%2Faccount&failure=http%3A%2F%2Flocalhost%3A9234%2Fcheck-your-state-pension%2Fnot-authorised"
-  override implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever
+  implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever
 
   val expectedMoneyServiceLink = "https://www.moneyadviceservice.org.uk/en"
   val expectedPensionCreditOverviewLink = "https://www.gov.uk/pension-credit/overview"
@@ -81,24 +76,14 @@ class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with
     SessionKeys.authProvider -> AuthenticationProviderIds.VerifyProviderId
   )
 
-  def createStatePensionController = {
-    new MockStatePensionController {
-      override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
-      override val applicationConfig: ApplicationConfig = ApplicationConfigBuilder()
-      override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
-      override val statePensionService: StatePensionService = mock[StatePensionService]
-      override val nationalInsuranceService: NationalInsuranceService = mock[NationalInsuranceService]
-    }
-  }
-
   "The State Pension page" when {
 
     "the user is a MQP" when {
 
       "State Pension page with forecast only" should {
 
-        lazy val controller = createStatePensionController
-        when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        lazy val controller = MockStatePensionController
+        when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Right(StatePension(
             new LocalDate(2016, 4, 5),
             amounts = StatePensionAmounts(
@@ -247,8 +232,8 @@ class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with
 
       "State Pension page with forecast only: With State Pension age under consideration message" should {
 
-        lazy val controller = createStatePensionController
-        when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        lazy val controller = MockStatePensionController
+        when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Right(StatePension(
             new LocalDate(2016, 4, 5),
             amounts = StatePensionAmounts(
@@ -330,8 +315,8 @@ class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with
       "The scenario is continue working" when {
 
         "State Pension page with MQP : Continue Working || Fill Gaps || Full Rate" should {
-          lazy val controller = createStatePensionController
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          lazy val controller = MockStatePensionController
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -489,8 +474,8 @@ class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with
         }
 
         "State Pension page with MQP : Continue Working || Fill Gaps || Full Rate: With State Pension age under consideration message" should {
-          lazy val controller = createStatePensionController
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          lazy val controller = MockStatePensionController
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -569,8 +554,8 @@ class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with
 
         "State Pension page with MQP : Continue Working || no gaps || Full Rate" should {
 
-          lazy val controller = createStatePensionController
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          lazy val controller = MockStatePensionController
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -719,8 +704,8 @@ class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with
 
         "State Pension page with MQP : Continue Working || no gaps || Full Rate: With State Pension age under consideration message" should {
 
-          lazy val controller = createStatePensionController
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          lazy val controller = MockStatePensionController
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -801,8 +786,8 @@ class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with
 
         "State Pension page with MQP : Continue Working || 0 Qualify Years || has fillable Gaps ||  Personal Max" should {
 
-          lazy val controller = createStatePensionController
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          lazy val controller = MockStatePensionController
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -952,8 +937,8 @@ class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with
 
         "State Pension page with MQP : Continue Working || 0 Qualify Years || has fillable Gaps ||  Personal Max: With State Pension age under consideration message" should {
 
-          lazy val controller = createStatePensionController
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          lazy val controller = MockStatePensionController
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -1034,8 +1019,8 @@ class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with
 
         "State Pension page with MQP : Continue Working || 9 Qualify Years || cant fill gaps ||  Personal Max" should {
 
-          lazy val controller = createStatePensionController
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          lazy val controller = MockStatePensionController
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -1184,8 +1169,8 @@ class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with
 
         "State Pension page with MQP : Continue Working || 9 Qualify Years || cant fill gaps ||  Personal Max: With State Pension age under consideration message" should {
 
-          lazy val controller = createStatePensionController
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          lazy val controller = MockStatePensionController
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -1268,9 +1253,9 @@ class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with
 
         "State Pension page with MQP :  No Gaps || Cant get pension" should {
 
-          lazy val controller = createStatePensionController
+          lazy val controller = MockStatePensionController
 
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -1401,9 +1386,9 @@ class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with
 
         "State Pension page with MQP :  No Gaps || Cant get pension: With State Pension age under consideration message" should {
 
-          lazy val controller = createStatePensionController
+          lazy val controller = MockStatePensionController
 
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -1468,9 +1453,9 @@ class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with
 
         "State Pension page with MQP :  has fillable Gaps || Personal Max" should {
 
-          lazy val controller = createStatePensionController
+          lazy val controller = MockStatePensionController
 
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
@@ -1595,9 +1580,9 @@ class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with
 
         "State Pension page with MQP :  has fillable Gaps || Personal Max: With State Pension age under consideration message" should {
 
-          lazy val controller = createStatePensionController
+          lazy val controller = MockStatePensionController
 
-          when(controller.statePensionService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
             .thenReturn(Future.successful(Right(StatePension(
               new LocalDate(2016, 4, 5),
               amounts = StatePensionAmounts(
