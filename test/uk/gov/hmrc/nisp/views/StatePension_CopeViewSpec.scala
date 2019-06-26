@@ -23,7 +23,7 @@ import org.joda.time.LocalDate
 import org.scalatest._
 import org.scalatest.mock.MockitoSugar
 import play.api.i18n.Messages
-import play.api.mvc.AnyContentAsEmpty
+import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.http.SessionKeys
@@ -36,6 +36,8 @@ import uk.gov.hmrc.play.frontend.auth.AuthenticationProviderIds
 import uk.gov.hmrc.play.language.LanguageUtils.Dates
 import uk.gov.hmrc.renderer.TemplateRenderer
 import uk.gov.hmrc.time.DateTimeUtils.now
+
+import scala.concurrent.Future
 
 class StatePension_CopeViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
 
@@ -76,7 +78,7 @@ class StatePension_CopeViewSpec extends HtmlSpec with MockitoSugar with BeforeAn
   lazy val controller: MockStatePensionController.type = MockStatePensionController
 
   "Render State Pension view with Contracted out User" should {
-    lazy val result = controller.show()(authenticatedFakeRequest(mockUserIdContractedOut).withCookies(lanCookie))
+    lazy val result: Future[Result] = controller.show()(authenticatedFakeRequest(mockUserIdContractedOut).withCookies(lanCookie))
     lazy val htmlAccountDoc = asDocument(contentAsString(result))
 
     "render with correct page title" in {

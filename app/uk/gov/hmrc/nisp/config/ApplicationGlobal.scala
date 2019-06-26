@@ -27,7 +27,6 @@ import play.twirl.api.Html
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.http.CoreGet
 import uk.gov.hmrc.nisp.config.wiring.{NispAuditConnector, NispCachedStaticHtmlPartialRetriever, WSHttp}
-import uk.gov.hmrc.nisp.controllers.NispFrontendController
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
 import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
 import uk.gov.hmrc.play.frontend.bootstrap.DefaultFrontendGlobal

@@ -21,6 +21,7 @@ import play.api.Logger
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
 import uk.gov.hmrc.nisp.controllers.connectors.AuthenticationConnectors
@@ -29,6 +30,7 @@ import uk.gov.hmrc.nisp.services._
 import uk.gov.hmrc.nisp.views.html._
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class ExclusionController @Inject()(val citizenDetailsService: CitizenDetailsService,
@@ -37,11 +39,9 @@ class ExclusionController @Inject()(val citizenDetailsService: CitizenDetailsSer
                                     nationalInsuranceService: NationalInsuranceService)
                                    (implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
                                      val formPartialRetriever: FormPartialRetriever,
-                                     val templateRenderer: TemplateRenderer)
-                                    extends NispFrontendController(cachedStaticHtmlPartialRetriever,
-                                      formPartialRetriever,
-                                      templateRenderer)
-                                    with AuthorisedForNisp
+                                     val templateRenderer: TemplateRenderer,
+                                    headerCarrier: HeaderCarrier)
+                                    extends AuthorisedForNisp
                                     with AuthenticationConnectors {
 
   def showSP: Action[AnyContent] = AuthorisedByAny.async {

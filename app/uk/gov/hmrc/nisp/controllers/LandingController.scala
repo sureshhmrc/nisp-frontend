@@ -21,6 +21,7 @@ import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Application, Logger}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nisp.auth.GovernmentGatewayProvider
 import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobal, LocalTemplateRenderer}
 import uk.gov.hmrc.nisp.connectors.IdentityVerificationSuccessResponse._
@@ -35,6 +36,7 @@ import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
@@ -46,11 +48,9 @@ class LandingController @Inject()(val citizenDetailsService: CitizenDetailsServi
                                  (implicit override val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
                                   val formPartialRetriever: FormPartialRetriever,
                                   val templateRenderer: TemplateRenderer,
-                                  val application: Application)
-                                  extends NispFrontendController(cachedStaticHtmlPartialRetriever,
-                                    formPartialRetriever,
-                                    templateRenderer)
-                                  with AuthenticationConnectors
+                                  val application: Application,
+                                  headerCarrier: HeaderCarrier)
+                                  extends AuthenticationConnectors
                                   with PartialRetriever
                                   with Actions
                                   with AuthorisedForNisp {

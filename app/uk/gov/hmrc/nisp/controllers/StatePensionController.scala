@@ -38,6 +38,7 @@ import uk.gov.hmrc.nisp.views.html._
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class StatePensionController @Inject()(val sessionCache: SessionCache,
                                        val customAuditConnector: CustomAuditConnector,
@@ -48,12 +49,10 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
                                        val statePensionConnection: StatePensionConnection,
                                        val nationalInsuranceService: NationalInsuranceService)
                                       (implicit override val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
-                                       implicit val formPartialRetriever: FormPartialRetriever,
-                                       implicit val templateRenderer: TemplateRenderer)
-                                      extends NispFrontendController(cachedStaticHtmlPartialRetriever,
-                                        formPartialRetriever,
-                                        templateRenderer)
-                                        with AuthorisedForNisp
+                                        val formPartialRetriever: FormPartialRetriever,
+                                        val templateRenderer: TemplateRenderer,
+                                        headerCarrier: HeaderCarrier)
+                                      extends AuthorisedForNisp
                                         with PertaxHelper
                                         with AuthenticationConnectors
                                         with PartialRetriever {
@@ -75,7 +74,7 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
       }
   }
 
-  private def sendAuditEvent(statePension: StatePension, user: NispUser)(implicit hc: HeaderCarrier): Unit = {
+  private def sendAuditEvent(statePension: StatePension, user: NispUser): Unit = {
     customAuditConnector.sendEvent(AccountAccessEvent(
       user.nino.nino,
       statePension.pensionDate,
@@ -187,7 +186,7 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
             case _ => throw new RuntimeException("StatePensionController: SP and NIR are unmatchable. This is probably a logic error.")
           }
         }).recover {
-          case ex: Exception => onError(ex)
+          case ex: Exception => InternalServerError(ex.getMessage)
         }
       }
   }

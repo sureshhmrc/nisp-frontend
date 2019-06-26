@@ -27,11 +27,6 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
-//TODO: only for testing?
-//trait NationalInsuranceService {
-//  def getSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[Exclusion, NationalInsuranceRecord]]
-//}
-
 class NationalInsuranceService @Inject()(nationalInsuranceConnector: NationalInsuranceConnector) extends NationalInsuranceConnection(nationalInsuranceConnector)
 
 class NationalInsuranceConnection @Inject()(nationalInsuranceConnector: NationalInsuranceConnector) {

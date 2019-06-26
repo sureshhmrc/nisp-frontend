@@ -16,15 +16,14 @@
 
 package uk.gov.hmrc.nisp.helpers
 
+import org.scalatest.mock.MockitoSugar
 import org.scalatest.mock.MockitoSugar._
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.nisp.connectors.StatePensionConnector
 import uk.gov.hmrc.nisp.services.MetricsService
 
-object MockStatePensionConnector extends StatePensionConnector(MockNispHttp.mockHttp, MockMetricsService.metrics,MockServiceConfig.servicesConfig) {
+object MockStatePensionConnector extends MockitoSugar {
 
-  override def sessionCache: SessionCache = MockSessionCache
-
-  override val serviceUrl: String = "state-pension"
+  val connector = mock[StatePensionConnector]
 
 }

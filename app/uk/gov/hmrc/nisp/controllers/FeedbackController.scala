@@ -36,7 +36,7 @@ import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
-
+import play.api.http.HeaderNames._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -46,9 +46,7 @@ class FeedbackController @Inject()(val httpPost: WSHttp,
                                    val applicationConfig: ApplicationConfig)(implicit formPartialRetriever: FormPartialRetriever,
                                                                                   implicit val templateRenderer: TemplateRenderer,
                                                                                   implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever)
-  extends NispFrontendController(cachedStaticHtmlPartialRetriever,
-    formPartialRetriever,
-    templateRenderer) with AuthenticationConnectors with Actions with AuthorisedForNisp {
+  extends AuthenticationConnectors with Actions with AuthorisedForNisp {
 
   def contactFormReferer(implicit request: Request[AnyContent]): String = request.headers.get(REFERER).getOrElse("")
 

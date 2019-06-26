@@ -28,9 +28,11 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
-class CitizenDetailsConnector @Inject()(metricsService: MetricsService, http: HttpGet) extends ServicesConfig {
+class CitizenDetailsConnector @Inject()(metricsService: MetricsService,
+                                        http: HttpGet,
+                                        configuration: Configuration) extends ServicesConfig {
   override protected def mode: Mode = Play.current.mode
-  override protected def runModeConfiguration: Configuration = Play.current.configuration
+  override protected def runModeConfiguration: Configuration = configuration
 
   val serviceUrl = baseUrl("citizen-details")
 

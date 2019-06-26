@@ -47,7 +47,7 @@ class LandingControllerSpec  extends PlaySpec with MockitoSugar with OneAppPerSu
   override lazy val app: Application = GuiceApplicationBuilder()
     .overrides(bind[CitizenDetailsService].toInstance(MockCitizenDetailsService))
     .overrides(bind[ApplicationConfig].toInstance(mock[ApplicationConfig]))
-    .overrides(bind[IdentityVerificationConnector].toInstance(MockIdentityVerificationConnector))
+    .overrides(bind[IdentityVerificationConnector].toInstance(MockIdentityVerificationConnector.connector))
     .overrides(bind[AuthConnector].toInstance(MockAuthConnector))
     .overrides(bind[CachedStaticHtmlPartialRetriever].toInstance(MockCachedStaticHtmlPartialRetriever))
     .overrides(bind[TemplateRenderer].toInstance(MockTemplateRenderer))

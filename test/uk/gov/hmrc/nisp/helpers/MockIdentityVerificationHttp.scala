@@ -24,10 +24,11 @@ import play.api.libs.json.Json
 
 import scala.concurrent.Future
 import scala.io.Source
-import uk.gov.hmrc.http.{ HttpGet, HttpResponse }
+import uk.gov.hmrc.http.{HttpGet, HttpResponse}
+import uk.gov.hmrc.nisp.config.wiring.WSHttp
 
 object MockIdentityVerificationHttp extends MockitoSugar {
-  val mockHttp = mock[HttpGet]
+  val mockHttp = mock[WSHttp]
 
   val possibleJournies = Map(
     "success-journey-id" -> "test/resources/identity-verification/success.json",

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nisp.helpers
 
-import uk.gov.hmrc.nisp.connectors.NationalInsuranceConnector
-import uk.gov.hmrc.nisp.services.{NationalInsuranceConnection, NationalInsuranceService}
+import uk.gov.hmrc.nisp.services.NationalInsuranceService
 
 object MockNationalInsuranceServiceViaNationalInsurance extends NationalInsuranceService(MockNationalInsuranceConnector)
