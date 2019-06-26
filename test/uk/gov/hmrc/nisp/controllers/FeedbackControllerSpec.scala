@@ -48,7 +48,7 @@ class FeedbackControllerSpec extends PlaySpec with MockitoSugar with OneAppPerSu
 
   val httpPost: WSHttp = mockHttp
   val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
-  val appConfig: ApplicationConfig = MockApplicationConfig
+  val appConfig: ApplicationConfig = MockApplicationConfig.appConfig
 
   val testFeedbackController: FeedbackController = new FeedbackController(httpPost, citizenDetailsService, appConfig) with AuthenticationConnectors {
     override def localSubmitUrl(implicit request: Request[AnyContent]): String = ""

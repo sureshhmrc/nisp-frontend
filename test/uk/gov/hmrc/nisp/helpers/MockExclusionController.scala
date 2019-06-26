@@ -28,7 +28,7 @@ object MockExclusionController extends ExclusionController(
   nationalInsuranceService = MockNationalInsuranceServiceViaNationalInsurance,
   citizenDetailsService = MockCitizenDetailsService,
   statePensionConnection = MockStatePensionConnection,
-  applicationConfig = MockApplicationConfig
+  applicationConfig = MockApplicationConfig.appConfig
 )(MockCachedStaticHtmlPartialRetriever,
   MockFormPartialRetriever,
   MockTemplateRenderer

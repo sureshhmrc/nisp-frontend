@@ -16,26 +16,96 @@
 
 package uk.gov.hmrc.nisp.helpers
 
+import org.mockito.Mockito.when
+import org.scalatest.mock.MockitoSugar
+import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.controllers.StatePensionController
-import uk.gov.hmrc.nisp.fixtures.MockApplicationConfig
+import uk.gov.hmrc.nisp.fixtures.MockApplicationConfig.appConfig
 import uk.gov.hmrc.nisp.utils.MockTemplateRenderer
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
 
-  object MockStatePensionController extends StatePensionController(MockSessionCache,
-    MockCustomAuditConnector,
-    MockApplicationConfig,
-    MockCitizenDetailsService,
-    MockMetricsService.metrics,
-    MockStatePensionService,
-    MockStatePensionConnection,
-    MockNationalInsuranceServiceViaNationalInsurance
-  )(
+
+class appConfig extends MockitoSugar {
+
+  val appConfig: ApplicationConfig = mock[ApplicationConfig]
+
+  when(appConfig.ggSignInUrl).thenReturn("ggsignin")
+  when(appConfig.verifySignIn).thenReturn("")
+  when(appConfig.verifySignInContinue).thenReturn(false)
+  when(appConfig.reportAProblemNonJSUrl).thenReturn("")
+  when(appConfig.ssoUrl).thenReturn(None)
+  when(appConfig.identityVerification).thenReturn(true)
+  when(appConfig.betaFeedbackUnauthenticatedUrl).thenReturn("")
+  when(appConfig.notAuthorisedRedirectUrl).thenReturn("")
+  when(appConfig.contactFrontendPartialBaseUrl).thenReturn("")
+  when(appConfig.govUkFinishedPageUrl).thenReturn("govukdone")
+  when(appConfig.showGovUkDonePage).thenReturn(true)
+  when(appConfig.analyticsHost).thenReturn("")
+  when(appConfig.betaFeedbackUrl).thenReturn("")
+  when(appConfig.analyticsToken).thenReturn(None)
+  when(appConfig.reportAProblemPartialUrl).thenReturn("")
+  when(appConfig.contactFormServiceIdentifier).thenReturn("")
+  when(appConfig.postSignInRedirectUrl).thenReturn("")
+  when(appConfig.ivUpliftUrl).thenReturn("ivuplift")
+  when(appConfig.pertaxFrontendUrl).thenReturn("")
+  when(appConfig.breadcrumbPartialUrl).thenReturn("")
+  when(appConfig.showFullNI).thenReturn(false)
+  when(appConfig.futureProofPersonalMax).thenReturn(false)
+  when(appConfig.isWelshEnabled).thenReturn(true)
+  when(appConfig.frontendTemplatePath).thenReturn("microservice.services.frontend-template-provider.path")
+  when(appConfig.feedbackFrontendUrl).thenReturn("/foo")
+
+}
+
+object MockStatePensionController extends StatePensionController(
+  MockSessionCache,
+  MockCustomAuditConnector,
+  appConfig,
+  MockCitizenDetailsService,
+  MockMetricsService.metrics,
+  MockStatePensionService,
+  MockStatePensionConnection,
+  MockNationalInsuranceServiceViaNationalInsurance
+)(
   MockCachedStaticHtmlPartialRetriever,
   MockFormPartialRetriever,
-MockTemplateRenderer
+  MockTemplateRenderer
 ) {
-      override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
+  override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
   override implicit val formPartialRetriever: FormPartialRetriever = MockFormPartialRetriever
   override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
-  }
+
+  override implicit def authConnector: AuthConnector = MockAuthConnector
+
+  //  override val applicationConfig: ApplicationConfig = new ApplicationConfig {
+  //    override val assetsPrefix: String = ""
+  //    override val reportAProblemNonJSUrl: String = ""
+  //    override val ssoUrl: Option[String] = None
+  //    override val betaFeedbackUnauthenticatedUrl: String = ""
+  //    override val contactFrontendPartialBaseUrl: String = ""
+  //    override val analyticsHost: String = ""
+  //    override val analyticsToken: Option[String] = None
+  //    override val betaFeedbackUrl: String = ""
+  //    override val reportAProblemPartialUrl: String = ""
+  //    override val showGovUkDonePage: Boolean = true
+  //    override val govUkFinishedPageUrl: String = "govukdone"
+  //    override val verifySignIn: String = ""
+  //    override val verifySignInContinue: Boolean = false
+  //    override val postSignInRedirectUrl: String = ""
+  //    override val notAuthorisedRedirectUrl: String = ""
+  //    override val identityVerification: Boolean = true
+  //    override val ivUpliftUrl: String = "ivuplift"
+  //    override val ggSignInUrl: String = "ggsignin"
+  //    override val pertaxFrontendUrl: String = ""
+  //    override val contactFormServiceIdentifier: String = ""
+  //    override val breadcrumbPartialUrl: String = ""
+  //    override val showFullNI: Boolean = false
+  //    override val futureProofPersonalMax: Boolean = false
+  //    override val isWelshEnabled = true
+  //    override val frontendTemplatePath: String = "microservice.services.frontend-template-provider.path"
+  //    override val feedbackFrontendUrl: String = "/foo"
+  //
+  //  }
+}

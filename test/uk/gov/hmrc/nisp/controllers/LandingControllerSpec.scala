@@ -62,7 +62,7 @@ class LandingControllerSpec  extends PlaySpec with MockitoSugar with OneAppPerSu
   val testLandingController = app.injector.instanceOf[LandingController]
 
 
-  val applicationConfig = MockApplicationConfig
+  val applicationConfig = MockApplicationConfig.appConfig
   implicit val partialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
   implicit val application:Application = app
 

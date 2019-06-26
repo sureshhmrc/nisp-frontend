@@ -16,34 +16,37 @@
 
 package uk.gov.hmrc.nisp.helpers
 
-
-
 import com.codahale.metrics.Timer.Context
 import com.codahale.metrics.{Counter, Timer}
+import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers.any
 import org.scalatest.mock.MockitoSugar
+import uk.gov.hmrc.nisp.models.enums.APIType
 import uk.gov.hmrc.nisp.models.enums.APIType.APIType
 import uk.gov.hmrc.nisp.services.MetricsService
 
 object MockMetricsService extends MockitoSugar {
 
   val metrics = mock[MetricsService]
-  val fakeTimerContext = mock[Timer.Context]
+
   val fakeTimer = new Timer()
   val fakeCounter = mock[Counter]
-  def startTimer(api: APIType): Context = fakeTimerContext
 
-  def incrementFailedCounter(api: APIType): Unit = {}
+  when(metrics.keystoreReadTimer).thenReturn(fakeTimer)
+  when(metrics.keystoreWriteTimer).thenReturn(fakeTimer)
+  when(metrics.keystoreReadFailed).thenReturn(fakeCounter)
+  when(metrics.keystoreWriteFailed).thenReturn(fakeCounter)
+  when(metrics.keystoreHitCounter).thenReturn(fakeCounter)
+  when(metrics.keystoreMissCounter).thenReturn(fakeCounter)
+  when(metrics.identityVerificationTimer).thenReturn(fakeTimer)
+  when(metrics.identityVerificationFailedCounter).thenReturn(fakeCounter)
+  when(metrics.citizenDetailsTimer).thenReturn(fakeTimer)
+  when(metrics.citizenDetailsFailedCounter).thenReturn(fakeCounter)
 
-  val keystoreReadTimer: Timer = fakeTimer
-  val keystoreWriteTimer: Timer = fakeTimer
-  val keystoreReadFailed: Counter = fakeCounter
-  val keystoreWriteFailed: Counter = fakeCounter
-  val keystoreHitCounter: Counter = fakeCounter
-  val keystoreMissCounter: Counter = fakeCounter
-  val identityVerificationTimer: Timer = fakeTimer
-  val identityVerificationFailedCounter: Counter = fakeCounter
-  val citizenDetailsTimer: Timer = fakeTimer
-  val citizenDetailsFailedCounter: Counter = fakeCounter
+  val fakeTimerContext = mock[Timer.Context]
+
+  when(metrics.startTimer(any[APIType])).thenReturn(fakeTimerContext)
+ // when(metrics.incrementFailedCounter(any[APIType])).thenReturn(fakeCounter.inc())
 
 }
 
