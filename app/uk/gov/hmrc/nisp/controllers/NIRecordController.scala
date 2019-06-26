@@ -18,6 +18,7 @@ package uk.gov.hmrc.nisp.controllers
 
 import javax.inject.Inject
 import org.joda.time.{DateTimeZone, LocalDate}
+import play.api.Logger
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent}
@@ -35,9 +36,12 @@ import uk.gov.hmrc.nisp.models._
 import uk.gov.hmrc.nisp.services._
 import uk.gov.hmrc.nisp.utils.{Constants, DateUtil, Formatting}
 import uk.gov.hmrc.nisp.views.html.{nirecordGapsAndHowToCheckThem, nirecordVoluntaryContributions, nirecordpage}
+import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
 import uk.gov.hmrc.time.TaxYear
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class NIRecordController @Inject()(val citizenDetailsService: CitizenDetailsService,
                                    val applicationConfig: ApplicationConfig,
@@ -50,12 +54,9 @@ class NIRecordController @Inject()(val citizenDetailsService: CitizenDetailsServ
                                    val dateUtil: DateUtil
                                    )
                                   (implicit override val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
-                                  implicit val formPartialRetriever: FormPartialRetriever,
-                                  implicit val templateRenderer: TemplateRenderer)
-                                  extends NispFrontendController(cachedStaticHtmlPartialRetriever,
-                                    formPartialRetriever,
-                                    templateRenderer)
-                                  with AuthenticationConnectors
+                                   val formPartialRetriever: FormPartialRetriever,
+                                   val templateRenderer: TemplateRenderer)
+                                  extends FrontendController with AuthenticationConnectors
                                   with PartialRetriever
                                   with AuthorisedForNisp
                                   with PertaxHelper {
@@ -164,7 +165,7 @@ class NIRecordController @Inject()(val citizenDetailsService: CitizenDetailsServ
               Redirect(routes.ExclusionController.showNI())
           }
         }).recover {
-          case ex: Exception => onError(ex)
+          case ex: Exception => InternalServerError(ex.getMessage)
         }
   }
 

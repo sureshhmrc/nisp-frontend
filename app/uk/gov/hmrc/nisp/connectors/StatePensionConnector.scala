@@ -32,10 +32,13 @@ import uk.gov.hmrc.play.config.{RunMode, ServicesConfig}
 
 import scala.concurrent.Future
 
-class StatePensionConnector @Inject()( val http: HttpGet, val metricsService: MetricsService, servicesConfig: ServicesConfig) extends BackendConnector {
+class StatePensionConnector @Inject()( val http: HttpGet, val metricsService: MetricsService, configuration: Configuration) extends BackendConnector with ServicesConfig {
 
-  val serviceUrl = servicesConfig.baseUrl("state-pension")
-  override def sessionCache: SessionCache = new NispSessionCache(WSHttp, Play.current.configuration)
+  override protected def mode: Mode = Play.current.mode
+  override protected def runModeConfiguration: Configuration = configuration
+
+  val serviceUrl = baseUrl("state-pension")
+  override def sessionCache: SessionCache = new NispSessionCache(WSHttp, configuration)
 
   implicit val reads = eitherReads[StatePensionExclusion, StatePension]
 

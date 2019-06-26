@@ -18,4 +18,4 @@ package uk.gov.hmrc.nisp.helpers
 
 import uk.gov.hmrc.nisp.services.CitizenDetailsService
 
-object MockCitizenDetailsService extends CitizenDetailsService(MockCitizenDetailsConnector)
+object MockCitizenDetailsService extends CitizenDetailsService(MockCitizenDetailsConnector.connector)

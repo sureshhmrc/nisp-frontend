@@ -34,10 +34,7 @@ class GARedirectController @Inject()(val citizenDetailsService: CitizenDetailsSe
                                      identityVerificationConnector: IdentityVerificationConnector,
                                      formPartialRetriever: FormPartialRetriever,
                                      templateRenderer: LocalTemplateRenderer)
-                                    extends NispFrontendController(cachedStaticHtmlPartialRetriever,
-                                            formPartialRetriever,
-                                            templateRenderer)
-                                    with AuthenticationConnectors with Actions with AuthorisedForNisp {
+                                    extends AuthenticationConnectors with Actions with AuthorisedForNisp {
 
   def show: Action[AnyContent] = UnauthorisedAction(
     implicit request =>

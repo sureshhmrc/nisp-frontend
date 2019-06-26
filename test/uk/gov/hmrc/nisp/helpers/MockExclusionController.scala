@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.nisp.helpers
 
+import org.scalatest.mock.MockitoSugar.mock
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nisp.controllers.ExclusionController
 import uk.gov.hmrc.nisp.fixtures.MockApplicationConfig
 import uk.gov.hmrc.nisp.utils.MockTemplateRenderer
@@ -24,14 +26,15 @@ import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.renderer.TemplateRenderer
 
 
-object MockExclusionController extends ExclusionController(
+object MockExclusionController extends ExclusionController (
   nationalInsuranceService = MockNationalInsuranceServiceViaNationalInsurance,
   citizenDetailsService = MockCitizenDetailsService,
   statePensionConnection = MockStatePensionConnection,
   applicationConfig = MockApplicationConfig.appConfig
 )(MockCachedStaticHtmlPartialRetriever,
   MockFormPartialRetriever,
-  MockTemplateRenderer
+  MockTemplateRenderer,
+  mock[HeaderCarrier]
 ) {
 
   override def authConnector: AuthConnector = MockAuthConnector

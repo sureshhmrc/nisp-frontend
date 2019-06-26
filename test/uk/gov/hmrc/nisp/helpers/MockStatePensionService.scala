@@ -21,6 +21,6 @@ import uk.gov.hmrc.nisp.connectors.StatePensionConnector
 import uk.gov.hmrc.nisp.services.{StatePensionConnection, StatePensionService}
 
 
-object MockStatePensionService extends StatePensionService(MockStatePensionConnector) {
+object MockStatePensionService extends StatePensionService(MockStatePensionConnector.connector) {
   override def now: () => DateTime = () => new DateTime(new LocalDate(2016, 11, 1))
 }

@@ -38,7 +38,7 @@ class NispModule extends Module {
       bind[FrontendAuditFilter].toInstance(NispFrontendAuditFilter),
       bind[HttpGet].toInstance(WSHttp),
       bind[WSHttp].toInstance(WSHttp),
-     bind[TemplateRenderer].toInstance(LocalTemplateRenderer),
+      bind[TemplateRenderer].toInstance(LocalTemplateRenderer),
       bind[SessionCache].to(classOf[NispSessionCache])
   )
 }

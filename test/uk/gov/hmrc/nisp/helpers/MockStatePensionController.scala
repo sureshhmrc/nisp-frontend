@@ -17,7 +17,8 @@
 package uk.gov.hmrc.nisp.helpers
 
 import org.mockito.Mockito.when
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mock.MockitoSugar.mock
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.controllers.StatePensionController
 import uk.gov.hmrc.nisp.fixtures.MockApplicationConfig.appConfig
@@ -27,7 +28,7 @@ import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialR
 import uk.gov.hmrc.renderer.TemplateRenderer
 
 
-class appConfig extends MockitoSugar {
+class appConfig {
 
   val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
@@ -71,7 +72,8 @@ object MockStatePensionController extends StatePensionController(
 )(
   MockCachedStaticHtmlPartialRetriever,
   MockFormPartialRetriever,
-  MockTemplateRenderer
+  MockTemplateRenderer,
+  mock[HeaderCarrier]
 ) {
   override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
   override implicit val formPartialRetriever: FormPartialRetriever = MockFormPartialRetriever
