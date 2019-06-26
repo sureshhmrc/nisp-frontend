@@ -37,7 +37,7 @@ class VoluntaryContributionsViewSpec extends HtmlSpec with MockitoSugar with Bef
   val mockUserIdForecastOnly = "/auth/oid/mockforecastonly"
   val mockUsername = "mockuser"
   val mockUserId: String = "/auth/oid/" + mockUsername
-  val appConfig: ApplicationConfig = MockApplicationConfig
+  val appConfig: ApplicationConfig = MockApplicationConfig.appConfig
 
   lazy val fakeRequest = FakeRequest()
   implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever

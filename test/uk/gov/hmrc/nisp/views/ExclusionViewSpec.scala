@@ -37,7 +37,7 @@ class ExclusionViewSpec extends HtmlSpec with MockitoSugar {
   implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever
   implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
 
-  val appConfig: ApplicationConfig = MockApplicationConfig
+  val appConfig: ApplicationConfig = MockApplicationConfig.appConfig
 
  // val mockUserNino = TestAccountBuilder.urBannerNino
   //val mockUserIdForecastOnly = "/auth/oid/mockforecastonly"

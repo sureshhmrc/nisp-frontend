@@ -17,33 +17,28 @@
 package uk.gov.hmrc.nisp.connectors
 
 import org.joda.time.LocalDate
-import uk.gov.hmrc.nisp.helpers.TestAccountBuilder
-import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.hmrc.nisp.helpers.MockNationalInsuranceConnector
-import uk.gov.hmrc.nisp.models.NationalInsuranceRecord
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
-import uk.gov.hmrc.nisp.models
-import uk.gov.hmrc.http.{ HeaderCarrier, Upstream4xxResponse }
+import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse}
+import uk.gov.hmrc.nisp.helpers.{MockNationalInsuranceConnector, TestAccountBuilder}
+import uk.gov.hmrc.nisp.models.NationalInsuranceRecord
+import uk.gov.hmrc.play.test.UnitSpec
+
+import scala.concurrent.Future
 
 class NationalInsuranceConnectorSpec extends UnitSpec with ScalaFutures {
 
-  implicit val headerCarrier = HeaderCarrier(extraHeaders = Seq("Accept" -> "application/vnd.hmrc.1.0+json"))
+  implicit val headerCarrier: HeaderCarrier = HeaderCarrier(extraHeaders = Seq("Accept" -> "application/vnd.hmrc.1.0+json"))
 
-  implicit val defaultPatience =
-    PatienceConfig(timeout = Span(5, Seconds), interval = Span(500, Millis))
+  implicit val defaultPatience: PatienceConfig = PatienceConfig(timeout = Span(5, Seconds), interval = Span(500, Millis))
 
   "getNationalInsuranceRecord" when {
 
     "there is a regular user" should {
 
-      val nationalInsuranceRecord = MockNationalInsuranceConnector.getNationalInsurance(TestAccountBuilder.regularNino)(headerCarrier)
+      val nationalInsuranceRecord: Future[NationalInsuranceRecord] = MockNationalInsuranceConnector.getNationalInsurance(TestAccountBuilder.regularNino)(headerCarrier)
 
       "return a National Insurance Record with 28 qualifying years" in {
-
-        whenReady(MockNationalInsuranceConnector.getNationalInsurance(TestAccountBuilder.regularNino)){ record =>
-          record.qualifyingYears shouldBe 28
-        }
 
         nationalInsuranceRecord.qualifyingYears shouldBe 28
       }

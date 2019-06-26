@@ -22,22 +22,18 @@ import org.apache.commons.lang3.StringEscapeUtils
 import org.joda.time.LocalDate
 import org.scalatest._
 import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import play.api.i18n.{Messages, MessagesApi}
+import play.api.i18n.Messages
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.http.SessionKeys
-import uk.gov.hmrc.nisp.builders.ApplicationConfigBuilder
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.config.wiring.NispFormPartialRetriever
-import uk.gov.hmrc.nisp.controllers.NispFrontendController
 import uk.gov.hmrc.nisp.fixtures.MockApplicationConfig
 import uk.gov.hmrc.nisp.helpers._
-import uk.gov.hmrc.nisp.services.CitizenDetailsService
 import uk.gov.hmrc.nisp.utils.{Constants, MockTemplateRenderer}
 import uk.gov.hmrc.play.frontend.auth.AuthenticationProviderIds
 import uk.gov.hmrc.play.language.LanguageUtils.Dates
-import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.renderer.TemplateRenderer
 import uk.gov.hmrc.time.DateTimeUtils.now
 
@@ -70,15 +66,14 @@ class StatePension_CopeViewSpec extends HtmlSpec with MockitoSugar with BeforeAn
 
   implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever
 
-  def authenticatedFakeRequest(userId: String) = fakeRequest.withSession(
+  def authenticatedFakeRequest(userId: String): FakeRequest[AnyContentAsEmpty.type] = fakeRequest.withSession(
     SessionKeys.sessionId -> s"session-${UUID.randomUUID()}",
     SessionKeys.lastRequestTimestamp -> now.getMillis.toString,
     SessionKeys.userId -> userId,
     SessionKeys.authProvider -> AuthenticationProviderIds.VerifyProviderId
   )
 
-
-  lazy val controller = MockStatePensionController
+  lazy val controller: MockStatePensionController.type = MockStatePensionController
 
   "Render State Pension view with Contracted out User" should {
     lazy val result = controller.show()(authenticatedFakeRequest(mockUserIdContractedOut).withCookies(lanCookie))
@@ -188,7 +183,7 @@ class StatePension_CopeViewSpec extends HtmlSpec with MockitoSugar with BeforeAn
 
   "Render Contracted Out View" should {
 
-    val appConfig: ApplicationConfig = MockApplicationConfig
+    val appConfig: ApplicationConfig = MockApplicationConfig.appConfig
     lazy val sResult = html.statepension_cope(99.54, isPertaxUrl = true, appConfig)
     lazy val htmlAccountDoc = asDocument(contentAsString(sResult))
 

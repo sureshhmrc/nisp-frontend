@@ -69,7 +69,7 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
   )
 
   object MockNIRecordController extends NIRecordController(MockCitizenDetailsService,
-  MockApplicationConfig,
+  MockApplicationConfig.appConfig,
     MockCustomAuditConnector,
     MockSessionCache,
     MockMetricsService.metrics,
@@ -342,7 +342,7 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
 
   "Render Ni Record view With HRP Message" should {
 
-    lazy val result = html.nirecordGapsAndHowToCheckThem(homeResponsibilitiesProtection = true, MockApplicationConfig)
+    lazy val result = html.nirecordGapsAndHowToCheckThem(homeResponsibilitiesProtection = true, MockApplicationConfig.appConfig)
 
     lazy val htmlAccountDoc = asDocument(contentAsString(result))
 
@@ -430,7 +430,7 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
   "Render Ni Record without With HRP Message" should {
 
 
-    lazy val result = html.nirecordGapsAndHowToCheckThem(homeResponsibilitiesProtection = false, MockApplicationConfig)
+    lazy val result = html.nirecordGapsAndHowToCheckThem(homeResponsibilitiesProtection = false, MockApplicationConfig.appConfig)
 
     lazy val htmlAccountDoc = asDocument(contentAsString(result))
 
@@ -513,7 +513,7 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
 
 
   "Render Ni Record without gap and has pre75years" should {
-    lazy val controller = MockApplicationConfig
+    lazy val controller = MockApplicationConfig.appConfig
 
     when(MockNationalInsuranceServiceViaNationalInsurance.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
       .thenReturn(Future.successful(Right(NationalInsuranceRecord(
