@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.nisp.helpers
 
+import javax.inject.Inject
 import play.api.Mode.Mode
 import play.api.{Configuration, Play}
 import uk.gov.hmrc.nisp.config.{ApplicationGlobalTrait, LocalTemplateRenderer}
 
-object MockApplicationGlobal extends ApplicationGlobalTrait {
-  override implicit val templateRenderer: LocalTemplateRenderer.type = LocalTemplateRenderer
-  override def mode: Mode = Play.current.mode
-  override def runModeConfiguration: Configuration = Play.current.configuration
+class MockApplicationGlobal @Inject()(configuration: Configuration) extends ApplicationGlobalTrait(configuration) {
+  override implicit val templateRenderer: LocalTemplateRenderer = LocalTemplateRenderer
 }

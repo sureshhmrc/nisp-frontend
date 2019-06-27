@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.nisp.helpers
 
+import play.api.Play
 import uk.gov.hmrc.nisp.fixtures.BreadcrumbApplicationConfig
 import uk.gov.hmrc.nisp.utils.NispBreadcrumb
 
-object MockBreadcrumb extends NispBreadcrumb(BreadcrumbApplicationConfig)
+object MockBreadcrumb extends NispBreadcrumb(new BreadcrumbApplicationConfig(Play.current.configuration))
