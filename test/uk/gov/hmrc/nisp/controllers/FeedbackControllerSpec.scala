@@ -27,11 +27,11 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.config.wiring.WSHttp
-import uk.gov.hmrc.nisp.controllers.connectors.AuthenticationConnectors
 import uk.gov.hmrc.nisp.fixtures.MockApplicationConfig
 import uk.gov.hmrc.nisp.helpers._
 import uk.gov.hmrc.nisp.services.CitizenDetailsService
 import uk.gov.hmrc.nisp.utils.MockTemplateRenderer
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
 
@@ -48,9 +48,10 @@ class FeedbackControllerSpec extends PlaySpec with MockitoSugar with OneAppPerSu
 
   val httpPost: WSHttp = mockHttp
   val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
+  val authConnector: AuthConnector= MockAuthConnector
   val appConfig: ApplicationConfig = MockApplicationConfig.appConfig
 
-  val testFeedbackController: FeedbackController = new FeedbackController(httpPost, citizenDetailsService, appConfig) with AuthenticationConnectors {
+  val testFeedbackController: FeedbackController = new FeedbackController(httpPost, citizenDetailsService, appConfig, authConnector) {
     override def localSubmitUrl(implicit request: Request[AnyContent]): String = ""
 
     override def contactFormReferer(implicit request: Request[AnyContent]): String = request.headers.get(REFERER).getOrElse("")

@@ -28,7 +28,7 @@ import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.nisp.config.wiring.NispSessionCache
 import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobal, LocalTemplateRenderer}
 import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
-import uk.gov.hmrc.nisp.controllers.connectors.{AuthenticationConnectors, CustomAuditConnector}
+import uk.gov.hmrc.nisp.controllers.connectors.CustomAuditConnector
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
 import uk.gov.hmrc.nisp.controllers.pertax.PertaxHelper
 import uk.gov.hmrc.nisp.events.{AccountExclusionEvent, NIRecordEvent}
@@ -36,6 +36,7 @@ import uk.gov.hmrc.nisp.models._
 import uk.gov.hmrc.nisp.services._
 import uk.gov.hmrc.nisp.utils.{Constants, DateUtil, Formatting}
 import uk.gov.hmrc.nisp.views.html.{nirecordGapsAndHowToCheckThem, nirecordVoluntaryContributions, nirecordpage}
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
@@ -51,15 +52,16 @@ class NIRecordController @Inject()(val citizenDetailsService: CitizenDetailsServ
                                    nationalInsuranceService: NationalInsuranceService,
                                    statePensionService: StatePensionService,
                                    statePensionConnection: StatePensionConnection,
-                                   val dateUtil: DateUtil
-                                   )
+                                   val dateUtil: DateUtil,
+                                   pertaxHelper: PertaxHelper,
+                                  val authConnector: AuthConnector
+                                  )
                                   (implicit override val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
                                    val formPartialRetriever: FormPartialRetriever,
                                    val templateRenderer: TemplateRenderer)
-                                  extends FrontendController with AuthenticationConnectors
-                                  with PartialRetriever
-                                  with AuthorisedForNisp
-                                  with PertaxHelper {
+  extends FrontendController
+    with PartialRetriever
+    with AuthorisedForNisp {
 
   val showFullNI: Boolean = applicationConfig.showFullNI
   val currentDate = dateUtil.nowInEuropeTimeZone
@@ -70,7 +72,7 @@ class NIRecordController @Inject()(val citizenDetailsService: CitizenDetailsServ
 
   def pta: Action[AnyContent] = AuthorisedByAny { implicit user =>
     implicit request =>
-      setFromPertax
+      pertaxHelper.setFromPertax
       Redirect(routes.NIRecordController.showFull())
   }
 

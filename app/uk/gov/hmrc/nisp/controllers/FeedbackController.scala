@@ -29,7 +29,6 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
 import uk.gov.hmrc.nisp.config.wiring.{NispHeaderCarrierForPartialsConverter, WSHttp}
 import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobal, LocalTemplateRenderer}
 import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
-import uk.gov.hmrc.nisp.controllers.connectors.AuthenticationConnectors
 import uk.gov.hmrc.nisp.services.CitizenDetailsService
 import uk.gov.hmrc.nisp.views.html.feedback_thankyou
 import uk.gov.hmrc.play.frontend.auth.Actions
@@ -37,16 +36,19 @@ import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
 import play.api.http.HeaderNames._
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
 class FeedbackController @Inject()(val httpPost: WSHttp,
                                    val citizenDetailsService: CitizenDetailsService,
-                                   val applicationConfig: ApplicationConfig)(implicit formPartialRetriever: FormPartialRetriever,
+                                   val applicationConfig: ApplicationConfig,
+                                   val authConnector: AuthConnector)(implicit formPartialRetriever: FormPartialRetriever,
                                                                                   implicit val templateRenderer: TemplateRenderer,
                                                                                   implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever)
-  extends AuthenticationConnectors with Actions with AuthorisedForNisp {
+  extends Actions with AuthorisedForNisp {
 
   def contactFormReferer(implicit request: Request[AnyContent]): String = request.headers.get(REFERER).getOrElse("")
 

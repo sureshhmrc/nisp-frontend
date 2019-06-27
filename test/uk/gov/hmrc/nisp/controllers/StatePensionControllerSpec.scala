@@ -31,6 +31,7 @@ import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.helpers._
 import uk.gov.hmrc.nisp.models.StatePensionAmountRegular
 import uk.gov.hmrc.nisp.services.{CitizenDetailsService, NationalInsuranceService, StatePensionConnection}
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.frontend.auth.AuthenticationProviderIds
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.play.test.UnitSpec
@@ -63,6 +64,7 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
     .overrides(bind[CitizenDetailsService].toInstance(MockCitizenDetailsService))
     .overrides(bind[CachedStaticHtmlPartialRetriever].toInstance(MockCachedStaticHtmlPartialRetriever))
     .overrides(bind[NationalInsuranceService].toInstance(MockNationalInsuranceServiceViaNationalInsurance))
+    .overrides(bind[AuditConnector].toInstance(MockAuditConnector))
     .build()
 
   private def authenticatedFakeRequest(userId: String = mockUserId) = FakeRequest().withSession(
@@ -72,7 +74,7 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
     SessionKeys.authProvider -> AuthenticationProviderIds.VerifyProviderId
   )
 
-  val configuration = app.injector.instanceOf[Configuration]
+  //val configuration = app.injector.instanceOf[Configuration]
 
   def testAccountController(testNow: LocalDateTime): StatePensionController = MockStatePensionController
 

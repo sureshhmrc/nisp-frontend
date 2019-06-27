@@ -23,9 +23,10 @@ import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent, Request, Session}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.SessionCache
-import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobal, LocalTemplateRenderer}
+import uk.gov.hmrc.nisp.config.wiring.NispAuthConnector
+import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobal}
 import uk.gov.hmrc.nisp.controllers.auth.{AuthorisedForNisp, NispUser}
-import uk.gov.hmrc.nisp.controllers.connectors.{AuthenticationConnectors, CustomAuditConnector}
+import uk.gov.hmrc.nisp.controllers.connectors.CustomAuditConnector
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
 import uk.gov.hmrc.nisp.controllers.pertax.PertaxHelper
 import uk.gov.hmrc.nisp.events.{AccountAccessEvent, AccountExclusionEvent}
@@ -35,9 +36,11 @@ import uk.gov.hmrc.nisp.services._
 import uk.gov.hmrc.nisp.utils.Constants
 import uk.gov.hmrc.nisp.utils.Constants._
 import uk.gov.hmrc.nisp.views.html._
-import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import uk.gov.hmrc.play.frontend.controller.{FrontendController, UnauthorisedAction}
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class StatePensionController @Inject()(val sessionCache: SessionCache,
@@ -47,19 +50,19 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
                                        val metricsService: MetricsService,
                                        val statePensionService: StatePensionService,
                                        val statePensionConnection: StatePensionConnection,
-                                       val nationalInsuranceService: NationalInsuranceService)
+                                       val nationalInsuranceService: NationalInsuranceService,
+                                       pertaxHelper: PertaxHelper)
                                       (implicit override val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
                                         val formPartialRetriever: FormPartialRetriever,
-                                        val templateRenderer: TemplateRenderer,
-                                        headerCarrier: HeaderCarrier)
-                                      extends AuthorisedForNisp
-                                        with PertaxHelper
-                                        with AuthenticationConnectors
+                                        val templateRenderer: TemplateRenderer)
+                                      extends FrontendController with AuthorisedForNisp
                                         with PartialRetriever {
+
+  def authConnector: AuthConnector = NispAuthConnector
 
   def showCope: Action[AnyContent] = AuthorisedByAny.async { implicit user =>
     implicit request =>
-      isFromPertax.flatMap { isPertax =>
+      pertaxHelper.isFromPertax.flatMap { isPertax =>
 
         statePensionConnection.getSummary(user.nino) map {
           case Right(statePension) if statePension.contractedOut => {
@@ -74,25 +77,10 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
       }
   }
 
-  private def sendAuditEvent(statePension: StatePension, user: NispUser): Unit = {
-    customAuditConnector.sendEvent(AccountAccessEvent(
-      user.nino.nino,
-      statePension.pensionDate,
-      statePension.amounts.current.weeklyAmount,
-      statePension.amounts.forecast.weeklyAmount,
-      user.dateOfBirth,
-      user.name,
-      user.sex,
-      statePension.contractedOut,
-      statePension.forecastScenario,
-      statePension.amounts.cope.weeklyAmount,
-      user.authProviderOld
-    ))
-  }
-
   def show: Action[AnyContent] = AuthorisedByAny.async { implicit user =>
     implicit request =>
-      isFromPertax.flatMap { isPertax =>
+
+      pertaxHelper.isFromPertax.flatMap { isPertax =>
 
         val statePensionResponseF = statePensionConnection.getSummary(user.nino)
         val nationalInsuranceResponseF = nationalInsuranceService.getSummary(user.nino)
@@ -186,15 +174,27 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
             case _ => throw new RuntimeException("StatePensionController: SP and NIR are unmatchable. This is probably a logic error.")
           }
         }).recover {
-          case ex: Exception => InternalServerError(ex.getMessage)
+          case ex: Exception => {
+            InternalServerError(ApplicationGlobal.internalServerErrorTemplate)
+          }
         }
       }
   }
 
-  def pta(): Action[AnyContent] = AuthorisedByAny { implicit user =>
-    implicit request =>
-      setFromPertax
-      Redirect(routes.StatePensionController.show())
+  private def sendAuditEvent(statePension: StatePension, user: NispUser)(implicit hc: HeaderCarrier): Unit = {
+    customAuditConnector.sendEvent(AccountAccessEvent(
+      user.nino.nino,
+      statePension.pensionDate,
+      statePension.amounts.current.weeklyAmount,
+      statePension.amounts.forecast.weeklyAmount,
+      user.dateOfBirth,
+      user.name,
+      user.sex,
+      statePension.contractedOut,
+      statePension.forecastScenario,
+      statePension.amounts.cope.weeklyAmount,
+      user.authProviderOld
+    ))
   }
 
   def calculateChartWidths(current: StatePensionAmount, forecast: StatePensionAmount, personalMaximum: StatePensionAmount): (SPChartModel, SPChartModel, SPChartModel) = {
@@ -227,6 +227,12 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
 
   private[controllers] def calculateAge(dateOfBirth: LocalDate, currentDate: LocalDate): Int = {
     new Period(dateOfBirth, currentDate).getYears
+  }
+
+  def pta(): Action[AnyContent] = AuthorisedByAny { implicit user =>
+    implicit request =>
+      pertaxHelper.setFromPertax
+      Redirect(routes.StatePensionController.show())
   }
 
   def signOut: Action[AnyContent] = UnauthorisedAction { implicit request =>

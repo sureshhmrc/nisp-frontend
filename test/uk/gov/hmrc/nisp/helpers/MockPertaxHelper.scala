@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nisp.controllers.connectors
+package uk.gov.hmrc.nisp.helpers
 
-import uk.gov.hmrc.nisp.config.wiring.{NispAuditConnector, NispAuthConnector}
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.nisp.controllers.pertax.PertaxHelper
 
-trait AuthenticationConnectors {
+import scala.concurrent.Future
 
-  def auditConnector = NispAuditConnector
-
-  def authConnector: AuthConnector = NispAuthConnector
-
+object MockPertaxHelper extends PertaxHelper(MockSessionCache, MockMetricsService.metrics){
+  override def isFromPertax(implicit hc: HeaderCarrier): Future[Boolean] = {
+    Future.successful(false)
+  }
 }
