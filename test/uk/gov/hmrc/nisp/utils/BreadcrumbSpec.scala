@@ -16,13 +16,10 @@
 
 package uk.gov.hmrc.nisp.utils
 
-import javax.inject.Inject
-
 import org.joda.time.LocalDate
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.i18n.Messages.Implicits._
 import play.api.test.FakeRequest
-import play.i18n.MessagesApi
 import uk.gov.hmrc.nisp.controllers.auth.NispUser
 import uk.gov.hmrc.nisp.helpers.MockBreadcrumb
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.{Accounts, ConfidenceLevel, CredentialStrength}

@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 class StatePensionServiceSpec extends UnitSpec with ScalaFutures {
 
-  implicit val defaultPatience =
+  implicit val defaultPatience: PatienceConfig =
     PatienceConfig(timeout = Span(5, Seconds), interval = Span(500, Millis))
 
   "yearsToContributeUntilPensionAge" should {
@@ -69,7 +69,7 @@ class StatePensionServiceSpec extends UnitSpec with ScalaFutures {
 
   "StatePensionConnection" should {
 
-    implicit val headerCarrier = HeaderCarrier(extraHeaders = Seq("Accept" -> "application/vnd.hmrc.1.0+json"))
+    implicit val headerCarrier: HeaderCarrier = HeaderCarrier(extraHeaders = Seq("Accept" -> "application/vnd.hmrc.1.0+json"))
 
     "transform the Dead 403 into a Left(StatePensionExclusion(Dead))" in {
       whenReady(MockStatePensionConnection.getSummary(TestAccountBuilder.excludedAll)) { exclusion =>
@@ -88,13 +88,13 @@ class StatePensionServiceSpec extends UnitSpec with ScalaFutures {
         statePension shouldBe Right(StatePension(
           new LocalDate(2015, 4, 5),
           StatePensionAmounts(
-            false,
+            protectedPayment = false,
             StatePensionAmountRegular(133.41, 580.1, 6961.14),
             StatePensionAmountForecast(3, 146.76, 638.14, 7657.73),
             StatePensionAmountMaximum(3, 2, 155.65, 676.8, 8121.59),
             StatePensionAmountRegular(0, 0, 0)
           ),
-          64, new LocalDate(2018, 7, 6), "2017-18", 30, false, 155.65, false, false, false
+          64, new LocalDate(2018, 7, 6), "2017-18", 30, pensionSharingOrder = false, 155.65, reducedRateElection = false, abroadAutoCredit = false, statePensionAgeUnderConsideration = false
         ))
       }
     }
@@ -104,13 +104,13 @@ class StatePensionServiceSpec extends UnitSpec with ScalaFutures {
         statePension shouldBe Right(StatePension(
           new LocalDate(2015, 4, 5),
           StatePensionAmounts(
-            false,
+            protectedPayment = false,
             StatePensionAmountRegular(133.41, 580.1, 6961.14),
             StatePensionAmountForecast(3, 146.76, 638.14, 7657.73),
             StatePensionAmountMaximum(3, 2, 155.65, 676.8, 8121.59),
             StatePensionAmountRegular(0, 0, 0)
           ),
-          64, new LocalDate(2018, 7, 6), "2017-18", 30, false, 155.65, true, false, false
+          64, new LocalDate(2018, 7, 6), "2017-18", 30, pensionSharingOrder = false, 155.65, reducedRateElection = true, abroadAutoCredit = false, statePensionAgeUnderConsideration = false
         ))
       }
     }
@@ -120,13 +120,13 @@ class StatePensionServiceSpec extends UnitSpec with ScalaFutures {
         statePension shouldBe Right(StatePension(
           new LocalDate(2015, 4, 5),
           StatePensionAmounts(
-            false,
+            protectedPayment = false,
             StatePensionAmountRegular(133.41, 580.1, 6961.14),
             StatePensionAmountForecast(3, 146.76, 638.14, 7657.73),
             StatePensionAmountMaximum(3, 2, 155.65, 676.8, 8121.59),
             StatePensionAmountRegular(0, 0, 0)
           ),
-          64, new LocalDate(2018, 7, 6), "2017-18", 30, false, 155.65, false, true, false
+          64, new LocalDate(2018, 7, 6), "2017-18", 30, pensionSharingOrder = false, 155.65, reducedRateElection = false, abroadAutoCredit = true, statePensionAgeUnderConsideration = false
         ))
       }
     }
@@ -147,13 +147,13 @@ class StatePensionServiceSpec extends UnitSpec with ScalaFutures {
         statePension shouldBe Right(StatePension(
           new LocalDate(2015, 4, 5),
           StatePensionAmounts(
-            false,
+            protectedPayment = false,
             StatePensionAmountRegular(133.41, 580.1, 6961.14),
             StatePensionAmountForecast(3, 146.76, 638.14, 7657.73),
             StatePensionAmountMaximum(3, 2, 155.65, 676.8, 8121.59),
             StatePensionAmountRegular(0, 0, 0)
           ),
-          64, new LocalDate(2018, 7, 6), "2017-18", 30, false, 155.65, false, false, true
+          64, new LocalDate(2018, 7, 6), "2017-18", 30, pensionSharingOrder = false, 155.65, reducedRateElection = false, abroadAutoCredit = false, statePensionAgeUnderConsideration = true
         ))
       }
     }
@@ -163,13 +163,13 @@ class StatePensionServiceSpec extends UnitSpec with ScalaFutures {
         statePension shouldBe Right(StatePension(
           new LocalDate(2015, 4, 5),
           StatePensionAmounts(
-            false,
+            protectedPayment = false,
             StatePensionAmountRegular(133.41, 580.1, 6961.14),
             StatePensionAmountForecast(3, 146.76, 638.14, 7657.73),
             StatePensionAmountMaximum(3, 2, 155.65, 676.8, 8121.59),
             StatePensionAmountRegular(0, 0, 0)
           ),
-          64, new LocalDate(2018, 7, 6), "2017-18", 30, false, 155.65, false, false, false
+          64, new LocalDate(2018, 7, 6), "2017-18", 30, pensionSharingOrder = false, 155.65, reducedRateElection = false, abroadAutoCredit = false, statePensionAgeUnderConsideration = false
         ))
       }
     }
