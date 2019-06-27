@@ -21,6 +21,7 @@ import org.scalatest.mock.MockitoSugar.mock
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.controllers.StatePensionController
+import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
 import uk.gov.hmrc.nisp.fixtures.MockApplicationConfig.appConfig
 import uk.gov.hmrc.nisp.utils.MockTemplateRenderer
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
@@ -28,7 +29,7 @@ import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialR
 import uk.gov.hmrc.renderer.TemplateRenderer
 
 
-class appConfig {
+object AppConfig {
 
   val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
@@ -63,7 +64,7 @@ class appConfig {
 object MockStatePensionController extends StatePensionController(
   MockSessionCache,
   MockCustomAuditConnector,
-  appConfig,
+  AppConfig.appConfig,
   MockCitizenDetailsService,
   MockMetricsService.metrics,
   MockStatePensionService,
