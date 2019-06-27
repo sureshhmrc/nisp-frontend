@@ -28,7 +28,7 @@ import scala.concurrent.Future
 object MockNationalInsuranceConnector extends NationalInsuranceConnector(MockNispHttp.mockHttp,MockMetricsService.metrics,MockStatePensionConnector.connector,MockServiceConfig.servicesConfig) with MockitoSugar {
   override def sessionCache: SessionCache = MockSessionCache
   override val serviceUrl: String = "national-insurance"
-  override   def getNationalInsurance(nino: Nino)(implicit hc: HeaderCarrier): Future[NationalInsuranceRecord] = {
+  override def getNationalInsurance(nino: Nino)(implicit hc: HeaderCarrier): Future[NationalInsuranceRecord] = {
     Future.successful(mock[NationalInsuranceRecord])
   }
 }

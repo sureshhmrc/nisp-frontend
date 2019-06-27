@@ -16,6 +16,28 @@
 
 package uk.gov.hmrc.nisp.helpers
 
+import org.joda.time.LocalDate
+import org.scalatest.mock.MockitoSugar
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.nisp.models.citizen.{Address, Citizen, CitizenDetailsResponse}
 import uk.gov.hmrc.nisp.services.CitizenDetailsService
 
-object MockCitizenDetailsService extends CitizenDetailsService(MockCitizenDetailsConnector.connector)
+import scala.concurrent.Future
+
+object MockCitizenDetailsService extends CitizenDetailsService(MockCitizenDetailsConnector.connector) with MockitoSugar {
+
+  override def retrievePerson(nino: Nino)(implicit hc: HeaderCarrier): Future[Option[CitizenDetailsResponse]] = {
+    Future.successful(Some(CitizenDetailsResponse(Citizen(
+      nino,
+      Some("FirstName"),
+      Some("Surname"),
+      Some("M"),
+      new LocalDate(1954, 3, 9)
+    ),
+      Some(Address(
+        country = Some("USA")
+      ))
+    )))
+  }
+}

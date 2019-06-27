@@ -16,8 +16,18 @@
 
 package uk.gov.hmrc.nisp.helpers
 
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.nisp.models.{StatePension, StatePensionExclusionFiltered}
 import uk.gov.hmrc.nisp.services.StatePensionConnection
+import org.scalatest.mock.MockitoSugar
+import scala.concurrent.Future
 
 object MockStatePensionConnection extends StatePensionConnection(
   statePensionConnector = MockStatePensionConnector.connector,
-  statePensionService = MockStatePensionService)
+  statePensionService = MockStatePensionService) with MockitoSugar {
+
+  override def getSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[StatePensionExclusionFiltered, StatePension]] = {
+    Future.successful(Left(mock[StatePensionExclusionFiltered]))
+  }
+}
