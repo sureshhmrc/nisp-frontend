@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.nisp.helpers
 
-import org.scalatest.mock.MockitoSugar
-import uk.gov.hmrc.nisp.connectors.IdentityVerificationConnector
-import uk.gov.hmrc.nisp.services.MetricsService
-import uk.gov.hmrc.http.HttpGet
 import uk.gov.hmrc.nisp.config.wiring.WSHttp
+import uk.gov.hmrc.nisp.connectors.IdentityVerificationConnector
 
-object MockIdentityVerificationConnector extends MockitoSugar {
-  val connector = mock[IdentityVerificationConnector]
+object MockIdentityVerificationConnector extends IdentityVerificationConnector(
+                                                    MockMetricsService.metrics,
+                                                    MockIdentityVerificationHttp.mockHttp.asInstanceOf[WSHttp]) {
+  override val serviceUrl: String = ""
 }

@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.nisp.builders
 
+import javax.inject.Inject
+import play.api.{Configuration, Play}
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 
-object ApplicationConfigBuilder {
+class ApplicationConfigBuilder @Inject()(configuration: Configuration) {
   def apply(assetsPrefix: String = "", betaFeedbackUrl: String = "", betaFeedbackUnauthenticatedUrl: String = "",
             analyticsToken: Option[String] = None, analyticsHost: String = "", ssoUrl: Option[String] = None,
             contactFormServiceIdentifier: String = "", contactFrontendPartialBaseUrl: String = "",
@@ -31,7 +33,7 @@ object ApplicationConfigBuilder {
             isWelshEnabled: Boolean = true,
             frontendTemplatePath: String = "",
             feedbackFrontendUrl: String = "/foo"
-           ): ApplicationConfig = new ApplicationConfig {
+           ): ApplicationConfig = new ApplicationConfig(configuration) {
     override lazy val assetsPrefix: String = assetsPrefix
     override lazy val betaFeedbackUrl: String = betaFeedbackUrl
     override lazy val betaFeedbackUnauthenticatedUrl: String = betaFeedbackUnauthenticatedUrl

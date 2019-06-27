@@ -24,7 +24,10 @@ import uk.gov.hmrc.nisp.utils.Constants
 import uk.gov.hmrc.play.config.ServicesConfig
 
 
-class ApplicationConfig @Inject()() extends ServicesConfig {
+class ApplicationConfig @Inject()(configuration: Configuration) extends ServicesConfig {
+
+  protected def mode: Mode = Play.current.mode
+  protected def runModeConfiguration: Configuration = configuration
 
   private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing key: $key"))
 
@@ -64,8 +67,6 @@ class ApplicationConfig @Inject()() extends ServicesConfig {
   lazy val futureProofPersonalMax: Boolean = configuration.getBoolean("microservice.services.features.future-proof.personalMax").getOrElse(false)
   val isWelshEnabled = configuration.getBoolean("microservice.services.features.welsh-translation").getOrElse(false)
   val feedbackFrontendUrl: String = loadConfig("feedback-frontend.url")
-  protected def mode: Mode = Play.current.mode
-  protected def runModeConfiguration: Configuration = Play.current.configuration
 }
 
-object ApplicationConfig extends ApplicationConfig
+object ApplicationConfig extends ApplicationConfig(Play.current.configuration)

@@ -54,6 +54,7 @@ class IdentityVerificationConnector @Inject()(metricsService: MetricsService, ht
   private def url(journeyId: String) = s"$serviceUrl/mdtp/journey/journeyId/$journeyId"
 
   def identityVerificationResponse(journeyId: String)(implicit hc: HeaderCarrier): Future[IdentityVerificationResponse] = {
+    println("-----------------------------real identityVerificationResponse----------------------")
     val context = metricsService.identityVerificationTimer.time()
     val ivFuture = http.GET[HttpResponse](url(journeyId)).map { httpResponse =>
       context.stop()
