@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.nisp.controllers.pertax
 
+import javax.inject.Inject
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.nisp.services.MetricsService
 import uk.gov.hmrc.nisp.utils.Constants._
@@ -24,10 +25,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
-trait PertaxHelper {
-
-  val sessionCache: SessionCache
-  val metricsService: MetricsService
+class PertaxHelper @Inject()(sessionCache: SessionCache,
+                             metricsService: MetricsService) {
 
   def setFromPertax(implicit hc: HeaderCarrier): Unit = {
     val timerContext = metricsService.keystoreWriteTimer.time()

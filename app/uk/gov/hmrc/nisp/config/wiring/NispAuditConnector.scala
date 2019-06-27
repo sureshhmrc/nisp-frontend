@@ -16,15 +16,18 @@
 
 package uk.gov.hmrc.nisp.config.wiring
 
+import javax.inject.Inject
 import play.api.{Configuration, Play}
 import play.api.Mode.Mode
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector => Auditing}
 import uk.gov.hmrc.play.config.{AppName, RunMode}
 import uk.gov.hmrc.play.frontend.config.LoadAuditingConfig
 
-object NispAuditConnector extends Auditing with AppName with RunMode{
+class NispAuditConnector @Inject()(configuration: Configuration) extends Auditing with AppName with RunMode{
   override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
-  override protected def appNameConfiguration: Configuration = Play.current.configuration
+  override protected def appNameConfiguration: Configuration = configuration
   override protected def mode: Mode = Play.current.mode
-  override protected def runModeConfiguration: Configuration = Play.current.configuration
+  override protected def runModeConfiguration: Configuration = configuration
 }
+
+object NispAuditConnector extends NispAuditConnector(Play.current.configuration)

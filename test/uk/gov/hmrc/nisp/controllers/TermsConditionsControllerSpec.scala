@@ -33,10 +33,10 @@ class TermsConditionsControllerSpec extends PlaySpec with OneAppPerSuite {
   implicit val formPartialRetriever: FormPartialRetriever = app.injector.instanceOf[FormPartialRetriever]
   implicit val templateRenderer: TemplateRenderer = app.injector.instanceOf[TemplateRenderer]
   val applicationConfig: ApplicationConfig = app.injector.instanceOf[ApplicationConfig]
+  val authConnector: AuthConnector = MockAuthConnector
 
 
-  val MockTermsConditionsController = new TermsConditionsController(applicationConfig) {
-    override def authConnector: AuthConnector = MockAuthConnector
+  val MockTermsConditionsController = new TermsConditionsController(applicationConfig, authConnector) {
 
     override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
 

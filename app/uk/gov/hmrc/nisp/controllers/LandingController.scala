@@ -27,31 +27,31 @@ import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobal, LocalTempl
 import uk.gov.hmrc.nisp.connectors.IdentityVerificationSuccessResponse._
 import uk.gov.hmrc.nisp.connectors.{IdentityVerificationConnector, IdentityVerificationSuccessResponse}
 import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
-import uk.gov.hmrc.nisp.controllers.connectors.AuthenticationConnectors
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
 import uk.gov.hmrc.nisp.services.CitizenDetailsService
 import uk.gov.hmrc.nisp.views.html.iv.failurepages.{locked_out, not_authorised, technical_issue, timeout}
 import uk.gov.hmrc.nisp.views.html.{identity_verification_landing, landing}
 import uk.gov.hmrc.play.frontend.auth.Actions
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class LandingController @Inject()(val citizenDetailsService: CitizenDetailsService,
                                   val applicationConfig: ApplicationConfig,
                                   identityVerificationConnector: IdentityVerificationConnector,
                                   governmentGatewayProvider: GovernmentGatewayProvider,
-                                  messagesApi: MessagesApi)
+                                  messagesApi: MessagesApi,
+                                  val authConnector: AuthConnector)
                                  (implicit override val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
                                   val formPartialRetriever: FormPartialRetriever,
                                   val templateRenderer: TemplateRenderer,
                                   val application: Application,
                                   headerCarrier: HeaderCarrier)
-                                  extends AuthenticationConnectors
-                                  with PartialRetriever
+                                  extends PartialRetriever
                                   with Actions
                                   with AuthorisedForNisp {
 

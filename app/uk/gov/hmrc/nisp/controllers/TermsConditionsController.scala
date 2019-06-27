@@ -21,17 +21,19 @@ import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.nisp.config.{ApplicationConfig, LocalTemplateRenderer}
-import uk.gov.hmrc.nisp.controllers.connectors.AuthenticationConnectors
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
 import uk.gov.hmrc.nisp.views.html.termsAndConditions
 import uk.gov.hmrc.play.frontend.auth.Actions
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
 import uk.gov.hmrc.play.partials.FormPartialRetriever
 import uk.gov.hmrc.renderer.TemplateRenderer
 
-class TermsConditionsController @Inject()(applicationConfig: ApplicationConfig)(implicit formPartialRetriever: FormPartialRetriever,
+class TermsConditionsController @Inject()(applicationConfig: ApplicationConfig,
+                                          val authConnector: AuthConnector)
+                                         (implicit formPartialRetriever: FormPartialRetriever,
                                             implicit val templateRenderer: TemplateRenderer)
-  extends AuthenticationConnectors with PartialRetriever with Actions {
+  extends PartialRetriever with Actions {
 
   def show: Action[AnyContent] = UnauthorisedAction {
     implicit request =>

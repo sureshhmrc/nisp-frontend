@@ -30,14 +30,14 @@ object MockExclusionController extends ExclusionController (
   nationalInsuranceService = MockNationalInsuranceServiceViaNationalInsurance,
   citizenDetailsService = MockCitizenDetailsService,
   statePensionConnection = MockStatePensionConnection,
-  applicationConfig = MockApplicationConfig.appConfig
+  applicationConfig = MockApplicationConfig.appConfig,
+  authConnector = MockAuthConnector
 )(MockCachedStaticHtmlPartialRetriever,
   MockFormPartialRetriever,
   MockTemplateRenderer,
   mock[HeaderCarrier]
 ) {
 
-  override def authConnector: AuthConnector = MockAuthConnector
   override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
   override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
 }

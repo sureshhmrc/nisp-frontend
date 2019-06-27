@@ -17,17 +17,17 @@
 package uk.gov.hmrc.nisp.helpers
 
 import org.mockito.Mockito.when
+import org.scalatest.mock.MockitoSugar
 import org.scalatest.mock.MockitoSugar.mock
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nisp.config.ApplicationConfig
+import uk.gov.hmrc.nisp.config.wiring.NispAuditConnector
 import uk.gov.hmrc.nisp.controllers.StatePensionController
-import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
-import uk.gov.hmrc.nisp.fixtures.MockApplicationConfig.appConfig
 import uk.gov.hmrc.nisp.utils.MockTemplateRenderer
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
-
 
 object AppConfig {
 
@@ -58,10 +58,9 @@ object AppConfig {
   when(appConfig.isWelshEnabled).thenReturn(true)
   when(appConfig.frontendTemplatePath).thenReturn("microservice.services.frontend-template-provider.path")
   when(appConfig.feedbackFrontendUrl).thenReturn("/foo")
-
 }
 
-object MockStatePensionController extends StatePensionController(
+object MockStatePensionController extends StatePensionController (
   MockSessionCache,
   MockCustomAuditConnector,
   AppConfig.appConfig,
@@ -69,18 +68,16 @@ object MockStatePensionController extends StatePensionController(
   MockMetricsService.metrics,
   MockStatePensionService,
   MockStatePensionConnection,
-  MockNationalInsuranceServiceViaNationalInsurance
+  MockNationalInsuranceServiceViaNationalInsurance,
+  MockPertaxHelper
 )(
   MockCachedStaticHtmlPartialRetriever,
   MockFormPartialRetriever,
-  MockTemplateRenderer,
-  mock[HeaderCarrier]
-) {
+  MockTemplateRenderer
+) with MockitoSugar {
   override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
   override implicit val formPartialRetriever: FormPartialRetriever = MockFormPartialRetriever
   override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
-
-  override implicit def authConnector: AuthConnector = MockAuthConnector
 
   //  override val applicationConfig: ApplicationConfig = new ApplicationConfig {
   //    override val assetsPrefix: String = ""

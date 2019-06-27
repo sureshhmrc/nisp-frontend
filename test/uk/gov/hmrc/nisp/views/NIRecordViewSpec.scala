@@ -23,7 +23,6 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatest._
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.mock.MockitoSugar.mock
 import play.api.i18n.Messages
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
@@ -33,7 +32,7 @@ import uk.gov.hmrc.nisp.builders.NationalInsuranceTaxYearBuilder
 import uk.gov.hmrc.nisp.config.wiring.NispFormPartialRetriever
 import uk.gov.hmrc.nisp.controllers.NIRecordController
 import uk.gov.hmrc.nisp.fixtures.MockApplicationConfig
-import uk.gov.hmrc.nisp.helpers.{MockStatePensionConnection, _}
+import uk.gov.hmrc.nisp.helpers._
 import uk.gov.hmrc.nisp.models.enums.Exclusion
 import uk.gov.hmrc.nisp.models.{NationalInsuranceRecord, StatePensionExclusionFiltered}
 import uk.gov.hmrc.nisp.services.{NationalInsuranceService, StatePensionConnection, StatePensionService}
@@ -82,9 +81,11 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
     nationalInsuranceServiceMock,
     statePensionServiceMock,
     statePensionConnectionMock,
-    mockDateUtil)
+    mockDateUtil,
+    MockPertaxHelper,
+    MockAuthConnector)
 
-  val mockDateUtil = mock[DateUtil]
+  val mockDateUtil: DateUtil = mock[DateUtil]
 
   "Render Ni Record UR banner" should {
     lazy val controller = MockNIRecordController
