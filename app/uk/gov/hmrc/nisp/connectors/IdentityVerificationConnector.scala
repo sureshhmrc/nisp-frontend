@@ -19,7 +19,7 @@ package uk.gov.hmrc.nisp.connectors
 import javax.inject.Inject
 import play.api.Mode.Mode
 import play.api.http.Status._
-import play.api.{Configuration, Play}
+import play.api.{Configuration, Environment, Play}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.nisp.config.wiring.WSHttp
 import uk.gov.hmrc.nisp.services.MetricsService
@@ -46,10 +46,13 @@ object IdentityVerificationSuccessResponse {
   val FailedIV = "FailedIV"
 }
 
-class IdentityVerificationConnector @Inject()(metricsService: MetricsService, http: WSHttp) extends ServicesConfig{
-  val serviceUrl = baseUrl("identity-verification")
-  protected def mode: Mode = Play.current.mode
-  protected def runModeConfiguration: Configuration = Play.current.configuration
+class IdentityVerificationConnector @Inject()(metricsService: MetricsService,
+                                              http: WSHttp,
+                                              val runModeConfiguration: Configuration,
+                                              environment: Environment) extends ServicesConfig {
+
+  lazy val serviceUrl = baseUrl("identity-verification")
+  protected def mode: Mode = environment.mode
 
   private def url(journeyId: String) = s"$serviceUrl/mdtp/journey/journeyId/$journeyId"
 

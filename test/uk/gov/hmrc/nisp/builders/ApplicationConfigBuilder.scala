@@ -44,21 +44,21 @@ class ApplicationConfigBuilder @Inject()(configuration: Configuration) {
     override lazy val contactFrontendPartialBaseUrl: String = contactFormServiceIdentifier
     override lazy val reportAProblemPartialUrl: String = reportAProblemPartialUrl
     override lazy val reportAProblemNonJSUrl: String = reportAProblemNonJSUrl
-    override val showGovUkDonePage: Boolean = showGovUkDonePage
-    override val govUkFinishedPageUrl: String = govUkFinishedPageUrl
-    override val identityVerification: Boolean = identityVerification
+    override lazy val showGovUkDonePage: Boolean = showGovUkDonePage
+    override lazy val govUkFinishedPageUrl: String = govUkFinishedPageUrl
+    override lazy val identityVerification: Boolean = identityVerification
     override lazy val postSignInRedirectUrl: String = postSignInRedirectUrl
     override lazy val notAuthorisedRedirectUrl: String = notAuthorisedRedirectUrl
     override lazy val verifySignIn: String = verifySignIn
     override lazy val verifySignInContinue: Boolean = verifySignInContinue
-    override val ivUpliftUrl: String = ivUpliftUrl
-    override val ggSignInUrl: String = ggSignInUrl
+    override lazy val ivUpliftUrl: String = ivUpliftUrl
+    override lazy val ggSignInUrl: String = ggSignInUrl
     override lazy val pertaxFrontendUrl: String = pertaxFrontendUrl
     override lazy val breadcrumbPartialUrl: String = breadcrumbPartialUrl
     override lazy val showFullNI: Boolean = showFullNI
     override lazy val futureProofPersonalMax: Boolean = futureProofPersonalMax
-    override val isWelshEnabled: Boolean = isWelshEnabled
+    override lazy val isWelshEnabled: Boolean = isWelshEnabled
     override lazy val frontendTemplatePath: String = frontendTemplatePath
-    override val feedbackFrontendUrl: String = "/foo"
+    override lazy val feedbackFrontendUrl: String = "/foo"
   }
 }

@@ -16,11 +16,17 @@
 
 package uk.gov.hmrc.nisp.helpers
 
+import javax.inject.Inject
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.nisp.config.wiring.WSHttp
 import uk.gov.hmrc.nisp.connectors.IdentityVerificationConnector
 
-object MockIdentityVerificationConnector extends IdentityVerificationConnector(
+class MockIdentityVerificationConnector @Inject()(configuration: Configuration,
+                                                  environment: Environment) extends IdentityVerificationConnector(
                                                     MockMetricsService.metrics,
-                                                    MockIdentityVerificationHttp.mockHttp.asInstanceOf[WSHttp]) {
-  override val serviceUrl: String = ""
+                                                    MockIdentityVerificationHttp.mockHttp.asInstanceOf[WSHttp],
+                                                    configuration: Configuration,
+                                                    environment: Environment
+                                                     ) {
+  override lazy val serviceUrl: String = ""
 }
