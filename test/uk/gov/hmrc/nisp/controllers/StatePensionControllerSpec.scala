@@ -21,26 +21,25 @@ import java.util.UUID
 import org.joda.time.{LocalDate, LocalDateTime}
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
+import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.api.{Application, Configuration}
 import uk.gov.hmrc.http.SessionKeys
-import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.helpers._
 import uk.gov.hmrc.nisp.models.StatePensionAmountRegular
-import uk.gov.hmrc.nisp.services.{CitizenDetailsService, NationalInsuranceService, StatePensionConnection}
+import uk.gov.hmrc.nisp.services.{CitizenDetailsService, NationalInsuranceService}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.frontend.auth.AuthenticationProviderIds
-import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
+import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.time.DateTimeUtils.now
 
 class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppPerSuite {
 
   val mockUsername = "mockuser"
-  val mockUserId = "/auth/oid/" + mockUsername
+  val mockUserId: String = "/auth/oid/" + mockUsername
   val mockUserIdExcluded = "/auth/oid/mockexcludedall"
   val mockUserIdContractedOut = "/auth/oid/mockcontractedout"
   val mockUserIdBlank = "/auth/oid/mockblank"
@@ -60,12 +59,12 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
 
   lazy val fakeRequest = FakeRequest()
 
-    override lazy val app: Application = GuiceApplicationBuilder()
-    .overrides(bind[CitizenDetailsService].toInstance(MockCitizenDetailsService))
-    .overrides(bind[CachedStaticHtmlPartialRetriever].toInstance(MockCachedStaticHtmlPartialRetriever))
-    .overrides(bind[NationalInsuranceService].toInstance(MockNationalInsuranceServiceViaNationalInsurance))
-    .overrides(bind[AuditConnector].toInstance(MockAuditConnector))
-    .build()
+  override lazy val app: Application = GuiceApplicationBuilder()
+  .overrides(bind[CitizenDetailsService].toInstance(MockCitizenDetailsService))
+  .overrides(bind[CachedStaticHtmlPartialRetriever].toInstance(MockCachedStaticHtmlPartialRetriever))
+  .overrides(bind[NationalInsuranceService].toInstance(MockNationalInsuranceServiceViaNationalInsurance))
+  .overrides(bind[AuditConnector].toInstance(MockAuditConnector))
+  .build()
 
   private def authenticatedFakeRequest(userId: String = mockUserId) = FakeRequest().withSession(
     SessionKeys.sessionId -> s"session-${UUID.randomUUID()}",
@@ -93,7 +92,7 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
 
       "return the forecast only page for a user with a forecast lower than current amount" in {
         val result = MockStatePensionController.show()(authenticatedFakeRequest(mockUserIdForecastOnly))
-        contentAsString(result) should not include ("£80.38")
+        contentAsString(result) should not include "£80.38"
       }
 
       "redirect to the GG Login" in {
