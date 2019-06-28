@@ -74,7 +74,7 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
   val statePensionServiceMock = mock[StatePensionService]
 
   object MockNIRecordController extends NIRecordController(MockCitizenDetailsService,
-  MockApplicationConfig.appConfig,
+    MockApplicationConfig.appConfig,
     MockCustomAuditConnector,
     MockSessionCache,
     MockMetricsService.metrics,
@@ -886,6 +886,5 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
       assertEqualsMessage(htmlAccountDoc, "article.content__body>dl:nth-child(5)>dd:nth-child(6)>div.contributions-wrapper>p:nth-child(8)", "nisp.nirecord.gap.whenyouareclaiming.info.singular")
     }
   }
-
 
 }

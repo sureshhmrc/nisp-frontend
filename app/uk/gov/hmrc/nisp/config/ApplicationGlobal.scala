@@ -25,6 +25,7 @@ import play.api.i18n.Messages.Implicits._
 import play.api.mvc.Request
 import play.api.{Application, Configuration, Play}
 import play.twirl.api.Html
+import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.http.CoreGet
 import uk.gov.hmrc.nisp.config.wiring.{NispAuditConnector, WSHttp}
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
@@ -33,7 +34,7 @@ import uk.gov.hmrc.play.frontend.bootstrap.DefaultFrontendGlobal
 import uk.gov.hmrc.play.frontend.filters.{FrontendAuditFilter, FrontendLoggingFilter, MicroserviceFilterSupport}
 import uk.gov.hmrc.play.partials.FormPartialRetriever
 
-object ApplicationGlobal extends ApplicationGlobalTrait(Play.current.configuration)
+object ApplicationGlobal extends ApplicationGlobalTrait
 
 object NispFormPartialRetriever extends FormPartialRetriever {
   override def crypto: String => String = ApplicationGlobal.sessionCookieCryptoFilter.encrypt
@@ -42,8 +43,8 @@ object NispFormPartialRetriever extends FormPartialRetriever {
 
 case class GlobalErrorParams(frontendTemplatePath: String, analyticsHost: String, analyticsToken: Option[String])
 
-class ApplicationGlobalTrait @Inject()(configuration: Configuration) extends DefaultFrontendGlobal with PartialRetriever {
-  val controllerConfiguration: ControllerConfiguration = new ControllerConfiguration(configuration)
+trait ApplicationGlobalTrait extends DefaultFrontendGlobal with PartialRetriever {
+  val controllerConfiguration: ControllerConfiguration = new ControllerConfiguration(Play.current.configuration)
 
   override val auditConnector = NispAuditConnector
   override val loggingFilter = new NispLoggingFilter(controllerConfiguration)
@@ -52,10 +53,10 @@ class ApplicationGlobalTrait @Inject()(configuration: Configuration) extends Def
   implicit val partialRetriever = NispFormPartialRetriever
   implicit val templateRenderer: LocalTemplateRenderer = LocalTemplateRenderer
 
-/*  override def onStart(app: Application) {
+  override def onStart(app: Application) {
     super.onStart(app)
     new ApplicationCrypto(Play.current.configuration.underlying).verifyConfiguration()
-  }*/
+  }
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): Html = {
 

@@ -16,19 +16,14 @@
 
 package uk.gov.hmrc.nisp.helpers
 
-import org.scalatest.mock.MockitoSugar
-import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.nisp.connectors.NationalInsuranceConnector
-import uk.gov.hmrc.nisp.models.NationalInsuranceRecord
 
-import scala.concurrent.Future
-
-object MockNationalInsuranceConnector extends NationalInsuranceConnector(MockNispHttp.mockHttp,MockMetricsService.metrics,MockStatePensionConnector.connector,MockServiceConfig.servicesConfig) with MockitoSugar {
+object MockNationalInsuranceConnector extends NationalInsuranceConnector(MockNispHttp.mockHttp,
+                                                                          MockMetricsService.metrics,
+                                                                          MockStatePensionConnector.connector,
+                                                                          MockServiceConfig.servicesConfig) {
   override def sessionCache: SessionCache = MockSessionCache
+
   override val serviceUrl: String = "national-insurance"
-  override def getNationalInsurance(nino: Nino)(implicit hc: HeaderCarrier): Future[NationalInsuranceRecord] = {
-    Future.successful(mock[NationalInsuranceRecord])
-  }
 }

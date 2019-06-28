@@ -17,21 +17,20 @@
 package uk.gov.hmrc.nisp.services
 
 import org.joda.time.LocalDate
-import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse}
 import uk.gov.hmrc.nisp.connectors.NationalInsuranceConnector
 import uk.gov.hmrc.nisp.models._
 import uk.gov.hmrc.nisp.models.enums.Exclusion
+import uk.gov.hmrc.nisp.models.enums.Exclusion.Exclusion
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 import scala.util.Random
-import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse}
-import uk.gov.hmrc.nisp.helpers.MockNationalInsuranceConnector
-import uk.gov.hmrc.nisp.models.enums.Exclusion.Exclusion
 
 class NationalInsuranceServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
@@ -95,8 +94,10 @@ class NationalInsuranceServiceSpec extends UnitSpec with MockitoSugar with Scala
         reducedRateElection = false
       )
 
-      val service = new NationalInsuranceService(MockNationalInsuranceConnector)
-      when(MockNationalInsuranceConnector.getNationalInsurance(ArgumentMatchers.any())(ArgumentMatchers.any()))
+      val mockNationalInsuranceConnector = mock[NationalInsuranceConnector]
+      val service = new NationalInsuranceService(mockNationalInsuranceConnector)
+
+      when(mockNationalInsuranceConnector.getNationalInsurance(any())(any()))
         .thenReturn(Future.successful(mockNationalInsuranceRecord))
 
       "return a Right(NationalInsuranceRecord)" in {
@@ -154,7 +155,7 @@ class NationalInsuranceServiceSpec extends UnitSpec with MockitoSugar with Scala
           )
         ))
 
-        when(MockNationalInsuranceConnector.getNationalInsurance(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockNationalInsuranceConnector.getNationalInsurance(any())(any()))
           .thenReturn(Future.successful(jumbledRecord))
 
         whenReady(service.getSummary(generateNino)) { result =>
@@ -167,9 +168,11 @@ class NationalInsuranceServiceSpec extends UnitSpec with MockitoSugar with Scala
 
     "There is failed future from a Dead exclusion" should {
       "return a Left Dead Exclusion" in {
-        val service = new NationalInsuranceService(MockNationalInsuranceConnector)
 
-        when(MockNationalInsuranceConnector.getNationalInsurance(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        val mockNationalInsuranceConnector = mock[NationalInsuranceConnector]
+        val service = new NationalInsuranceService(mockNationalInsuranceConnector)
+
+        when(mockNationalInsuranceConnector.getNationalInsurance(any())(any()))
           .thenReturn(Future.failed(new Upstream4xxResponse(
             message = "GET of 'http://url' returned 403. Response body: '{\"code\":\"EXCLUSION_DEAD\",\"message\":\"The customer needs to contact the National Insurance helpline\"}'",
             upstreamResponseCode = 403,
@@ -184,8 +187,9 @@ class NationalInsuranceServiceSpec extends UnitSpec with MockitoSugar with Scala
 
     "There is failed future from a MCI exclusion" should {
       "return a Left MCI Exclusion" in {
-        val service = new NationalInsuranceService(MockNationalInsuranceConnector)
-        when(MockNationalInsuranceConnector.getNationalInsurance(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        val mockNationalInsuranceConnector = mock[NationalInsuranceConnector]
+        val service = new NationalInsuranceService(mockNationalInsuranceConnector)
+        when(mockNationalInsuranceConnector.getNationalInsurance(any())(any()))
           .thenReturn(Future.failed(new Upstream4xxResponse(
             message = "GET of 'http://url' returned 403. Response body: '{\"code\":\"EXCLUSION_MANUAL_CORRESPONDENCE\",\"message\":\"The customer cannot access the service, they should contact HMRC\"}'",
             upstreamResponseCode = 403,
@@ -200,8 +204,10 @@ class NationalInsuranceServiceSpec extends UnitSpec with MockitoSugar with Scala
 
     "There is failed future from a Isle of Man exclusion" should {
       "return a Left Isle of Man Exclusion" in {
-        val service = new NationalInsuranceService(MockNationalInsuranceConnector)
-        when(MockNationalInsuranceConnector.getNationalInsurance(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        val mockNationalInsuranceConnector = mock[NationalInsuranceConnector]
+        val service = new NationalInsuranceService(mockNationalInsuranceConnector)
+
+        when(mockNationalInsuranceConnector.getNationalInsurance(any())(any()))
           .thenReturn(Future.failed(new Upstream4xxResponse(
             message = "GET of 'http://url' returned 403. Response body: '{\"code\":\"EXCLUSION_ISLE_OF_MAN\",\"message\":\"The customer cannot access the service, they should contact HMRC\"}'",
             upstreamResponseCode = 403,
@@ -216,8 +222,9 @@ class NationalInsuranceServiceSpec extends UnitSpec with MockitoSugar with Scala
 
     "There is failed future from a MWRRE exclusion" should {
       "return a Left MWRRE Exclusion" in {
-        val service = new NationalInsuranceService(MockNationalInsuranceConnector)
-        when(MockNationalInsuranceConnector.getNationalInsurance(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        val mockNationalInsuranceConnector = mock[NationalInsuranceConnector]
+        val service = new NationalInsuranceService(mockNationalInsuranceConnector)
+        when(mockNationalInsuranceConnector.getNationalInsurance(any())(any()))
           .thenReturn(Future.failed(new Upstream4xxResponse(
             message = "GET of 'http://url' returned 403. Response body: '{\"code\":\"EXCLUSION_MARRIED_WOMENS_REDUCED_RATE\",\"message\":\"The customer cannot access the service, they should contact HMRC\"}'",
             upstreamResponseCode = 403,
@@ -258,8 +265,9 @@ class NationalInsuranceServiceSpec extends UnitSpec with MockitoSugar with Scala
         reducedRateElection = true
       )
 
-      val service = new NationalInsuranceService(MockNationalInsuranceConnector)
-      when(MockNationalInsuranceConnector.getNationalInsurance(ArgumentMatchers.any())(ArgumentMatchers.any()))
+      val mockNationalInsuranceConnector = mock[NationalInsuranceConnector]
+      val service = new NationalInsuranceService(mockNationalInsuranceConnector)
+      when(mockNationalInsuranceConnector.getNationalInsurance(any())(any()))
         .thenReturn(Future.successful(mockNationalInsuranceRecord))
 
       "return a Left(Excelution)" in {
