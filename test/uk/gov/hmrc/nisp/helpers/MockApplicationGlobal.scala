@@ -18,6 +18,6 @@ package uk.gov.hmrc.nisp.helpers
 
 import uk.gov.hmrc.nisp.config.{ApplicationGlobalTrait, LocalTemplateRenderer}
 
-class MockApplicationGlobal extends ApplicationGlobalTrait {
+object MockApplicationGlobal extends ApplicationGlobalTrait {
   override implicit val templateRenderer: LocalTemplateRenderer = LocalTemplateRenderer
 }

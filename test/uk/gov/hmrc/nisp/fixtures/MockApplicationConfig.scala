@@ -34,7 +34,7 @@ object MockApplicationConfig extends MockitoSugar {
   when(appConfig.identityVerification).thenReturn(false)
   when(appConfig.betaFeedbackUnauthenticatedUrl).thenReturn("")
   when(appConfig.notAuthorisedRedirectUrl).thenReturn("")
-  when(appConfig.contactFrontendPartialBaseUrl).thenReturn("")
+  when(appConfig.contactFrontendPartialBaseUrl).thenReturn("http://localhost:9250")
   when(appConfig.govUkFinishedPageUrl).thenReturn("")
   when(appConfig.showGovUkDonePage).thenReturn(false)
   when(appConfig.analyticsHost).thenReturn("")

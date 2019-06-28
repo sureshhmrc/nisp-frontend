@@ -23,11 +23,9 @@ import uk.gov.hmrc.play.audit.http.connector.{AuditConnector => Auditing}
 import uk.gov.hmrc.play.config.{AppName, RunMode}
 import uk.gov.hmrc.play.frontend.config.LoadAuditingConfig
 
-class NispAuditConnector @Inject()(configuration: Configuration) extends Auditing with AppName with RunMode{
+object NispAuditConnector extends Auditing with AppName with RunMode{
   override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
-  override protected def appNameConfiguration: Configuration = configuration
+  override protected def appNameConfiguration: Configuration = Play.current.configuration
   override protected def mode: Mode = Play.current.mode
-  override protected def runModeConfiguration: Configuration = configuration
+  override protected def runModeConfiguration: Configuration = Play.current.configuration
 }
-
-object NispAuditConnector extends NispAuditConnector(Play.current.configuration)

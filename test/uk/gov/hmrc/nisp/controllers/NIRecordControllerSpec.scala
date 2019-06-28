@@ -63,7 +63,7 @@ class NIRecordControllerSpec extends UnitSpec with MockitoSugar with OneAppPerSu
     .overrides(bind[AuthConnector].toInstance(MockAuthConnector))
     .overrides(bind[CachedStaticHtmlPartialRetriever].toInstance(MockCachedStaticHtmlPartialRetriever))
     .overrides(bind[TemplateRenderer].toInstance(MockTemplateRenderer))
-    .overrides(bind[ApplicationGlobalTrait].to[MockApplicationGlobal])
+    .overrides(bind[ApplicationGlobalTrait].toInstance(MockApplicationGlobal))
     .overrides(bind[StatePensionService].toInstance(MockStatePensionService))
     .overrides(bind[NationalInsuranceService].toInstance(MockNationalInsuranceServiceViaNationalInsurance))
     .overrides(bind[CustomAuditConnector].toInstance(MockCustomAuditConnector))

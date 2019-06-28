@@ -23,7 +23,5 @@ import uk.gov.hmrc.nisp.connectors.StatePensionConnector
 import uk.gov.hmrc.nisp.services.MetricsService
 
 object MockStatePensionConnector extends MockitoSugar {
-
   val connector = mock[StatePensionConnector]
-
 }

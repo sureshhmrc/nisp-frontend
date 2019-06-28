@@ -30,7 +30,7 @@ class NispModule extends Module {
 
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = Seq(
       bind[CachedStaticHtmlPartialRetriever].to[NispCachedStaticHtmlPartialRetriever],
-      bind[AuditConnector].to[NispAuditConnector],
+      bind[AuditConnector].toInstance(NispAuditConnector),
       bind[FrontendLoggingFilter].to[NispLoggingFilter],
       bind[FormPartialRetriever].toInstance(NispFormPartialRetriever),
       bind[FrontendAuditFilter].to[NispFrontendAuditFilter],

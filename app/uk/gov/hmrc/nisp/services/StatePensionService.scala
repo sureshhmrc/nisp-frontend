@@ -31,7 +31,7 @@ import uk.gov.hmrc.time.CurrentTaxYear
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse}
 
 
-class StatePensionService @Inject()(statePensionConnector: StatePensionConnector) extends CurrentTaxYear {
+class StatePensionService @Inject() extends CurrentTaxYear {
   override def now: () => DateTime = () => DateTime.now(ukTime)
 
   def yearsToContributeUntilPensionAge(earningsIncludedUpTo: LocalDate, finalRelevantYearStart: Int): Int = {

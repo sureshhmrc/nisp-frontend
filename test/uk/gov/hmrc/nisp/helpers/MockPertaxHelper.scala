@@ -23,6 +23,6 @@ import scala.concurrent.Future
 
 object MockPertaxHelper extends PertaxHelper(MockSessionCache, MockMetricsService.metrics){
   override def isFromPertax(implicit hc: HeaderCarrier): Future[Boolean] = {
-    Future.successful(false)
+    Future.successful(true)
   }
 }

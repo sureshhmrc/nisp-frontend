@@ -44,11 +44,11 @@ object NispFormPartialRetriever extends FormPartialRetriever {
 case class GlobalErrorParams(frontendTemplatePath: String, analyticsHost: String, analyticsToken: Option[String])
 
 trait ApplicationGlobalTrait extends DefaultFrontendGlobal with PartialRetriever {
-  val controllerConfiguration: ControllerConfiguration = new ControllerConfiguration(Play.current.configuration)
+  lazy val controllerConfiguration: ControllerConfiguration = new ControllerConfiguration(Play.current.configuration)
 
   override val auditConnector = NispAuditConnector
-  override val loggingFilter = new NispLoggingFilter(controllerConfiguration)
-  override val frontendAuditFilter = new NispFrontendAuditFilter(controllerConfiguration)
+  override def loggingFilter = new NispLoggingFilter(controllerConfiguration)
+  override def frontendAuditFilter = new NispFrontendAuditFilter(controllerConfiguration)
 
   implicit val partialRetriever = NispFormPartialRetriever
   implicit val templateRenderer: LocalTemplateRenderer = LocalTemplateRenderer
