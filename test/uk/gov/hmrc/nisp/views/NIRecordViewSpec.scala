@@ -89,7 +89,6 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
 
   "Render Ni Record UR banner" should {
     lazy val controller = MockNIRecordController
-
     lazy val urResult = controller.showFull(authenticatedFakeRequest(urMockUserId).withCookies(lanCookie))
     lazy val urHtmlAccountDoc = asDocument(contentAsString(urResult))
 
@@ -127,6 +126,23 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
 
   "Render Ni Record to view all the years" should {
     lazy val controller = MockNIRecordController
+    when(nationalInsuranceServiceMock.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
+      .thenReturn(Future.successful(Right(NationalInsuranceRecord(
+        qualifyingYears = 28,
+        qualifyingYearsPriorTo1975 = 5,
+        numberOfGaps = 0,
+        numberOfGapsPayable = 0,
+        Some(new LocalDate(1954, 3, 6)),
+        false,
+        new LocalDate(2016, 4, 5),
+        List(
+          NationalInsuranceTaxYearBuilder("2015-16", qualifying = true, underInvestigation = false),
+          NationalInsuranceTaxYearBuilder("2014-15", qualifying = false, underInvestigation = false),
+          NationalInsuranceTaxYearBuilder("2013-14", qualifying = false, payable = true, underInvestigation = false)
+        ),
+        reducedRateElection = false
+      )
+      )))
 
     lazy val result = controller.showFull(authenticatedFakeRequest(mockUserId).withCookies(lanCookie))
     lazy val htmlAccountDoc = asDocument(contentAsString(result))
@@ -136,6 +152,7 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
       assertEqualsMessage(htmlAccountDoc, "div.sidebar-border>h2", "nisp.nirecord.summary.yourrecord")
     }
     "render page with number of qualifying years - 28" in {
+
       assertEqualsValue(htmlAccountDoc, "div.sidebar-border>p:nth-child(2)", "28")
     }
     "render page with text 'years of full contributions'" in {

@@ -24,16 +24,21 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatest._
 import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
 import play.api.i18n.Messages
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.http.SessionKeys
+import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.nisp.builders.NationalInsuranceTaxYearBuilder
-import uk.gov.hmrc.nisp.config.wiring.NispFormPartialRetriever
+import uk.gov.hmrc.nisp.config.wiring.{NispFormPartialRetriever, WSHttp}
 import uk.gov.hmrc.nisp.controllers.StatePensionController
 import uk.gov.hmrc.nisp.fixtures.MockApplicationConfig
 import uk.gov.hmrc.nisp.helpers._
 import uk.gov.hmrc.nisp.models._
+import uk.gov.hmrc.nisp.services.{MetricsService, StatePensionConnection}
 import uk.gov.hmrc.nisp.utils.{Constants, MockTemplateRenderer}
 import uk.gov.hmrc.nisp.views.formatting.Time
 import uk.gov.hmrc.play.frontend.auth.AuthenticationProviderIds
@@ -42,7 +47,13 @@ import uk.gov.hmrc.time.DateTimeUtils.now
 
 import scala.concurrent.Future
 
-class StatePension_MQPViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
+class StatePension_MQPViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter with OneAppPerSuite {
+
+  lazy override val app = GuiceApplicationBuilder()
+    .overrides(bind[WSHttp].toInstance(MockNispHttp.mockHttp))
+    .overrides(bind[MetricsService].toInstance(MockMetricsService.metrics))
+    .overrides(bind[SessionCache].toInstance(MockSessionCache))
+    .build()
 
   implicit val cachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
   lazy val fakeRequest = FakeRequest()
@@ -82,7 +93,21 @@ class StatePension_MQPViewSpec extends HtmlSpec with MockitoSugar with BeforeAnd
 
       "State Pension page with forecast only" should {
 
-        lazy val controller = MockStatePensionController
+        lazy val controller = new StatePensionController(
+          MockSessionCache,
+          MockCustomAuditConnector,
+          AppConfig.appConfig,
+          MockCitizenDetailsService,
+          MockMetricsService.metrics,
+          MockStatePensionService,
+          mock[StatePensionConnection],
+          MockNationalInsuranceServiceViaNationalInsurance,
+          MockPertaxHelper,
+          MockAuthConnector
+        )(MockCachedStaticHtmlPartialRetriever,
+          MockFormPartialRetriever,
+          MockTemplateRenderer
+        )
         when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Right(StatePension(
             new LocalDate(2016, 4, 5),
@@ -128,7 +153,7 @@ class StatePension_MQPViewSpec extends HtmlSpec with MockitoSugar with BeforeAnd
         lazy val htmlAccountDoc = asDocument(contentAsString(result))
 
         "render with correct page title" in {
-          assertElementContainsText(htmlAccountDoc, "head>title" ,messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))
+          assertElementContainsText(htmlAccountDoc, "head>title", messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))
         }
         "render page with heading  'Your State Pension' " in {
           assertEqualsMessage(htmlAccountDoc, "article.content__body>h1.heading-large", "nisp.main.h1.title")
@@ -362,7 +387,7 @@ class StatePension_MQPViewSpec extends HtmlSpec with MockitoSugar with BeforeAnd
           lazy val htmlAccountDoc = asDocument(contentAsString(result))
 
           "render with correct page title" in {
-            assertElementContainsText(htmlAccountDoc, "head>title" ,messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))
+            assertElementContainsText(htmlAccountDoc, "head>title", messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))
           }
           "render page with heading  'Your State Pension' " in {
             assertEqualsMessage(htmlAccountDoc, "article.content__body>h1.heading-large", "nisp.main.h1.title")
@@ -435,7 +460,7 @@ class StatePension_MQPViewSpec extends HtmlSpec with MockitoSugar with BeforeAnd
 
           /*Start of Non SPA Checks*/
           "Not render page with heading 'Proposed change to your State Pension age'" in {
-            assertPageDoesNotContainMessage(htmlAccountDoc,"nisp.spa.under.consideration.title")
+            assertPageDoesNotContainMessage(htmlAccountDoc, "nisp.spa.under.consideration.title")
           }
 
           "Not render page with text 'Youll reach State Pension age on 7 June 2020. Under government proposals this may increase by up to a year.'" in {
@@ -601,7 +626,7 @@ class StatePension_MQPViewSpec extends HtmlSpec with MockitoSugar with BeforeAnd
           lazy val htmlAccountDoc = asDocument(contentAsString(result))
 
           "render with correct page title" in {
-            assertElementContainsText(htmlAccountDoc, "head>title" ,messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))
+            assertElementContainsText(htmlAccountDoc, "head>title", messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))
           }
           "render page with heading  'Your State Pension' " in {
             assertEqualsMessage(htmlAccountDoc, "article.content__body>h1.heading-large", "nisp.main.h1.title")
@@ -833,7 +858,7 @@ class StatePension_MQPViewSpec extends HtmlSpec with MockitoSugar with BeforeAnd
           lazy val htmlAccountDoc = asDocument(contentAsString(result))
 
           "render with correct page title" in {
-            assertElementContainsText(htmlAccountDoc, "head>title" ,messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))
+            assertElementContainsText(htmlAccountDoc, "head>title", messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))
           }
           "render page with heading  'Your State Pension' " in {
 
@@ -1065,7 +1090,7 @@ class StatePension_MQPViewSpec extends HtmlSpec with MockitoSugar with BeforeAnd
           lazy val htmlAccountDoc = asDocument(contentAsString(result))
 
           "render with correct page title" in {
-            assertElementContainsText(htmlAccountDoc, "head>title" ,messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))
+            assertElementContainsText(htmlAccountDoc, "head>title", messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))
           }
           "render page with heading  'Your State Pension' " in {
             assertEqualsMessage(htmlAccountDoc, "article.content__body>h1.heading-large", "nisp.main.h1.title")
@@ -1301,7 +1326,7 @@ class StatePension_MQPViewSpec extends HtmlSpec with MockitoSugar with BeforeAnd
           lazy val htmlAccountDoc = asDocument(contentAsString(result))
 
           "render with correct page title" in {
-            assertElementContainsText(htmlAccountDoc, "head>title" ,messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))
+            assertElementContainsText(htmlAccountDoc, "head>title", messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))
           }
           "render page with heading  'Your State Pension' " in {
             assertEqualsMessage(htmlAccountDoc, "article.content__body>h1.heading-large", "nisp.main.h1.title")
@@ -1500,7 +1525,7 @@ class StatePension_MQPViewSpec extends HtmlSpec with MockitoSugar with BeforeAnd
           lazy val htmlAccountDoc = asDocument(contentAsString(result))
 
           "render with correct page title" in {
-            assertElementContainsText(htmlAccountDoc, "head>title" ,messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))
+            assertElementContainsText(htmlAccountDoc, "head>title", messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))
           }
           "render page with heading  'Your State Pension' " in {
             assertEqualsMessage(htmlAccountDoc, "article.content__body>h1.heading-large", "nisp.main.h1.title")

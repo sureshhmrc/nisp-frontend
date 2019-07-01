@@ -21,6 +21,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatest.mock.MockitoSugar.mock
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.controllers.StatePensionController
+import uk.gov.hmrc.nisp.services.StatePensionConnection
 import uk.gov.hmrc.nisp.utils.MockTemplateRenderer
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
@@ -63,7 +64,7 @@ object MockStatePensionController extends StatePensionController (
   MockCitizenDetailsService,
   MockMetricsService.metrics,
   MockStatePensionService,
-  MockStatePensionConnection,
+  mock[StatePensionConnection],
   MockNationalInsuranceServiceViaNationalInsurance,
   MockPertaxHelper,
   MockAuthConnector

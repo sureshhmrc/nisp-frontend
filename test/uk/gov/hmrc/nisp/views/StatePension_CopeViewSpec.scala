@@ -20,6 +20,8 @@ import java.util.UUID
 
 import org.apache.commons.lang3.StringEscapeUtils
 import org.joda.time.LocalDate
+import org.mockito.{ArgumentMatcher, ArgumentMatchers}
+import org.parboiled.matchers.AnyMatcher
 import org.scalatest._
 import org.scalatest.mock.MockitoSugar
 import play.api.i18n.Messages
@@ -37,16 +39,20 @@ import uk.gov.hmrc.nisp.controllers.connectors.CustomAuditConnector
 import uk.gov.hmrc.nisp.controllers.pertax.PertaxHelper
 import uk.gov.hmrc.nisp.fixtures.MockApplicationConfig
 import uk.gov.hmrc.nisp.helpers._
+import uk.gov.hmrc.nisp.models.{StatePension, StatePensionAmountForecast, StatePensionAmountMaximum, StatePensionAmountRegular, StatePensionAmounts}
 import uk.gov.hmrc.nisp.services.{CitizenDetailsService, MetricsService, NationalInsuranceService, StatePensionConnection, StatePensionService}
 import uk.gov.hmrc.nisp.utils.{Constants, MockTemplateRenderer}
+import uk.gov.hmrc.nisp.views.html.includes.statePensionAgeUnderConsideration
 import uk.gov.hmrc.play.frontend.auth.AuthenticationProviderIds
 import uk.gov.hmrc.play.language.LanguageUtils.Dates
 import uk.gov.hmrc.renderer.TemplateRenderer
 import uk.gov.hmrc.time.DateTimeUtils.now
+import org.mockito.Mockito.when
+import org.scalatestplus.play.OneAppPerSuite
 
 import scala.concurrent.Future
 
-class StatePension_CopeViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
+class StatePension_CopeViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter with OneAppPerSuite {
 
   lazy override val app = GuiceApplicationBuilder()
     .overrides(bind[WSHttp].toInstance(MockNispHttp.mockHttp))
@@ -87,7 +93,7 @@ class StatePension_CopeViewSpec extends HtmlSpec with MockitoSugar with BeforeAn
 
   val sessionCache = mock[SessionCache]
 
-  val mockStatePensionConnection = app.injector.instanceOf[StatePensionConnection]
+//  val mockStatePensionConnection = app.injector.instanceOf[StatePensionConnection]
 
   lazy val controller = new StatePensionController(
     sessionCache,
@@ -96,7 +102,7 @@ class StatePension_CopeViewSpec extends HtmlSpec with MockitoSugar with BeforeAn
     MockCitizenDetailsService,
     MockMetricsService.metrics,
     MockStatePensionService,
-    mockStatePensionConnection,
+    mock[StatePensionConnection],
     MockNationalInsuranceServiceViaNationalInsurance,
     MockPertaxHelper,
     MockAuthConnector
@@ -105,6 +111,28 @@ class StatePension_CopeViewSpec extends HtmlSpec with MockitoSugar with BeforeAn
   "Render State Pension view with Contracted out User" should {
     lazy val result: Future[Result] = controller.show()(authenticatedFakeRequest(mockUserIdContractedOut).withCookies(lanCookie))
     lazy val htmlAccountDoc = asDocument(contentAsString(result))
+
+
+    when(controller.statePensionConnection.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(Right(StatePension(
+            new LocalDate(2016, 4, 5),
+            amounts = StatePensionAmounts(
+              protectedPayment = false,
+              StatePensionAmountRegular(151.71, 590.10, 7081.15),
+              StatePensionAmountForecast(4, 150.71, 590.10, 7081.15),
+              StatePensionAmountMaximum(4, 1, 149.71, 590.10, 7081.15),
+              StatePensionAmountRegular(0, 0, 0)
+            ),
+            pensionAge = 67,
+            new LocalDate(2020, 6, 7),
+            "2019-20",
+            20,
+            pensionSharingOrder = false,
+            currentFullWeeklyPensionAmount = 155.65,
+            false,
+            false,
+            false
+          )
+          )))
 
     "render with correct page title" in {
       assertElementContainsText(htmlAccountDoc, "head>title", messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))

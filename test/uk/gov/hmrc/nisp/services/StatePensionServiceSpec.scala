@@ -87,7 +87,7 @@ class StatePensionServiceSpec extends PlaySpec with OneAppPerSuite with MockitoS
 
     lazy val configuration = app.configuration
 
-    lazy val statePensionConnector = new StatePensionConnector(MockNispHttp.mockHttp, MockMetricsService.metrics, configuration)
+    lazy val statePensionConnector = new StatePensionConnector(MockNispHttp.mockHttp, MockMetricsService.metrics, MockSessionCache, configuration)
     lazy val statePensionConnection = new StatePensionConnection(
       statePensionConnector = statePensionConnector,
       statePensionService = MockStatePensionService)

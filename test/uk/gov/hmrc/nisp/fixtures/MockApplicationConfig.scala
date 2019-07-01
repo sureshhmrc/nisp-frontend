@@ -27,6 +27,7 @@ object MockApplicationConfig extends MockitoSugar {
   val appConfig: ApplicationConfig = mock[ApplicationConfig]
 
   when(appConfig.ggSignInUrl).thenReturn("")
+  when(appConfig.showUrBanner).thenReturn(true)
   when(appConfig.verifySignIn).thenReturn("")
   when(appConfig.verifySignInContinue).thenReturn(false)
   when(appConfig.reportAProblemNonJSUrl).thenReturn("")

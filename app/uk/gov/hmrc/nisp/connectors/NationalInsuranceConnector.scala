@@ -31,7 +31,7 @@ import scala.concurrent.Future
 
 class NationalInsuranceConnector @Inject()(val http: HttpGet,
                                            val metricsService: MetricsService,
-                                           statePensionConnector: StatePensionConnector,
+//                                           statePensionConnector: StatePensionConnector,
                                            servicesConfig: ServicesConfig
 ) extends BackendConnector {
 

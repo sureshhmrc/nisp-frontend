@@ -60,7 +60,7 @@ class StatePensionService @Inject() extends CurrentTaxYear {
 }
 
 class StatePensionConnection @Inject()(statePensionConnector: StatePensionConnector,
-                                       statePensionService: StatePensionService)  {
+                                       statePensionService: StatePensionService) {
 
   final val exclusionCodeDead = "EXCLUSION_DEAD"
   final val exclusionCodeManualCorrespondence = "EXCLUSION_MANUAL_CORRESPONDENCE"
