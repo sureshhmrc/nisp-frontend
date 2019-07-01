@@ -20,8 +20,9 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatest.mock.MockitoSugar._
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.nisp.connectors.StatePensionConnector
+import uk.gov.hmrc.nisp.fixtures.MockApplicationConfig
 import uk.gov.hmrc.nisp.services.MetricsService
 
-object MockStatePensionConnector extends MockitoSugar {
-  val connector = mock[StatePensionConnector]
-}
+/*object MockStatePensionConnector extends StatePensionConnector(
+
+)*/

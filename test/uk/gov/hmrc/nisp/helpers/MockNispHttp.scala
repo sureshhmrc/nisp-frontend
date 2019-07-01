@@ -23,9 +23,10 @@ import uk.gov.hmrc.domain.Nino
 
 import scala.concurrent.Future
 import uk.gov.hmrc.http.{BadRequestException, HttpGet, HttpResponse, Upstream4xxResponse}
+import uk.gov.hmrc.nisp.config.wiring.WSHttp
 
 object MockNispHttp extends MockitoSugar {
-  val mockHttp = mock[HttpGet]
+  val mockHttp = mock[WSHttp]
 
   val noDataNinos = List(
     TestAccountBuilder.backendNotFound

@@ -20,8 +20,9 @@ import play.api.inject.{Binding, Module}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.HttpGet
 import uk.gov.hmrc.http.cache.client.SessionCache
-import uk.gov.hmrc.nisp.config.wiring.{NispAuditConnector, NispCachedStaticHtmlPartialRetriever, NispSessionCache, WSHttp}
+import uk.gov.hmrc.nisp.config.wiring.{NispAuditConnector, NispAuthConnector, NispCachedStaticHtmlPartialRetriever, NispSessionCache, WSHttp}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.filters.{FrontendAuditFilter, FrontendLoggingFilter}
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
@@ -37,6 +38,7 @@ class NispModule extends Module {
       bind[HttpGet].toInstance(WSHttp),
       bind[WSHttp].toInstance(WSHttp),
       bind[TemplateRenderer].toInstance(LocalTemplateRenderer),
-      bind[SessionCache].to(classOf[NispSessionCache])
+      bind[SessionCache].to(classOf[NispSessionCache]),
+      bind[AuthConnector].toInstance(NispAuthConnector)
   )
 }

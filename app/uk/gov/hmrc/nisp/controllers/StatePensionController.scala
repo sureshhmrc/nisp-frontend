@@ -23,7 +23,6 @@ import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent, Request, Session}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.SessionCache
-import uk.gov.hmrc.nisp.config.wiring.NispAuthConnector
 import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobal}
 import uk.gov.hmrc.nisp.controllers.auth.{AuthorisedForNisp, NispUser}
 import uk.gov.hmrc.nisp.controllers.connectors.CustomAuditConnector
@@ -51,14 +50,14 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
                                        val statePensionService: StatePensionService,
                                        val statePensionConnection: StatePensionConnection,
                                        val nationalInsuranceService: NationalInsuranceService,
-                                       pertaxHelper: PertaxHelper)
+                                       pertaxHelper: PertaxHelper,
+                                       val authConnector: AuthConnector
+                                      )
                                       (implicit override val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
                                         val formPartialRetriever: FormPartialRetriever,
                                         val templateRenderer: TemplateRenderer)
                                       extends FrontendController with AuthorisedForNisp
                                         with PartialRetriever {
-
-  def authConnector: AuthConnector = NispAuthConnector
 
   def showCope: Action[AnyContent] = AuthorisedByAny.async { implicit user =>
     implicit request =>
@@ -80,10 +79,14 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
   def show: Action[AnyContent] = AuthorisedByAny.async { implicit user =>
     implicit request =>
 
+      println("%%%%%%%%%%%%%% got here 1!")
+
       pertaxHelper.isFromPertax.flatMap { isPertax =>
 
         val statePensionResponseF = statePensionConnection.getSummary(user.nino)
         val nationalInsuranceResponseF = nationalInsuranceService.getSummary(user.nino)
+
+              println("%%%%%%%%%%%%%% got here 2!")
 
         (for (
           statePensionResponse <- statePensionResponseF;
@@ -96,6 +99,8 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
                 user.name,
                 nationalInsuranceExclusion
               ))
+                    println("%%%%%%%%%%%%%% got here 3!")
+
               Redirect(routes.ExclusionController.showSP()).withSession(storeUserInfoInSession(user, contractedOut = false))
 
             case (Right(statePension), Right(nationalInsuranceRecord)) =>
@@ -106,6 +111,7 @@ class StatePensionController @Inject()(val sessionCache: SessionCache,
                 statePension.earningsIncludedUpTo,
                 statePension.finalRelevantStartYear
               )
+      println("%%%%%%%%%%%%%% got here 4!")
 
               if (statePension.mqpScenario.fold(false)(_ != MQPScenario.ContinueWorking)) {
                 val yearsMissing = Constants.minimumQualifyingYearsNSP - statePension.numberOfQualifyingYears

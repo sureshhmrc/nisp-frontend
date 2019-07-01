@@ -38,7 +38,7 @@ trait BackendConnector {
   protected def retrieveFromCache[A](api: APIType, url: String)(implicit hc: HeaderCarrier, formats: Format[A]): Future[A] = {
     val keystoreTimerContext = metricsService.keystoreReadTimer.time()
 
-    val sessionCacheF = sessionCache.fetchAndGetEntry[A](api.toString)
+    val sessionCacheF: Future[Option[A]] = sessionCache.fetchAndGetEntry[A](api.toString)
     sessionCacheF.onFailure {
       case _ => metricsService.keystoreReadFailed.inc()
     }

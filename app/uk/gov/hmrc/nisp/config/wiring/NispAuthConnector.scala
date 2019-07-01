@@ -25,7 +25,7 @@ import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 
 object NispAuthConnector extends AuthConnector with ServicesConfig {
-  override val serviceUrl: String = baseUrl("auth")
+  override lazy val serviceUrl: String = baseUrl("auth")
 
   override def http: HttpGet = new HttpGet with WSHttp {
     override protected def appNameConfiguration: Configuration = Play.current.configuration

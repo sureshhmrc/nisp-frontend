@@ -19,13 +19,9 @@ package uk.gov.hmrc.nisp.helpers
 import org.mockito.Mockito.when
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.mock.MockitoSugar.mock
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nisp.config.ApplicationConfig
-import uk.gov.hmrc.nisp.config.wiring.NispAuditConnector
 import uk.gov.hmrc.nisp.controllers.StatePensionController
 import uk.gov.hmrc.nisp.utils.MockTemplateRenderer
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 import uk.gov.hmrc.renderer.TemplateRenderer
 
@@ -69,7 +65,8 @@ object MockStatePensionController extends StatePensionController (
   MockStatePensionService,
   MockStatePensionConnection,
   MockNationalInsuranceServiceViaNationalInsurance,
-  MockPertaxHelper
+  MockPertaxHelper,
+  MockAuthConnector
 )(
   MockCachedStaticHtmlPartialRetriever,
   MockFormPartialRetriever,

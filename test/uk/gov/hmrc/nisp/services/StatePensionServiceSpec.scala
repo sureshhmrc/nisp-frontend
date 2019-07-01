@@ -17,27 +17,17 @@
 package uk.gov.hmrc.nisp.services
 
 import org.joda.time.LocalDate
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import play.api.{Application, Configuration}
+import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.nisp.services.StatePensionConnection
-import uk.gov.hmrc.nisp.helpers.{MockApplicationGlobal, MockAuthConnector, MockCachedStaticHtmlPartialRetriever, MockCitizenDetailsService, MockCustomAuditConnector, MockIdentityVerificationConnector, MockMetricsService, MockNationalInsuranceServiceViaNationalInsurance, MockNispHttp, MockSessionCache, MockStatePensionConnection, MockStatePensionConnector, MockStatePensionService, TestAccountBuilder}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.nisp.config.ApplicationGlobalTrait
+import uk.gov.hmrc.nisp.connectors.StatePensionConnector
+import uk.gov.hmrc.nisp.helpers._
 import uk.gov.hmrc.nisp.models._
 import uk.gov.hmrc.nisp.models.enums.Exclusion
-import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.SessionCache
-import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobalTrait}
-import uk.gov.hmrc.nisp.connectors.{IdentityVerificationConnector, StatePensionConnector}
-import uk.gov.hmrc.nisp.controllers.connectors.CustomAuditConnector
-import uk.gov.hmrc.nisp.utils.{DateUtil, MockTemplateRenderer}
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
-import uk.gov.hmrc.renderer.TemplateRenderer
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

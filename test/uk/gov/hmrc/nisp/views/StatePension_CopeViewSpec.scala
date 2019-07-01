@@ -23,13 +23,15 @@ import org.joda.time.LocalDate
 import org.scalatest._
 import org.scalatest.mock.MockitoSugar
 import play.api.i18n.Messages
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.nisp.config.ApplicationConfig
-import uk.gov.hmrc.nisp.config.wiring.NispFormPartialRetriever
+import uk.gov.hmrc.nisp.config.wiring.{NispFormPartialRetriever, WSHttp}
 import uk.gov.hmrc.nisp.controllers.StatePensionController
 import uk.gov.hmrc.nisp.controllers.connectors.CustomAuditConnector
 import uk.gov.hmrc.nisp.controllers.pertax.PertaxHelper
@@ -45,6 +47,12 @@ import uk.gov.hmrc.time.DateTimeUtils.now
 import scala.concurrent.Future
 
 class StatePension_CopeViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
+
+  lazy override val app = GuiceApplicationBuilder()
+    .overrides(bind[WSHttp].toInstance(MockNispHttp.mockHttp))
+    .overrides(bind[MetricsService].toInstance(MockMetricsService.metrics))
+    .overrides(bind[SessionCache].toInstance(MockSessionCache))
+    .build()
 
   implicit val cachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
   implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
@@ -66,9 +74,6 @@ class StatePension_CopeViewSpec extends HtmlSpec with MockitoSugar with BeforeAn
   val mockUserIdFillGapsSingle = "/auth/oid/mockfillgapssingle"
   val mockUserIdFillGapsMultiple = "/auth/oid/mockfillgapsmultiple"
 
-  val ggSignInUrl = "http://localhost:9949/gg/sign-in?continue=http%3A%2F%2Flocalhost%3A9234%2Fcheck-your-state-pension%2Faccount&origin=nisp-frontend&accountType=individual"
-  val twoFactorUrl = "http://localhost:9949/coafe/two-step-verification/register/?continue=http%3A%2F%2Flocalhost%3A9234%2Fcheck-your-state-pension%2Faccount&failure=http%3A%2F%2Flocalhost%3A9234%2Fcheck-your-state-pension%2Fnot-authorised"
-
   lazy val fakeRequest = FakeRequest()
 
   implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever
@@ -82,16 +87,19 @@ class StatePension_CopeViewSpec extends HtmlSpec with MockitoSugar with BeforeAn
 
   val sessionCache = mock[SessionCache]
 
+  val mockStatePensionConnection = app.injector.instanceOf[StatePensionConnection]
+
   lazy val controller = new StatePensionController(
     sessionCache,
-    mock[CustomAuditConnector],
-    mock[ApplicationConfig],
-    mock[CitizenDetailsService],
-    mock[MetricsService],
-    mock[StatePensionService],
-    mock[StatePensionConnection],
-    mock[NationalInsuranceService],
-    mock[PertaxHelper]
+    MockCustomAuditConnector,
+    MockApplicationConfig.appConfig,
+    MockCitizenDetailsService,
+    MockMetricsService.metrics,
+    MockStatePensionService,
+    mockStatePensionConnection,
+    MockNationalInsuranceServiceViaNationalInsurance,
+    MockPertaxHelper,
+    MockAuthConnector
   )
 
   "Render State Pension view with Contracted out User" should {

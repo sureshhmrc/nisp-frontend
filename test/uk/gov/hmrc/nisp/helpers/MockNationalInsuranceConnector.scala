@@ -24,6 +24,5 @@ object MockNationalInsuranceConnector extends NationalInsuranceConnector(MockNis
                                                                           MockStatePensionConnector.connector,
                                                                           MockServiceConfig.servicesConfig) {
   override def sessionCache: SessionCache = MockSessionCache
-
   override val serviceUrl: String = "national-insurance"
 }
