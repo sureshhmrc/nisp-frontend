@@ -67,7 +67,7 @@ trait MockStatePensionController extends StatePensionController {
     override val pertaxFrontendUrl: String = ""
     override val contactFormServiceIdentifier: String = ""
     override val breadcrumbPartialUrl: String = ""
-    override val showFullNI: Boolean = false
+    override lazy val showFullNI: Boolean = false
     override val futureProofPersonalMax: Boolean = false
     override val isWelshEnabled = true
     override val frontendTemplatePath: String = "microservice.services.frontend-template-provider.path"

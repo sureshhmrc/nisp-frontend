@@ -21,7 +21,7 @@ import play.api.mvc.{Action, AnyContent, Request, Session}
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.config.wiring.NispSessionCache
-import uk.gov.hmrc.nisp.controllers.auth.{AuthorisedForNisp, NispUser}
+import uk.gov.hmrc.nisp.controllers.auth.{AuthAction, AuthorisedForNisp, NispAuthedUser, NispUser}
 import uk.gov.hmrc.nisp.controllers.connectors.{AuthenticationConnectors, CustomAuditConnector}
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
 import uk.gov.hmrc.nisp.controllers.pertax.PertaxHelper
@@ -34,6 +34,8 @@ import uk.gov.hmrc.nisp.utils.Constants._
 import uk.gov.hmrc.nisp.views.html._
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
 import uk.gov.hmrc.http.HeaderCarrier
+import play.api.Play.current
+import play.api.i18n.Messages.Implicits._
 
 object StatePensionController extends StatePensionController {
 
@@ -44,12 +46,13 @@ object StatePensionController extends StatePensionController {
   override val metricsService: MetricsService = MetricsService
   override val statePensionService: StatePensionService = StatePensionService
   override val nationalInsuranceService: NationalInsuranceService = NationalInsuranceService
+  override val authenticate: AuthAction = AuthAction
+
 }
 
 trait StatePensionController extends NispFrontendController with AuthorisedForNisp with PertaxHelper with AuthenticationConnectors with PartialRetriever {
 
-  import play.api.Play.current
-  import play.api.i18n.Messages.Implicits._
+  val authenticate: AuthAction = AuthAction
 
   def statePensionService: StatePensionService
 
@@ -74,14 +77,14 @@ trait StatePensionController extends NispFrontendController with AuthorisedForNi
       }
   }
 
-  private def sendAuditEvent(statePension: StatePension, user: NispUser)(implicit hc: HeaderCarrier) = {
+  private def sendAuditEvent(statePension: StatePension, user: NispAuthedUser)(implicit hc: HeaderCarrier) = {
     customAuditConnector.sendEvent(AccountAccessEvent(
       user.nino.nino,
       statePension.pensionDate,
       statePension.amounts.current.weeklyAmount,
       statePension.amounts.forecast.weeklyAmount,
       user.dateOfBirth,
-      user.name,
+      user.name.map(_.toString),
       user.sex,
       statePension.contractedOut,
       statePension.forecastScenario,
@@ -90,8 +93,10 @@ trait StatePensionController extends NispFrontendController with AuthorisedForNi
     ))
   }
 
-  def show: Action[AnyContent] = AuthorisedByAny.async { implicit user =>
+  def show: Action[AnyContent] = authenticate.async {
     implicit request =>
+      implicit val user = request.nispAuthedUser
+
       isFromPertax.flatMap { isPertax =>
 
         val statePensionResponseF = statePensionService.getSummary(user.nino)
@@ -215,9 +220,11 @@ trait StatePensionController extends NispFrontendController with AuthorisedForNi
     }
   }
 
-  private def storeUserInfoInSession(user: NispUser, contractedOut: Boolean)(implicit request: Request[AnyContent]): Session = {
+  private def storeUserInfoInSession(user: NispAuthedUser, contractedOut: Boolean)(implicit request: Request[AnyContent]): Session = {
+    println("$$$$$$$$$$$$" + user.name)
     request.session +
-      (NAME -> user.name.getOrElse("N/A")) +
+//      (NAME -> user.name.getOrElse("N/A")) +
+      (NAME -> user.name.fold("N/A")(_.toString)) +
       (NINO -> user.nino.nino) +
       (CONTRACTEDOUT -> contractedOut.toString)
   }

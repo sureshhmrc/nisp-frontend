@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nisp.controllers
 
-import javax.inject.Inject
 import org.joda.time.{DateTimeZone, LocalDate}
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
@@ -44,7 +43,7 @@ object NIRecordController extends NIRecordController with AuthenticationConnecto
   override val applicationConfig: ApplicationConfig = ApplicationConfig
   override val customAuditConnector: CustomAuditConnector = CustomAuditConnector
   override val sessionCache: SessionCache = NispSessionCache
-  override val showFullNI: Boolean = ApplicationConfig.showFullNI
+  override lazy val showFullNI: Boolean = ApplicationConfig.showFullNI
   override val currentDate = new LocalDate(DateTimeZone.forID("Europe/London"))
   override val metricsService: MetricsService = MetricsService
   override val nationalInsuranceService: NationalInsuranceService = NationalInsuranceService
@@ -52,16 +51,13 @@ object NIRecordController extends NIRecordController with AuthenticationConnecto
   override val authenticate: AuthAction = AuthAction
 }
 
-
 trait NIRecordController extends NispFrontendController with AuthorisedForNisp with PertaxHelper {
   val customAuditConnector: CustomAuditConnector
-  val showFullNI: Boolean
-  val currentDate: LocalDate
   val authenticate: AuthAction
   val nationalInsuranceService: NationalInsuranceService
   val statePensionService: StatePensionService
 
-  val showFullNI: Boolean = ApplicationConfig.showFullNI
+  lazy val showFullNI: Boolean = ApplicationConfig.showFullNI
   val currentDate: LocalDate = new LocalDate(DateTimeZone.forID("Europe/London"))
 
   def showFull: Action[AnyContent] = show(gapsOnlyView = false)
@@ -114,7 +110,8 @@ trait NIRecordController extends NispFrontendController with AuthorisedForNisp w
 
   private def show(gapsOnlyView: Boolean): Action[AnyContent] = authenticate.async {
     implicit request =>
-      val nino = request.nispAuthedUser.nino
+      implicit val user = request.nispAuthedUser
+      val nino = user.nino
 
       val nationalInsuranceResponseF = nationalInsuranceService.getSummary(nino)
       val statePensionResponseF = statePensionService.getSummary(nino)
@@ -151,15 +148,15 @@ trait NIRecordController extends NispFrontendController with AuthorisedForNisp w
                 recordHasEnded = recordHasEnded,
                 yearsToContribute = yearsToContribute,
                 finalRelevantEndYear = finalRelevantStartYear + 1,
-                showPre1975Years = showPre1975Years(niRecord.dateOfEntry, request.dateOfBirth, niRecord.qualifyingYearsPriorTo1975),
-                authenticationProvider = authenticate.getAuthenticationProvider(request.confidenceLevel),
+                showPre1975Years = showPre1975Years(niRecord.dateOfEntry, request.nispAuthedUser.dateOfBirth, niRecord.qualifyingYearsPriorTo1975),
+                authenticationProvider = authenticate.getAuthenticationProvider(request.nispAuthedUser.confidenceLevel),
                 showFullNI = showFullNI,
                 currentDate = currentDate))
             }
           case Left(exclusion) =>
             customAuditConnector.sendEvent(AccountExclusionEvent(
               nino.nino,
-              request.name,
+              request.nispAuthedUser.name,
               exclusion
             ))
             Redirect(routes.ExclusionController.showNI())
@@ -171,8 +168,8 @@ trait NIRecordController extends NispFrontendController with AuthorisedForNisp w
 
   def showGapsAndHowToCheckThem: Action[AnyContent] = authenticate.async {
     implicit request =>
-
-      nationalInsuranceService.getSummary(request.nino) map {
+      implicit val user = request.nispAuthedUser
+      nationalInsuranceService.getSummary(request.nispAuthedUser.nino) map {
         case Right(niRecord) =>
           Ok(nirecordGapsAndHowToCheckThem(niRecord.homeResponsibilitiesProtection))
         case Left(_) =>
@@ -182,6 +179,7 @@ trait NIRecordController extends NispFrontendController with AuthorisedForNisp w
 
   def showVoluntaryContributions: Action[AnyContent] = authenticate {
     implicit request =>
+      implicit val user = request.nispAuthedUser
       Ok(nirecordVoluntaryContributions())
   }
 

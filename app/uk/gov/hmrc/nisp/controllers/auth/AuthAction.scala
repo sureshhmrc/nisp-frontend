@@ -26,6 +26,7 @@ import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, ConfidenceLeve
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{CorePost, HeaderCarrier}
 import uk.gov.hmrc.nisp.config.wiring.WSHttp
+import uk.gov.hmrc.nisp.models.UserName
 import uk.gov.hmrc.nisp.utils.Constants
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -49,7 +50,7 @@ class AuthActionImpl @Inject()(override val authConnector: AuthConnector)
     authorised().
       retrieve(Retrievals.nino and Retrievals.confidenceLevel and Retrievals.dateOfBirth and Retrievals.name and Retrievals.itmpAddress) {
         case Some(nino) ~ confidenceLevel ~ dateOfBirth ~ name ~ itmpAddress => {
-          block(AuthenticatedRequest(request, NispAuthedUser(Nino(nino), confidenceLevel, dateOfBirth, name, itmpAddress)))
+          block(AuthenticatedRequest(request, NispAuthedUser(Nino(nino), confidenceLevel, dateOfBirth, name.map(UserName), itmpAddress)))
         }
         case _ => throw new RuntimeException("Can't find credentials for user")
       }

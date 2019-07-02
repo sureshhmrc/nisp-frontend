@@ -50,7 +50,7 @@ object MockExclusionController extends ExclusionController {
     override val ivUpliftUrl: String = ""
     override val pertaxFrontendUrl: String = ""
     override val breadcrumbPartialUrl: String = ""
-    override val showFullNI: Boolean = false
+    override lazy val showFullNI: Boolean = false
     override val futureProofPersonalMax: Boolean = false
     override val isWelshEnabled = true
     override val frontendTemplatePath: String = "microservice.services.frontend-template-provider.path"

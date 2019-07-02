@@ -120,7 +120,7 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
             override val pertaxFrontendUrl: String = ""
             override val contactFormServiceIdentifier: String = ""
             override val breadcrumbPartialUrl: String = ""
-            override val showFullNI: Boolean = false
+            override lazy val showFullNI: Boolean = false
             override val futureProofPersonalMax: Boolean = false
             override val isWelshEnabled = false
             override val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
@@ -251,7 +251,7 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
             override val pertaxFrontendUrl: String = ""
             override val contactFormServiceIdentifier: String = ""
             override val breadcrumbPartialUrl: String = ""
-            override val showFullNI: Boolean = false
+            override lazy val showFullNI: Boolean = false
             override val futureProofPersonalMax: Boolean = false
             override val isWelshEnabled = false
             override val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
@@ -289,7 +289,7 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
             override val pertaxFrontendUrl: String = ""
             override val contactFormServiceIdentifier: String = ""
             override val breadcrumbPartialUrl: String = ""
-            override val showFullNI: Boolean = false
+            override lazy val showFullNI: Boolean = false
             override val futureProofPersonalMax: Boolean = false
             override val isWelshEnabled = false
             override val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
@@ -390,7 +390,7 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
             override val pertaxFrontendUrl: String = ""
             override val contactFormServiceIdentifier: String = ""
             override val breadcrumbPartialUrl: String = ""
-            override val showFullNI: Boolean = false
+            override lazy val showFullNI: Boolean = false
             override val futureProofPersonalMax: Boolean = true
             override val isWelshEnabled = false
             override val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
