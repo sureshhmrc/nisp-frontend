@@ -17,27 +17,21 @@
 package uk.gov.hmrc.nisp.controllers.auth
 
 import com.google.inject.{ImplementedBy, Inject}
-import org.joda.time.LocalDate
+import play.api.Mode.Mode
 import play.api.mvc._
+import play.api.{Configuration, Play}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, Name, ~}
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, ConfidenceLevel}
+import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, ConfidenceLevel, PlayAuthConnector}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.nisp.utils.{Constants, Country}
+import uk.gov.hmrc.http.{CorePost, HeaderCarrier}
+import uk.gov.hmrc.nisp.config.wiring.WSHttp
+import uk.gov.hmrc.nisp.utils.Constants
 import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.config.ServicesConfig
 
+import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
-
-case class NispAuthedUser (nino: Nino,
-                           confidenceLevel: ConfidenceLevel,
-                           dateOfBirth: Option[LocalDate],
-                           name: Option[Name],
-                           address: Option[ItmpAddress]) {
-
-  lazy val livesAbroad: Boolean = address.fold(false)( co => co.countryName.exists(Country.isAbroad(_)) )
-
-}
 
 case class AuthenticatedRequest[A](request: Request[A],
                                    nispAuthedUser: NispAuthedUser
@@ -51,6 +45,7 @@ class AuthActionImpl @Inject()(override val authConnector: AuthConnector)
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
+    //Add authorisation parameters
     authorised().
       retrieve(Retrievals.nino and Retrievals.confidenceLevel and Retrievals.dateOfBirth and Retrievals.name and Retrievals.itmpAddress) {
         case Some(nino) ~ confidenceLevel ~ dateOfBirth ~ name ~ itmpAddress => {
@@ -68,4 +63,18 @@ class AuthActionImpl @Inject()(override val authConnector: AuthConnector)
 @ImplementedBy(classOf[AuthActionImpl])
 trait AuthAction extends ActionBuilder[AuthenticatedRequest] with ActionFunction[Request, AuthenticatedRequest] {
   def getAuthenticationProvider(confidenceLevel: ConfidenceLevel): String
+}
+
+
+object AuthAction extends AuthActionImpl(AuthConnector)
+
+
+object AuthConnector extends PlayAuthConnector with ServicesConfig {
+  override val serviceUrl: String = baseUrl("auth")
+
+  override def http: CorePost = WSHttp
+
+  override protected def mode: Mode = Play.current.mode
+
+  override protected def runModeConfiguration: Configuration = Play.current.configuration
 }

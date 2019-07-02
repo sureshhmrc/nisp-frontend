@@ -37,15 +37,29 @@ import uk.gov.hmrc.nisp.utils.{Constants, Formatting}
 import uk.gov.hmrc.nisp.views.html.{nirecordGapsAndHowToCheckThem, nirecordVoluntaryContributions, nirecordpage}
 import uk.gov.hmrc.time.TaxYear
 
-// TODO:// bind this in modules
 // override val sessionCache: SessionCache = NispSessionCache
 
-class NIRecordController @Inject()(customAuditConnector: CustomAuditConnector,
-                                    sessionCache: SessionCache,
-                                    metricsService: MetricsService,
-                                    nationalInsuranceService: NationalInsuranceService,
-                                    statePensionService: StatePensionService = StatePensionService,
-                                    authenticate: AuthAction) extends NispFrontendController with PertaxHelper {
+object NIRecordController extends NIRecordController with AuthenticationConnectors with PartialRetriever {
+  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
+  override val applicationConfig: ApplicationConfig = ApplicationConfig
+  override val customAuditConnector: CustomAuditConnector = CustomAuditConnector
+  override val sessionCache: SessionCache = NispSessionCache
+  override val showFullNI: Boolean = ApplicationConfig.showFullNI
+  override val currentDate = new LocalDate(DateTimeZone.forID("Europe/London"))
+  override val metricsService: MetricsService = MetricsService
+  override val nationalInsuranceService: NationalInsuranceService = NationalInsuranceService
+  override val statePensionService: StatePensionService = StatePensionService
+  override val authenticate: AuthAction = AuthAction
+}
+
+
+trait NIRecordController extends NispFrontendController with AuthorisedForNisp with PertaxHelper {
+  val customAuditConnector: CustomAuditConnector
+  val showFullNI: Boolean
+  val currentDate: LocalDate
+  val authenticate: AuthAction
+  val nationalInsuranceService: NationalInsuranceService
+  val statePensionService: StatePensionService
 
   val showFullNI: Boolean = ApplicationConfig.showFullNI
   val currentDate: LocalDate = new LocalDate(DateTimeZone.forID("Europe/London"))
