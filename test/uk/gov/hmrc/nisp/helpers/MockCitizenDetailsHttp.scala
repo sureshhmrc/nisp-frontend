@@ -66,10 +66,11 @@ object MockCitizenDetailsHttp extends UnitSpec with MockitoSugar {
   def createMockedURL(nino: Nino, response: Future[HttpResponse]): Unit =
     when(mockHttp.GET[HttpResponse](ArgumentMatchers.endsWith(s"citizen-details/$nino/designatory-details"))(ArgumentMatchers.any(), ArgumentMatchers.any(),ArgumentMatchers.any())).thenReturn(response)
 
-  private def setupCitizenDetailsMocking(nino: Nino) =
-    createMockedURL(nino, TestAccountBuilder.jsonResponse(nino, "citizen-details"))
+/*  private def setupCitizenDetailsMocking(nino: Nino) = ???
+  //Shouldnt need this anymore as auth manages retrievals
+    /*createMockedURL(nino, TestAccountBuilder.jsonResponse(nino, "citizen-details"))*/
 
-  ninos.foreach(setupCitizenDetailsMocking)
+  ninos.foreach(setupCitizenDetailsMocking)*/
 
   createMockedURL(TestAccountBuilder.notFoundNino, Future.failed(new NotFoundException("")))
   createMockedURL(TestAccountBuilder.nonExistentNino, Future.failed(new NotFoundException("")))

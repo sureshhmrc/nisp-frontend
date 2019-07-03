@@ -50,7 +50,8 @@ class AuthActionImpl @Inject()(override val authConnector: AuthConnector)
     authorised().
       retrieve(Retrievals.nino and Retrievals.confidenceLevel and Retrievals.dateOfBirth and Retrievals.name and Retrievals.itmpAddress) {
         case Some(nino) ~ confidenceLevel ~ dateOfBirth ~ name ~ itmpAddress => {
-          block(AuthenticatedRequest(request, NispAuthedUser(Nino(nino), confidenceLevel, dateOfBirth, name.map(UserName), itmpAddress)))
+          //Todo: We can avoid a call to citizen details if we remove the need to log gender
+          block(AuthenticatedRequest(request, NispAuthedUser(Nino(nino), confidenceLevel, dateOfBirth, name.map(UserName), itmpAddress, sex = None)))
         }
         case _ => throw new RuntimeException("Can't find credentials for user")
       }

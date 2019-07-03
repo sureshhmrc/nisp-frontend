@@ -27,18 +27,15 @@ import play.api.i18n.Messages
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
-import uk.gov.hmrc.auth.core.ConfidenceLevel
-import uk.gov.hmrc.auth.core.retrieve.ItmpAddress
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.nisp.builders.NationalInsuranceTaxYearBuilder
 import uk.gov.hmrc.nisp.config.wiring.NispFormPartialRetriever
-import uk.gov.hmrc.nisp.controllers.auth.{AuthAction, NispAuthedUser}
+import uk.gov.hmrc.nisp.controllers.auth.AuthAction
 import uk.gov.hmrc.nisp.controllers.connectors.CustomAuditConnector
 import uk.gov.hmrc.nisp.helpers._
 import uk.gov.hmrc.nisp.models.enums.Exclusion
-import uk.gov.hmrc.nisp.models.{NationalInsuranceRecord, StatePensionExclusionFiltered, UserName}
+import uk.gov.hmrc.nisp.models.{NationalInsuranceRecord, StatePensionExclusionFiltered}
 import uk.gov.hmrc.nisp.services.{CitizenDetailsService, MetricsService, NationalInsuranceService, StatePensionService}
 import uk.gov.hmrc.nisp.utils.{Constants, MockTemplateRenderer}
 import uk.gov.hmrc.play.frontend.auth.AuthenticationProviderIds
@@ -47,7 +44,7 @@ import uk.gov.hmrc.play.language.LanguageUtils._
 import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.renderer.TemplateRenderer
 import uk.gov.hmrc.time.DateTimeUtils.now
-import uk.gov.hmrc.domain.Generator
+import uk.gov.hmrc.nisp.fixtures.NispAuthedUserFixture
 
 import scala.concurrent.Future
 
@@ -56,12 +53,6 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
   implicit val cachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
   implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever
   implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
-
-  implicit val user = NispAuthedUser(nino = new Generator().nextNino,
-                           confidenceLevel =  ConfidenceLevel.L200,
-                           dateOfBirth =  None,
-                           name = None,
-                           address = None)
 
   val mockUsername = "mockuser"
   val mockUserId = "/auth/oid/" + mockUsername
@@ -93,9 +84,10 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
       override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
       override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
       override val metricsService: MetricsService = MockMetricsService
-      override val authenticate: AuthAction = MockAuthAction
+      override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.urBannerNino)
     }
 
+    implicit val user = NispAuthedUserFixture.user(TestAccountBuilder.urBannerNino)
     lazy val urResult = controller.showFull(authenticatedFakeRequest(urMockUserId).withCookies(lanCookie))
     lazy val urHtmlAccountDoc = asDocument(contentAsString(urResult))
 
@@ -142,9 +134,10 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
       override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
       override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
       override val metricsService: MetricsService = MockMetricsService
-      override val authenticate: AuthAction = MockAuthAction
+      override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.urBannerNino)
     }
 
+    implicit val user = NispAuthedUserFixture.user(TestAccountBuilder.regularNino)
     lazy val result = controller.showFull(authenticatedFakeRequest(mockUserId).withCookies(lanCookie))
     lazy val htmlAccountDoc = asDocument(contentAsString(result))
 
@@ -269,9 +262,10 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
       override protected def authConnector: AuthConnector = MockAuthConnector
       override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
       override val metricsService: MetricsService = MockMetricsService
-      override val authenticate: AuthAction = MockAuthAction
+      override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.regularNino)
     }
 
+        implicit val user = NispAuthedUserFixture.user(TestAccountBuilder.regularNino)
     lazy val result = controller.showGaps(authenticatedFakeRequest(mockUserId).withCookies(lanCookie))
     lazy val htmlAccountDoc = asDocument(contentAsString(result))
 
@@ -376,7 +370,7 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
 
 
   "Render Ni Record view With HRP Message" should {
-
+    implicit val user = NispAuthedUserFixture.user(TestAccountBuilder.regularNino)
     lazy val result = html.nirecordGapsAndHowToCheckThem(true)
 
     lazy val htmlAccountDoc = asDocument(contentAsString(result))
@@ -463,8 +457,7 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
 
 
   "Render Ni Record without With HRP Message" should {
-
-
+    implicit val user = NispAuthedUserFixture.user(TestAccountBuilder.regularNino)
     lazy val result = html.nirecordGapsAndHowToCheckThem(false)
 
     lazy val htmlAccountDoc = asDocument(contentAsString(result))
@@ -559,7 +552,7 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
       override val metricsService: MetricsService = MockMetricsService
       override val nationalInsuranceService: NationalInsuranceService = mock[NationalInsuranceService]
       override val statePensionService: StatePensionService = mock[StatePensionService]
-      override val authenticate: AuthAction = MockAuthAction
+      override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.regularNino)
     }
 
     when(controller.nationalInsuranceService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
@@ -645,7 +638,7 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
       override val metricsService: MetricsService = MockMetricsService
       override val nationalInsuranceService: NationalInsuranceService = mock[NationalInsuranceService]
       override val statePensionService: StatePensionService = mock[StatePensionService]
-      override val authenticate: AuthAction = MockAuthAction
+      override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.regularNino)
     }
 
     when(controller.nationalInsuranceService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
@@ -740,7 +733,7 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
       override val metricsService: MetricsService = MockMetricsService
       override val nationalInsuranceService: NationalInsuranceService = mock[NationalInsuranceService]
       override val statePensionService: StatePensionService = mock[StatePensionService]
-      override val authenticate: AuthAction = MockAuthAction
+      override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.regularNino)
     }
 
     when(controller.nationalInsuranceService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))
@@ -865,7 +858,7 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
       override val metricsService: MetricsService = MockMetricsService
       override val nationalInsuranceService: NationalInsuranceService = mock[NationalInsuranceService]
       override val statePensionService: StatePensionService = mock[StatePensionService]
-      override val authenticate: AuthAction = MockAuthAction
+      override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.abroadNino)
     }
 
     when(controller.nationalInsuranceService.getSummary(ArgumentMatchers.any())(ArgumentMatchers.any()))

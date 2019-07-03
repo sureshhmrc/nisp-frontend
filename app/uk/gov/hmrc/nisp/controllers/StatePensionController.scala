@@ -36,6 +36,7 @@ import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
 import uk.gov.hmrc.http.HeaderCarrier
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
+import uk.gov.hmrc.nisp.utils.Calculate._
 
 object StatePensionController extends StatePensionController {
 
@@ -52,7 +53,7 @@ object StatePensionController extends StatePensionController {
 
 trait StatePensionController extends NispFrontendController with AuthorisedForNisp with PertaxHelper with AuthenticationConnectors with PartialRetriever {
 
-  val authenticate: AuthAction = AuthAction
+  def authenticate: AuthAction
 
   def statePensionService: StatePensionService
 
@@ -61,8 +62,9 @@ trait StatePensionController extends NispFrontendController with AuthorisedForNi
   val customAuditConnector: CustomAuditConnector
   val applicationConfig: ApplicationConfig
 
-  def showCope: Action[AnyContent] = AuthorisedByAny.async { implicit user =>
+  def showCope: Action[AnyContent] = authenticate.async {
     implicit request =>
+    implicit val user: NispAuthedUser = request.nispAuthedUser
       isFromPertax.flatMap { isPertax =>
 
         statePensionService.getSummary(user.nino) map {
@@ -199,38 +201,11 @@ trait StatePensionController extends NispFrontendController with AuthorisedForNi
       Redirect(routes.StatePensionController.show())
   }
 
-  def calculateChartWidths(current: StatePensionAmount, forecast: StatePensionAmount, personalMaximum: StatePensionAmount): (SPChartModel, SPChartModel, SPChartModel) = {
-    // scalastyle:off magic.number
-    if (personalMaximum.weeklyAmount > forecast.weeklyAmount) {
-      val currentChart = SPChartModel((current.weeklyAmount / personalMaximum.weeklyAmount * 100).toInt.max(Constants.chartWidthMinimum), current)
-      val forecastChart = SPChartModel((forecast.weeklyAmount / personalMaximum.weeklyAmount * 100).toInt.max(Constants.chartWidthMinimum), forecast)
-      val personalMaxChart = SPChartModel(100, personalMaximum)
-      (currentChart, forecastChart, personalMaxChart)
-    } else {
-      if (forecast.weeklyAmount > current.weeklyAmount) {
-        val currentPercentage = (current.weeklyAmount / forecast.weeklyAmount * 100).toInt
-        val currentChart = SPChartModel(currentPercentage.max(Constants.chartWidthMinimum), current)
-        val forecastChart = SPChartModel(100, forecast)
-        (currentChart, forecastChart, forecastChart)
-      } else {
-        val currentChart = SPChartModel(100, current)
-        val forecastChart = SPChartModel((forecast.weeklyAmount / current.weeklyAmount * 100).toInt, forecast)
-        (currentChart, forecastChart, forecastChart)
-      }
-    }
-  }
-
   private def storeUserInfoInSession(user: NispAuthedUser, contractedOut: Boolean)(implicit request: Request[AnyContent]): Session = {
-    println("$$$$$$$$$$$$" + user.name)
     request.session +
-//      (NAME -> user.name.getOrElse("N/A")) +
       (NAME -> user.name.fold("N/A")(_.toString)) +
       (NINO -> user.nino.nino) +
       (CONTRACTEDOUT -> contractedOut.toString)
-  }
-
-  private[controllers] def calculateAge(dateOfBirth: LocalDate, currentDate: LocalDate): Int = {
-    new Period(dateOfBirth, currentDate).getYears
   }
 
   def signOut: Action[AnyContent] = UnauthorisedAction { implicit request =>

@@ -21,16 +21,18 @@ import java.util.UUID
 import org.apache.commons.lang3.StringEscapeUtils
 import org.joda.time.LocalDate
 import org.scalatest._
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import play.api.i18n.{Messages, MessagesApi}
+import play.api.i18n.Messages
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
+import uk.gov.hmrc.auth.core.ConfidenceLevel
 import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.nisp.builders.ApplicationConfigBuilder
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.config.wiring.NispFormPartialRetriever
 import uk.gov.hmrc.nisp.controllers.NispFrontendController
+import uk.gov.hmrc.nisp.controllers.auth.{AuthAction, NispAuthedUser}
 import uk.gov.hmrc.nisp.helpers._
 import uk.gov.hmrc.nisp.services.CitizenDetailsService
 import uk.gov.hmrc.nisp.utils.{Constants, MockTemplateRenderer}
@@ -40,7 +42,7 @@ import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.renderer.TemplateRenderer
 import uk.gov.hmrc.time.DateTimeUtils.now
 
-class StatePension_CopeViewSpec extends HtmlSpec with NispFrontendController with MockitoSugar with BeforeAndAfter {
+class StatePension_CopeViewSpec extends HtmlSpec with NispFrontendController with MockitoSugar with BeforeAndAfter with ScalaFutures {
 
   implicit val cachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
   override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
@@ -65,29 +67,38 @@ class StatePension_CopeViewSpec extends HtmlSpec with NispFrontendController wit
   val ggSignInUrl = "http://localhost:9949/gg/sign-in?continue=http%3A%2F%2Flocalhost%3A9234%2Fcheck-your-state-pension%2Faccount&origin=nisp-frontend&accountType=individual"
   val twoFactorUrl = "http://localhost:9949/coafe/two-step-verification/register/?continue=http%3A%2F%2Flocalhost%3A9234%2Fcheck-your-state-pension%2Faccount&failure=http%3A%2F%2Flocalhost%3A9234%2Fcheck-your-state-pension%2Fnot-authorised"
 
+  implicit val user = NispAuthedUser(mockUserNino, ConfidenceLevel.L200, None, None, None, None)
+
   lazy val fakeRequest = FakeRequest()
 
   override implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever
 
-  def authenticatedFakeRequest(userId: String) = fakeRequest.withSession(
+  def authenticatedFakeRequest(userId: String) = fakeRequest/*.withSession(
     SessionKeys.sessionId -> s"session-${UUID.randomUUID()}",
     SessionKeys.lastRequestTimestamp -> now.getMillis.toString,
     SessionKeys.userId -> userId,
     SessionKeys.authProvider -> AuthenticationProviderIds.VerifyProviderId
-  )
+  )*/
 
   lazy val controller = new MockStatePensionController {
+    override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.contractedOutBTestNino)
     override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
     override val applicationConfig: ApplicationConfig = ApplicationConfigBuilder()
     override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
     override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
+
   }
 
   "Render State Pension view with Contracted out User" should {
     lazy val result = controller.show()(authenticatedFakeRequest(mockUserIdContractedOut).withCookies(lanCookie))
+
     lazy val htmlAccountDoc = asDocument(contentAsString(result))
 
     "render with correct page title" in {
+              println("******************************")
+        println(htmlAccountDoc)
+        println("******************************")
+
       assertElementContainsText(htmlAccountDoc, "head>title" ,messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))
     }
     "render page with heading  'Your State Pension' " in {
@@ -159,7 +170,7 @@ class StatePension_CopeViewSpec extends HtmlSpec with NispFrontendController wit
     }
     /*Ends*/
 
-    "render page with heading  'Putting of claiming'" in {
+    "render page with heading 'Putting off claiming'" in {
       assertEqualsMessage(htmlAccountDoc, "article.content__body>h2:nth-child(15)", "nisp.main.puttingOff")
     }
 

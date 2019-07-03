@@ -17,15 +17,35 @@
 package uk.gov.hmrc.nisp.fixtures
 
 import uk.gov.hmrc.auth.core.ConfidenceLevel
-import uk.gov.hmrc.domain.Generator
+import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, Name}
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.controllers.auth.NispAuthedUser
+import uk.gov.hmrc.nisp.helpers.TestAccountBuilder
+import uk.gov.hmrc.nisp.models.UserName
+import uk.gov.hmrc.nisp.models.citizen.CitizenDetailsResponse
 
 object NispAuthedUserFixture {
 
-  val user = NispAuthedUser(nino = new Generator().nextNino,
-                           confidenceLevel =  ConfidenceLevel.L200,
-                           dateOfBirth =  None,
-                           name = None,
-                           address = None)
+  def user(nino: Nino): NispAuthedUser = {
+
+    val citizenDetailsResponse: CitizenDetailsResponse = TestAccountBuilder.directJsonResponse(nino, "citizen-details")
+
+    NispAuthedUser(nino,
+      confidenceLevel =  ConfidenceLevel.L200,
+      dateOfBirth =  Some(citizenDetailsResponse.person.dateOfBirth),
+      name = Some(UserName(Name(citizenDetailsResponse.person.firstName,
+                      citizenDetailsResponse.person.lastName))),
+      address = citizenDetailsResponse.address.map{address =>
+        ItmpAddress(line1 = None,
+                       line2 = None,
+                       line3 = None,
+                       line4 = None,
+                       line5 = None,
+                       postCode = None,
+                       countryName = address.country,
+                       countryCode = None)
+      },
+      sex = citizenDetailsResponse.person.sex)
+  }
 
 }

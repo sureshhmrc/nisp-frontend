@@ -16,33 +16,31 @@
 
 package uk.gov.hmrc.nisp.helpers
 
-import play.api.Play.configuration
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobalTrait}
 import uk.gov.hmrc.nisp.controllers.StatePensionController
+import uk.gov.hmrc.nisp.controllers.auth.AuthAction
 import uk.gov.hmrc.nisp.controllers.connectors.CustomAuditConnector
 import uk.gov.hmrc.nisp.services.{MetricsService, NationalInsuranceService, StatePensionService}
 import uk.gov.hmrc.nisp.utils.MockTemplateRenderer
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.renderer.TemplateRenderer
 
-object MockStatePensionController extends MockStatePensionController {
+class MockStatePensionControllerImpl(nino: Nino) extends MockStatePensionController {
   override val citizenDetailsService = MockCitizenDetailsService
   override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
   override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
+  override val authenticate: AuthAction = new MockAuthAction(nino)
 }
 
 trait MockStatePensionController extends StatePensionController {
-  override implicit def authConnector: AuthConnector = MockAuthConnector
 
   override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
   override val sessionCache: SessionCache = MockSessionCache
   override val metricsService: MetricsService = MockMetricsService
-
   override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
-  override val applicationGlobal:ApplicationGlobalTrait = MockApplicationGlobal
-
+  override val applicationGlobal: ApplicationGlobalTrait = MockApplicationGlobal
   override val statePensionService: StatePensionService = MockStatePensionServiceViaStatePension
   override val nationalInsuranceService: NationalInsuranceService = MockNationalInsuranceServiceViaNationalInsurance
   override val applicationConfig: ApplicationConfig = new ApplicationConfig {

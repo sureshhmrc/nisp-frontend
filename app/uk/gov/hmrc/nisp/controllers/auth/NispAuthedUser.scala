@@ -27,11 +27,11 @@ case class NispAuthedUser(nino: Nino,
                            confidenceLevel: ConfidenceLevel,
                            dateOfBirth: Option[LocalDate],
                            name: Option[UserName],
-                           address: Option[ItmpAddress]) {
+                           address: Option[ItmpAddress],
+                           sex: Option[String]) {
 
   lazy val livesAbroad: Boolean = address.fold(false)( co => co.countryName.exists(Country.isAbroad))
   val authProviderOld = if(confidenceLevel.level == 500) Constants.verify else Constants.iv
   val authProvider = if(confidenceLevel.level == 500) Constants.verify else Constants.iv
-  val sex = None
 
 }

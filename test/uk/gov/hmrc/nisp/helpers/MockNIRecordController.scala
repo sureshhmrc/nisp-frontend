@@ -17,6 +17,7 @@
 package uk.gov.hmrc.nisp.helpers
 
 import org.joda.time.LocalDate
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobalTrait}
 import uk.gov.hmrc.nisp.controllers.NIRecordController
@@ -28,14 +29,14 @@ import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.renderer.TemplateRenderer
 
-object MockNIRecordController extends MockNIRecordController {
+class MockNIRecordControllerImpl(nino: Nino) extends MockNIRecordController {
   override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
   override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
   override val sessionCache: SessionCache = MockSessionCache
   override lazy val showFullNI: Boolean = true
   override val currentDate = new LocalDate(2016,9,9)
   override val metricsService: MetricsService = MockMetricsService
-  override val authenticate: AuthAction = MockAuthAction
+  override val authenticate: AuthAction = new MockAuthAction(nino)
 }
 
 trait MockNIRecordController extends NIRecordController {

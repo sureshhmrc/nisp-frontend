@@ -37,7 +37,7 @@ class VoluntaryContributionsViewSpec extends HtmlSpec with NispFrontendControlle
   val mockUsername = "mockuser"
   val mockUserId = "/auth/oid/" + mockUsername
 
-  implicit val user = NispAuthedUserFixture.user
+  implicit val user = NispAuthedUserFixture.user(mockUserNino)
 
   lazy val fakeRequest = FakeRequest()
   override implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever
