@@ -104,7 +104,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
 
       "The User has every exclusion" should {
         "return only the Dead Exclusion on /exclusion" in {
-          val result = generateSPRequest(mockUserIdExcludedAll)
+          val result = generateSPRequest(mockUserIdExcludedAll, TestAccountBuilder.excludedAll)
           redirectLocation(result) shouldBe None
           contentAsString(result) should include (deadMessaging)
           contentAsString(result) should not include mciMessaging
@@ -116,7 +116,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
         }
 
         "return only the Dead Exclusion on /exclusionni" in {
-          val result = generateNIRequest(mockUserIdExcludedAll)
+          val result = generateNIRequest(mockUserIdExcludedAll, TestAccountBuilder.excludedAll)
           redirectLocation(result) shouldBe None
           contentAsString(result) should include (deadMessaging)
           contentAsString(result) should not include mciMessaging
@@ -127,7 +127,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
 
       "The User has every exclusion except Dead" should {
         "return only the MCI Exclusion on /exclusion" in {
-          val result = generateSPRequest(mockUserIdExcludedAllButDead)
+          val result = generateSPRequest(mockUserIdExcludedAllButDead, TestAccountBuilder.excludedAllButDead)
           redirectLocation(result) shouldBe None
           contentAsString(result) should not include deadMessaging
           contentAsString(result) should include (mciMessaging)
@@ -139,7 +139,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
         }
 
         "return only the MCI Exclusion on /exclusionni" in {
-          val result = generateNIRequest(mockUserIdExcludedAllButDead)
+          val result = generateNIRequest(mockUserIdExcludedAllButDead, TestAccountBuilder.excludedAllButDead)
           redirectLocation(result) shouldBe None
           contentAsString(result) should not include deadMessaging
           contentAsString(result) should include (mciMessaging)
@@ -150,7 +150,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
 
       "The User has every exclusion except Dead and MCI" should {
         "return only the Post SPA Exclusion on /exclusion" in {
-          val result = generateSPRequest(mockUserIdExcludedAllButDeadMCI)
+          val result = generateSPRequest(mockUserIdExcludedAllButDeadMCI, TestAccountBuilder.excludedAllButDeadMCI)
           redirectLocation(result) shouldBe None
           contentAsString(result) should not include deadMessaging
           contentAsString(result) should not include mciMessaging
@@ -162,7 +162,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
         }
 
         "return only the Isle of Man Exclusion on /exclusionni" in {
-          val result = generateNIRequest(mockUserIdExcludedAllButDeadMCI)
+          val result = generateNIRequest(mockUserIdExcludedAllButDeadMCI, TestAccountBuilder.excludedAllButDeadMCI)
           redirectLocation(result) shouldBe None
           contentAsString(result) should not include deadMessaging
           contentAsString(result) should not include mciMessaging
@@ -173,7 +173,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
 
       "The User has every exclusion except Dead, MCI and Post SPA" should {
         "return only the Amount Dissonance Exclusion on /exclusion" in {
-          val result = generateSPRequest(mockUserIdExcludedDissonanceIomMwrreAbroad)
+          val result = generateSPRequest(mockUserIdExcludedDissonanceIomMwrreAbroad, TestAccountBuilder.excludedDissonanceIomMwrreAbroad)
           redirectLocation(result) shouldBe None
           contentAsString(result) should not include deadMessaging
           contentAsString(result) should not include mciMessaging
@@ -185,7 +185,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
         }
 
         "return only the Isle of Man Exclusion on /exclusionni" in {
-          val result = generateNIRequest(mockUserIdExcludedDissonanceIomMwrreAbroad)
+          val result = generateNIRequest(mockUserIdExcludedDissonanceIomMwrreAbroad, TestAccountBuilder.excludedDissonanceIomMwrreAbroad)
           redirectLocation(result) shouldBe None
           contentAsString(result) should not include deadMessaging
           contentAsString(result) should not include mciMessaging
@@ -196,7 +196,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
 
       "The User has the Isle of Man, MWRRE and Abroad exclusions" should {
         "return only the Isle of Man Exclusion on /exclusion" in {
-          val result = generateSPRequest(mockUserIdExcludedIomMwrreAbroad)
+          val result = generateSPRequest(mockUserIdExcludedIomMwrreAbroad, TestAccountBuilder.excludedIomMwrreAbroad)
           redirectLocation(result) shouldBe None
           contentAsString(result) should not include deadMessaging
           contentAsString(result) should not include mciMessaging
@@ -208,7 +208,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
         }
 
         "return only the Isle of Man Exclusion on /exclusionni" in {
-          val result = generateNIRequest(mockUserIdExcludedIomMwrreAbroad)
+          val result = generateNIRequest(mockUserIdExcludedIomMwrreAbroad, TestAccountBuilder.excludedIomMwrreAbroad)
           redirectLocation(result) shouldBe None
           contentAsString(result) should not include deadMessaging
           contentAsString(result) should not include mciMessaging
@@ -219,7 +219,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
 
       "The User has MWRRE and Abroad exclusions" should {
         "return only the MWREE Exclusion on /exclusion" in {
-          val result = generateSPRequest(mockUserIdExcludedMwrreAbroad)
+          val result = generateSPRequest(mockUserIdExcludedMwrreAbroad, TestAccountBuilder.excludedMwrreAbroad)
           redirectLocation(result) shouldBe None
           contentAsString(result) should not include deadMessaging
           contentAsString(result) should not include mciMessaging
@@ -231,7 +231,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
         }
 
         "return only the MWRRE Exclusion on /exclusionni" in {
-          val result = generateNIRequest(mockUserIdExcludedMwrreAbroad)
+          val result = generateNIRequest(mockUserIdExcludedMwrreAbroad, TestAccountBuilder.excludedMwrreAbroad)
           redirectLocation(result) shouldBe None
           contentAsString(result) should not include deadMessaging
           contentAsString(result) should not include mciMessaging
@@ -245,7 +245,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
 
         "return only the MWRRE Exclusion on /exclusion" in {
 
-          val result = MockExclusionController.showSP()(fakeRequest.withSession(
+          val result = new MockExclusionController(TestAccountBuilder.excludedMwrre).showSP()(fakeRequest.withSession(
               SessionKeys.sessionId -> s"session-${UUID.randomUUID()}",
               SessionKeys.lastRequestTimestamp -> now.getMillis.toString,
               SessionKeys.userId -> mockUserIdExcludedMwrre,
@@ -259,7 +259,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
         }
 
         "return only the MWRRE Exclusion on /exclusionni" in {
-          val result = generateNIRequest(mockUserIdExcludedMwrre)
+          val result = generateNIRequest(mockUserIdExcludedMwrre, TestAccountBuilder.excludedMwrre)
           redirectLocation(result) shouldBe None
           contentAsString(result) should not include deadMessaging
           contentAsString(result) should not include mciMessaging
@@ -270,7 +270,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
 
       "The User has the Abroad only should" should {
         "return only the Abroad Exclusion on /exclusion" in {
-          val result = generateSPRequest(mockUserIdExcludedAbroad)
+          val result = generateSPRequest(mockUserIdExcludedAbroad, TestAccountBuilder.excludedAbroad)
           redirectLocation(result) shouldBe None
           contentAsString(result) should not include deadMessaging
           contentAsString(result) should not include mciMessaging
@@ -282,7 +282,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
         }
 
         "they should be redirected from /exclusionni to /nirecord" in {
-          val result = generateNIRequest(mockUserIdExcludedAbroad)
+          val result = generateNIRequest(mockUserIdExcludedAbroad, TestAccountBuilder.excludedAbroad)
           redirectLocation(result) shouldBe Some("/check-your-state-pension/account/nirecord/gaps")
 
         }
@@ -290,7 +290,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
 
       "The User has SPA under consideration flag and Amount Dis exclusion" should {
         "return with SPA under consideration message" in {
-          val result = generateSPRequest(mockUserIdSPAUnderConsiderationExcludedAmountDis)
+          val result = generateSPRequest(mockUserIdSPAUnderConsiderationExcludedAmountDis, TestAccountBuilder.spaUnderConsiderationExclusionAmountDisNino)
           redirectLocation(result) shouldBe None
           contentAsString(result) should include (spaUnderConsiderationMessaging)
         }
@@ -298,7 +298,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
 
       "The User has SPA under consideration flag and IoM exclusion" should {
         "return with SPA under consideration message" in {
-          val result = generateSPRequest(mockUserIdSPAUnderConsiderationExcludedIoM)
+          val result = generateSPRequest(mockUserIdSPAUnderConsiderationExcludedIoM, TestAccountBuilder.spaUnderConsiderationExclusionIoMNino)
           redirectLocation(result) shouldBe None
           contentAsString(result) should include (spaUnderConsiderationMessaging)
         }
@@ -306,7 +306,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
 
       "The User has SPA under consideration flag and Mwrre exclusion" should {
         "return with no SPA under consideration message" in {
-          val result = generateSPRequest(mockUserIdSPAUnderConsiderationExcludedMwrre)
+          val result = generateSPRequest(mockUserIdSPAUnderConsiderationExcludedMwrre, TestAccountBuilder.spaUnderConsiderationExclusionMwrreNino)
           redirectLocation(result) shouldBe None
           contentAsString(result) should not include spaUnderConsiderationMessaging
         }
@@ -314,7 +314,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
 
       "The User has SPA under consideration flag and Over Spa exclusion" should {
         "return with no SPA under consideration message" in {
-          val result = generateSPRequest(mockUserIdSPAUnderConsiderationExcludedOverSpa)
+          val result = generateSPRequest(mockUserIdSPAUnderConsiderationExcludedOverSpa, TestAccountBuilder.spaUnderConsiderationExclusionOverSpaNino)
           redirectLocation(result) shouldBe None
           contentAsString(result) should not include spaUnderConsiderationMessaging
         }
@@ -322,7 +322,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
 
       "The User has SPA under consideration flag and Multiple exclusions with Over SPA first" should {
         "return with no SPA under consideration message" in {
-          val result = generateSPRequest(mockUserIdSPAUnderConsiderationExcludedMultiple)
+          val result = generateSPRequest(mockUserIdSPAUnderConsiderationExcludedMultiple, TestAccountBuilder.spaUnderConsiderationExclusionMultipleNino)
           redirectLocation(result) shouldBe None
           contentAsString(result) should not include spaUnderConsiderationMessaging
         }
@@ -330,7 +330,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
 
       "The User has no SPA under consideration flag and exclusion" should {
         "return with no SPA under consideration message" in {
-          val result = generateSPRequest(mockUserIdSPAUnderConsiderationExcludedNoFlag)
+          val result = generateSPRequest(mockUserIdSPAUnderConsiderationExcludedNoFlag, TestAccountBuilder.spaUnderConsiderationExclusionNoFlagNino)
           redirectLocation(result) shouldBe None
           contentAsString(result) should not include spaUnderConsiderationMessaging
         }
