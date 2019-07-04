@@ -16,16 +16,19 @@
 
 package uk.gov.hmrc.nisp.helpers
 
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.controllers.ExclusionController
+import uk.gov.hmrc.nisp.controllers.auth.AuthAction
 import uk.gov.hmrc.nisp.services.{CitizenDetailsService, NationalInsuranceService, StatePensionService}
 import uk.gov.hmrc.nisp.utils.MockTemplateRenderer
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.renderer.TemplateRenderer
 
-object MockExclusionController extends ExclusionController {
+class MockExclusionController(nino: Nino) extends ExclusionController {
   override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
+  override val authenticate: AuthAction = new MockAuthAction(nino)
 
   override protected def authConnector: AuthConnector = MockAuthConnector
   override val applicationConfig: ApplicationConfig = new ApplicationConfig {

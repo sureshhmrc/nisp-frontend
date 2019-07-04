@@ -72,7 +72,7 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
   "GET /exclusion" should {
 
     "return redirect to account page for non-excluded user" in {
-      val result = MockExclusionController.showSP()(fakeRequest.withSession(
+      val result = new MockExclusionController(TestAccountBuilder.regularNino).showSP()(fakeRequest.withSession(
         SessionKeys.sessionId -> s"session-${UUID.randomUUID()}",
         SessionKeys.lastRequestTimestamp -> now.getMillis.toString,
         SessionKeys.userId -> mockUserId,
@@ -84,8 +84,8 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
 
     "Exclusion Controller" when {
 
-      def generateSPRequest(userId: String): Future[Result] = {
-        MockExclusionController.showSP()(fakeRequest.withSession(
+      def generateSPRequest(userId: String, nino: Nino): Future[Result] = {
+        new MockExclusionController(nino).showSP()(fakeRequest.withSession(
           SessionKeys.sessionId -> s"session-${UUID.randomUUID()}",
           SessionKeys.lastRequestTimestamp -> now.getMillis.toString,
           SessionKeys.userId -> userId,
@@ -93,8 +93,8 @@ class ExclusionControllerSpec extends UnitSpec with OneAppPerSuite {
         ))
       }
 
-      def generateNIRequest(userId: String): Future[Result] = {
-        MockExclusionController.showNI()(fakeRequest.withSession(
+      def generateNIRequest(userId: String, nino: Nino): Future[Result] = {
+        new MockExclusionController(nino).showNI()(fakeRequest.withSession(
           SessionKeys.sessionId -> s"session-${UUID.randomUUID()}",
           SessionKeys.lastRequestTimestamp -> now.getMillis.toString,
           SessionKeys.userId -> userId,

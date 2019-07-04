@@ -51,6 +51,7 @@ class AuthActionImpl @Inject()(override val authConnector: AuthConnector)
       retrieve(Retrievals.nino and Retrievals.confidenceLevel and Retrievals.dateOfBirth and Retrievals.name and Retrievals.itmpAddress) {
         case Some(nino) ~ confidenceLevel ~ dateOfBirth ~ name ~ itmpAddress => {
           //Todo: We can avoid a call to citizen details if we remove the need to log gender
+          //Todo: Is ITMP Address more or less likely than Citizen Details to have the data?
           block(AuthenticatedRequest(request, NispAuthedUser(Nino(nino), confidenceLevel, dateOfBirth, name.map(UserName), itmpAddress, sex = None)))
         }
         case _ => throw new RuntimeException("Can't find credentials for user")
