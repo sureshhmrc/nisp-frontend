@@ -82,7 +82,6 @@ class StatePension_CopeViewSpec extends HtmlSpec with NispFrontendController wit
 
   lazy val controller = new MockStatePensionController {
     override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.contractedOutBTestNino)
-    override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
     override val applicationConfig: ApplicationConfig = ApplicationConfigBuilder()
     override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
     override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
@@ -95,10 +94,6 @@ class StatePension_CopeViewSpec extends HtmlSpec with NispFrontendController wit
     lazy val htmlAccountDoc = asDocument(contentAsString(result))
 
     "render with correct page title" in {
-              println("******************************")
-        println(htmlAccountDoc)
-        println("******************************")
-
       assertElementContainsText(htmlAccountDoc, "head>title" ,messages("nisp.main.h1.title") + Constants.titleSplitter + messages("nisp.title.extension") + Constants.titleSplitter + messages("nisp.gov-uk"))
     }
     "render page with heading  'Your State Pension' " in {

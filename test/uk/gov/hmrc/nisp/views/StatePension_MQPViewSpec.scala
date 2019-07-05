@@ -82,7 +82,6 @@ class StatePension_MQPViewSpec extends HtmlSpec with NispFrontendController with
   def createStatePensionController = {
     new MockStatePensionController {
       override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.forecastOnlyNino)
-      override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
       override val applicationConfig: ApplicationConfig = ApplicationConfigBuilder()
       override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
       override val statePensionService: StatePensionService = mock[StatePensionService]

@@ -68,14 +68,12 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
   )
 
   def testAccountController(testNow: LocalDateTime,nino: Nino): StatePensionController = new MockStatePensionController {
-    override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
     override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
     override val nationalInsuranceService: NationalInsuranceService = MockNationalInsuranceServiceViaNationalInsurance
     override val authenticate: AuthAction = new MockAuthAction(nino)
   }
 
   def mockStatePensionController(nino: Nino): StatePensionController = new MockStatePensionController {
-    override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
     override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
     override val nationalInsuranceService: NationalInsuranceService = MockNationalInsuranceServiceViaNationalInsurance
     override val authenticate: AuthAction = new MockAuthAction(nino)
@@ -366,7 +364,6 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
       "the future proof config is set to true" should {
         val controller = new MockStatePensionController {
           override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.fillGapsMultiple)
-          override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
           override val applicationConfig: ApplicationConfig = new ApplicationConfig {
             override val assetsPrefix: String = ""
             override val reportAProblemNonJSUrl: String = ""
