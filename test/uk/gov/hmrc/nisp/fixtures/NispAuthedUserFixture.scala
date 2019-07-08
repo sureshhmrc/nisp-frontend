@@ -32,19 +32,10 @@ object NispAuthedUserFixture {
 
     NispAuthedUser(nino,
       confidenceLevel =  ConfidenceLevel.L200,
-      dateOfBirth =  Some(citizenDetailsResponse.person.dateOfBirth),
-      name = Some(UserName(Name(citizenDetailsResponse.person.firstName,
-                      citizenDetailsResponse.person.lastName))),
-      address = citizenDetailsResponse.address.map{address =>
-        ItmpAddress(line1 = None,
-                       line2 = None,
-                       line3 = None,
-                       line4 = None,
-                       line5 = None,
-                       postCode = None,
-                       countryName = address.country,
-                       countryCode = None)
-      },
+      dateOfBirth =  citizenDetailsResponse.person.dateOfBirth,
+      name = UserName(Name(citizenDetailsResponse.person.firstName,
+                      citizenDetailsResponse.person.lastName)),
+      address = citizenDetailsResponse.address,
       sex = citizenDetailsResponse.person.sex)
   }
 

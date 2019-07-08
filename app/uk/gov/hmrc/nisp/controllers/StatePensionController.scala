@@ -85,7 +85,7 @@ trait StatePensionController extends NispFrontendController with PertaxHelper wi
       statePension.amounts.current.weeklyAmount,
       statePension.amounts.forecast.weeklyAmount,
       user.dateOfBirth,
-      user.name.map(_.toString),
+      user.name.toString,
       user.sex,
       statePension.contractedOut,
       statePension.forecastScenario,
@@ -133,7 +133,7 @@ trait StatePensionController extends NispFrontendController with PertaxHelper wi
                   nationalInsuranceRecord.numberOfGapsPayable,
                   yearsMissing,
                   user.livesAbroad,
-                  user.dateOfBirth.map(calculateAge(_, DateTimeUtils.now.toLocalDate)),
+                  calculateAge(user.dateOfBirth, DateTimeUtils.now.toLocalDate),
                   isPertax,
                   yearsToContributeUntilPensionAge
                 )).withSession(storeUserInfoInSession(user, statePension.contractedOut))
@@ -143,7 +143,7 @@ trait StatePensionController extends NispFrontendController with PertaxHelper wi
                   statePension,
                   nationalInsuranceRecord.numberOfGaps,
                   nationalInsuranceRecord.numberOfGapsPayable,
-                  user.dateOfBirth.map(calculateAge(_, DateTimeUtils.now.toLocalDate)),
+                  calculateAge(user.dateOfBirth, DateTimeUtils.now.toLocalDate),
                   user.livesAbroad,
                   isPertax,
                   yearsToContributeUntilPensionAge
@@ -173,7 +173,7 @@ trait StatePensionController extends NispFrontendController with PertaxHelper wi
                   personalMaximumChart,
                   isPertax,
                   hidePersonalMaxYears = applicationConfig.futureProofPersonalMax,
-                  user.dateOfBirth.map(calculateAge(_, DateTimeUtils.now.toLocalDate)),
+                  calculateAge(user.dateOfBirth, DateTimeUtils.now.toLocalDate),
                   user.livesAbroad,
                   yearsToContributeUntilPensionAge
                 )).withSession(storeUserInfoInSession(user, statePension.contractedOut))
@@ -186,10 +186,16 @@ trait StatePensionController extends NispFrontendController with PertaxHelper wi
                 statePensionExclusion.exclusion
               ))
               Redirect(routes.ExclusionController.showSP()).withSession(storeUserInfoInSession(user, contractedOut = false))
-            case _ => throw new RuntimeException("StatePensionController: SP and NIR are unmatchable. This is probably a logic error.")
+            case _ => {
+              println("$$$$$$$$$$$$$$$$$$$$$ got here 1")
+              throw new RuntimeException("StatePensionController: SP and NIR are unmatchable. This is probably a logic error.")
+            }
           }
         }).recover {
-          case ex: Exception => onError(ex)
+          case ex: Exception => {
+            println("$$$$$$$$$$$$$$$$$$$$$ got here 2")
+            onError(ex)
+          }
         }
       }
   }
@@ -202,7 +208,7 @@ trait StatePensionController extends NispFrontendController with PertaxHelper wi
 
   private def storeUserInfoInSession(user: NispAuthedUser, contractedOut: Boolean)(implicit request: Request[AnyContent]): Session = {
     request.session +
-      (NAME -> user.name.fold("N/A")(_.toString)) +
+      (NAME -> user.name.toString) +
       (NINO -> user.nino.nino) +
       (CONTRACTEDOUT -> contractedOut.toString)
   }

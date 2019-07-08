@@ -21,8 +21,8 @@ import uk.gov.hmrc.nisp.models.UserName
 import uk.gov.hmrc.nisp.models.enums.Exclusion.Exclusion
 
 object AccountExclusionEvent {
-  def apply(nino: String, name: Option[UserName], spExclusion: Exclusion)(implicit hc: HeaderCarrier): AccountExclusionEvent = {
-    new AccountExclusionEvent(nino, name.map(_.toString).getOrElse("N/A"), spExclusion)
+  def apply(nino: String, name: UserName, spExclusion: Exclusion)(implicit hc: HeaderCarrier): AccountExclusionEvent = {
+    new AccountExclusionEvent(nino, name.toString, spExclusion)
   }
 
 }

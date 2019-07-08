@@ -18,19 +18,19 @@ package uk.gov.hmrc.nisp.controllers.auth
 
 import org.joda.time.LocalDate
 import uk.gov.hmrc.auth.core.ConfidenceLevel
-import uk.gov.hmrc.auth.core.retrieve.ItmpAddress
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nisp.models.UserName
+import uk.gov.hmrc.nisp.models.citizen.Address
 import uk.gov.hmrc.nisp.utils.{Constants, Country}
 
 case class NispAuthedUser(nino: Nino,
                            confidenceLevel: ConfidenceLevel,
-                           dateOfBirth: Option[LocalDate],
-                           name: Option[UserName],
-                           address: Option[ItmpAddress],
+                           dateOfBirth: LocalDate,
+                           name: UserName,
+                           address: Option[Address],
                            sex: Option[String]) {
 
-  lazy val livesAbroad: Boolean = address.fold(false)( co => co.countryName.exists(Country.isAbroad))
+  lazy val livesAbroad: Boolean = address.fold(false)( co => co.country.exists(Country.isAbroad))
   val authProviderOld = if(confidenceLevel.level == 500) Constants.verify else Constants.iv
   val authProvider = if(confidenceLevel.level == 500) Constants.verify else Constants.iv
 

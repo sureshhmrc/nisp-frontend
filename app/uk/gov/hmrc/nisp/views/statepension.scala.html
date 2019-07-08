@@ -34,7 +34,7 @@
     personalMaximumChart: SPChartModel,
     isPertaxUrl:Boolean,
     hidePersonalMaxYears: Boolean,
-    customerAge: Option[Int],
+    customerAge: Int,
     isAbroad: Boolean,
     yearsToContributeUntilPensionAge: Int
 )(implicit request: Request[_], user: NispAuthedUser, partialRetriever: CachedStaticHtmlPartialRetriever, messages: Messages,
@@ -176,10 +176,8 @@ application: Application, formPartialRetriever: uk.gov.hmrc.play.partials.FormPa
         @includes.contractedOut()
     }
 
-    @for(age <- customerAge) {
-        @if(age > Constants.deferralCutOffAge) {
-            @includes.deferral(Dates.formatDate(statePension.pensionDate))
-        }
+    @if(customerAge > Constants.deferralCutOffAge) {
+        @includes.deferral(Dates.formatDate(statePension.pensionDate))
     }
 
     @if(isPertaxUrl) {

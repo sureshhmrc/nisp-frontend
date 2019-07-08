@@ -33,7 +33,7 @@
   numberOfPayableGaps: Int,
   numberOfYearsMissing: Int,
   isAbroad: Boolean,
-  customerAge: Option[Int],
+  customerAge: Int,
   isPertaxUrl: Boolean,
   yearsToContributeUntilPensionAge: Int
 )(implicit request: Request[_], user: NispAuthedUser, partialRetriever: CachedStaticHtmlPartialRetriever, messages: Messages,

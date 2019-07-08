@@ -23,6 +23,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatest._
 import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
 import play.api.i18n.Messages
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
@@ -48,7 +49,7 @@ import uk.gov.hmrc.nisp.fixtures.NispAuthedUserFixture
 
 import scala.concurrent.Future
 
-class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter {
+class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter with OneAppPerSuite {
 
   implicit val cachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
   implicit val formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever = NispFormPartialRetriever

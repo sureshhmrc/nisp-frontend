@@ -82,16 +82,16 @@ trait NIRecordController extends NispFrontendController with AuthorisedForNisp w
     ))
   }
 
-  private[controllers] def showPre1975Years(dateOfEntry: Option[LocalDate], dateOfBirth: Option[LocalDate], pre1975Years: Int): Boolean = {
+  private[controllers] def showPre1975Years(dateOfEntry: Option[LocalDate], dateOfBirth: LocalDate, pre1975Years: Int): Boolean = {
 
     val dateOfEntryDiff = dateOfEntry.map(Constants.niRecordStartYear - TaxYear.taxYearFor(_).startYear)
 
-    val sixteenthBirthdayTaxYear = dateOfBirth.map(dob => TaxYear.taxYearFor(dob.plusYears(Constants.niRecordMinAge)))
-    val sixteenthBirthdayDiff = sixteenthBirthdayTaxYear.map(Constants.niRecordStartYear - _.startYear)
+    val sixteenthBirthdayTaxYear: TaxYear = TaxYear.taxYearFor(dateOfBirth.plusYears(Constants.niRecordMinAge))
+    val sixteenthBirthdayDiff: Int = Constants.niRecordStartYear - sixteenthBirthdayTaxYear.startYear
 
     (sixteenthBirthdayDiff, dateOfEntryDiff) match {
-      case (Some(sb), Some(doe)) => sb.min(doe) > 0
-      case (Some(sb), _) => sb > 0
+      case (sb, Some(doe)) => sb.min(doe) > 0
+      case (sb, _) => sb > 0
       case (_, Some(doe)) => doe > 0
       case _ => pre1975Years > 0
     }

@@ -24,7 +24,7 @@
 @import play.api.Application
 
 @import uk.gov.hmrc.nisp.views.viewParams.MainTemplateParams
-@(statePension: StatePension, numberOfGaps: Int, numberOfGapsPayable: Int, customerAge: Option[Int], isAbroad: Boolean,
+@(statePension: StatePension, numberOfGaps: Int, numberOfGapsPayable: Int, customerAge: Int, isAbroad: Boolean,
 isPertaxUrl:Boolean, yearsToContributeUntilPensionAge: Int)(implicit request: Request[_], user: NispAuthedUser,
 partialRetriever: CachedStaticHtmlPartialRetriever, messages: Messages, application: Application, formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever, templateRenderer: uk.gov.hmrc.renderer.TemplateRenderer)
 
@@ -105,10 +105,8 @@ partialRetriever: CachedStaticHtmlPartialRetriever, messages: Messages, applicat
         @includes.contractedOut()
     }
 
-    @for(age <- customerAge) {
-        @if(age > Constants.deferralCutOffAge) {
-            @includes.deferral(Dates.formatDate(statePension.pensionDate))
-        }
+    @if(customerAge > Constants.deferralCutOffAge) {
+        @includes.deferral(Dates.formatDate(statePension.pensionDate))
     }
 
     @if(isPertaxUrl){<div class="panel-indent">@Html(Messages("nisp.landing.estimateprovided"))</div>}

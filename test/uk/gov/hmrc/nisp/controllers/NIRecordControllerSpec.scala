@@ -59,12 +59,7 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
     SessionKeys.authProvider -> AuthenticationProviderIds.VerifyProviderId
   )
 
-  //TODO
   "GET /account/nirecord/gaps (gaps)" should {
-    //    "return redirect for unauthenticated user" in {
-    //      val result = MockNIRecordControllerImpl.showGaps(fakeRequest)
-    //      redirectLocation(result) shouldBe Some(ggSignInUrl)
-    //    }
 
     "return gaps page for user with gaps" in {
       val result = new MockNIRecordControllerImpl(TestAccountBuilder.regularNino)
@@ -76,13 +71,6 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
       val result = new MockNIRecordControllerImpl(TestAccountBuilder.fullUserNino)
         .showGaps(authenticatedFakeRequest(mockFullUserId))
       redirectLocation(result) shouldBe Some("/check-your-state-pension/account/nirecord")
-    }
-
-    //TODO testing blank data for auth retrieval
-    "return error page for blank response NINO" ignore{
-      val result = new MockNIRecordControllerImpl(TestAccountBuilder.blankNino)
-        .showGaps(authenticatedFakeRequest(mockBlankUserId))
-      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
 
     "return 500 when backend 404" in {
@@ -102,11 +90,8 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
       redirectLocation(result) shouldBe Some("/check-your-state-pension/exclusionni")
     }
   }
+
   "GET /account/nirecord (full)" should {
-    //    "return redirect for unauthenticated user" in {
-    //      val result = MockNIRecordControllerImpl.showFull(fakeRequest)
-    //      redirectLocation(result) shouldBe Some(ggSignInUrl)
-    //    }
 
     "return gaps page for user with gaps" in {
       val result = new MockNIRecordControllerImpl(TestAccountBuilder.regularNino)
@@ -133,10 +118,6 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
   }
 
   "GET /account/nirecord/gapsandhowtocheck" should {
-    //    "return redirect for unauthenticated user" in {
-    //      val result = MockNIRecordControllerImpl.showGapsAndHowToCheckThem(fakeRequest)
-    //      redirectLocation(result) shouldBe Some(ggSignInUrl)
-    //    }
 
     "return how to check page for authenticated user" in {
       val result = new MockNIRecordControllerImpl(TestAccountBuilder.regularNino)
@@ -157,10 +138,6 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
   }
 
   "GET /account/nirecord/voluntarycontribs" should {
-    //    "return redirect for unauthenticated user" in {
-    //      val result = MockNIRecordControllerImpl.showVoluntaryContributions(fakeRequest)
-    //      redirectLocation(result) shouldBe Some(ggSignInUrl)
-    //    }
 
     "return how to check page for authenticated user" in {
       val result = new MockNIRecordControllerImpl(TestAccountBuilder.regularNino)
@@ -206,7 +183,7 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
       contentAsString(result) shouldNot include("52 weeks")
     }
 
-    "return NI record when numner of qualifying years is 0" in {
+    "return NI record when number of qualifying years is 0" in {
       // Unit test for bug NISP-2436
       val controller = new MockNIRecordController {
         override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
@@ -286,12 +263,12 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
     "the date of entry is the sixteenth birthday" should {
       "return true for 5th April 1975" in {
         val date = new LocalDate(1975, 4, 5)
-        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(Some(date), Some(date.minusYears(16)), 0) shouldBe true
+        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(Some(date), date.minusYears(16), 0) shouldBe true
       }
 
       "return false for 6th April 1975" in {
         val date = new LocalDate(1975, 4, 6)
-        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(Some(date), Some(date.minusYears(16)), 0) shouldBe false
+        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(Some(date), date.minusYears(16), 0) shouldBe false
       }
     }
 
@@ -299,36 +276,37 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
       "return true for 16th: 5th April 1970, Date of entry: 5th April 1975" in {
         val dob = new LocalDate(1970, 4, 5).minusYears(16)
         val entry = new LocalDate(1975, 4, 5)
-        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(Some(entry), Some(dob), 0) shouldBe true
+        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(Some(entry), dob, 0) shouldBe true
       }
 
       "return true for 16th: 5th April 1970, Date of entry: 6th April 1975" in {
         val dob = new LocalDate(1970, 4, 5).minusYears(16)
         val entry = new LocalDate(1975, 4, 6)
-        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(Some(entry), Some(dob), 0) shouldBe false
+        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(Some(entry), dob, 0) shouldBe false
       }
 
       "return true for 16th: 5th April 1975, Date of entry: 5th April 1970" in {
         val dob = new LocalDate(1975, 4, 5).minusYears(16)
         val entry = new LocalDate(1970, 4, 5)
-        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(Some(entry), Some(dob), 0) shouldBe true
+        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(Some(entry), dob, 0) shouldBe true
       }
 
       "return true for 16th: 6th April 1975, Date of entry: 5th April 1970" in {
         val dob = new LocalDate(1975, 4, 6).minusYears(16)
         val entry = new LocalDate(1970, 4, 5)
-        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(Some(entry), Some(dob), 0) shouldBe false
+        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(Some(entry), dob, 0) shouldBe false
       }
 
       "return false for 16th: 10th July 1983, Date of Entry: 16th October 1977" in {
         val dob = new LocalDate(1983, 7, 10).minusYears(16)
         val entry = new LocalDate(1977, 10, 16)
-        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(Some(entry), Some(dob), 0) shouldBe false
+        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(Some(entry), dob, 0) shouldBe false
       }
 
     }
 
-    "the date of birth is unavailable" should {
+    //Todo: Confirm not valid
+    /*"the date of birth is unavailable" should {
       "return true for date of entry 5th April 1975" in {
         val date = new LocalDate(1975, 4, 5)
         new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(Some(date), None, 0) shouldBe true
@@ -338,28 +316,29 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
         val date = new LocalDate(1975, 4, 6)
         new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(Some(date), None, 0) shouldBe false
       }
-    }
+    }*/
 
     "there is no date of entry" should {
       "return false for 16th birthday: 6th April 1975" in {
         val dob = new LocalDate(1975, 4, 6).minusYears(16)
-        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(None, Some(dob), 0) shouldBe false
+        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(None, dob, 0) shouldBe false
       }
 
       "return true for 16th birthday: 5th April 1975" in {
         val dob = new LocalDate(1975, 4, 5).minusYears(16)
-        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(None, Some(dob), 0) shouldBe true
+        new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(None, dob, 0) shouldBe true
       }
     }
 
-    "both date of birth and date of entry are unavailable" should {
+    //Todo: Confirm not valid
+/*    "both date of birth and date of entry are unavailable" should {
       "return true for pre1975 > 0" in {
         new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(None, None, 1) shouldBe true
       }
       "return false for pre1975 years = 0" in {
         new MockNIRecordControllerImpl(TestAccountBuilder.regularNino).showPre1975Years(None, None, 0) shouldBe false
       }
-    }
+    }*/
   }
 
   "generateTableList" when {

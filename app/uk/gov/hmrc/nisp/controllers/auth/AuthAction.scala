@@ -18,15 +18,19 @@ package uk.gov.hmrc.nisp.controllers.auth
 
 import com.google.inject.{ImplementedBy, Inject}
 import play.api.Mode.Mode
+import play.api.mvc.Results.Redirect
 import play.api.mvc._
 import play.api.{Configuration, Play}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, ConfidenceLevel, PlayAuthConnector}
+import uk.gov.hmrc.auth.core.retrieve.{Name, ~}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, ConfidenceLevel, NoActiveSession, PlayAuthConnector}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{CorePost, HeaderCarrier}
+import uk.gov.hmrc.http.{CorePost, HeaderCarrier, InternalServerException}
+import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.config.wiring.WSHttp
 import uk.gov.hmrc.nisp.models.UserName
+import uk.gov.hmrc.nisp.models.citizen.CitizenDetailsResponse
+import uk.gov.hmrc.nisp.services.CitizenDetailsService
 import uk.gov.hmrc.nisp.utils.Constants
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -38,8 +42,8 @@ case class AuthenticatedRequest[A](request: Request[A],
                                    nispAuthedUser: NispAuthedUser
                                   ) extends WrappedRequest[A](request)
 
-
-class AuthActionImpl @Inject()(override val authConnector: AuthConnector)
+class AuthActionImpl @Inject()(override val authConnector: AuthConnector,
+                               cds: CitizenDetailsService)
                               (implicit ec: ExecutionContext) extends AuthAction with AuthorisedFunctions {
 
   override def invokeBlock[A](request: Request[A], block: AuthenticatedRequest[A] => Future[Result]): Future[Result] = {
@@ -48,18 +52,34 @@ class AuthActionImpl @Inject()(override val authConnector: AuthConnector)
 
     //Add authorisation parameters
     authorised().
-      retrieve(Retrievals.nino and Retrievals.confidenceLevel and Retrievals.dateOfBirth and Retrievals.name and Retrievals.itmpAddress) {
-        case Some(nino) ~ confidenceLevel ~ dateOfBirth ~ name ~ itmpAddress => {
+      retrieve(Retrievals.nino and Retrievals.confidenceLevel) {
+        case Some(nino) ~ confidenceLevel => {
           //Todo: We can avoid a call to citizen details if we remove the need to log gender
           //Todo: Is ITMP Address more or less likely than Citizen Details to have the data?
-          block(AuthenticatedRequest(request, NispAuthedUser(Nino(nino), confidenceLevel, dateOfBirth, name.map(UserName), itmpAddress, sex = None)))
+
+          cds.retrievePerson(Nino(nino)).flatMap {
+            case Some(cdr) => {
+              block(AuthenticatedRequest(request,
+                NispAuthedUser(Nino(nino),
+                  confidenceLevel,
+                  cdr.person.dateOfBirth,
+                  UserName(Name(cdr.person.firstName, cdr.person.lastName)),
+                  cdr.address,
+                  cdr.person.sex)))
+            }
+            case None => throw new InternalServerException("")
+          }
+
         }
         case _ => throw new RuntimeException("Can't find credentials for user")
-      }
+      } recover {
+      case t: NoActiveSession => Redirect(ApplicationConfig.ggSignInUrl, Map("continue" -> Seq(ApplicationConfig.postSignInRedirectUrl),
+        "origin" -> Seq("nisp-frontend"), "accountType" -> Seq("individual")))
+    }
   }
 
   def getAuthenticationProvider(confidenceLevel: ConfidenceLevel): String = {
-      if (confidenceLevel.level == 500) Constants.verify else Constants.iv
+    if (confidenceLevel.level == 500) Constants.verify else Constants.iv
   }
 }
 
@@ -68,9 +88,7 @@ trait AuthAction extends ActionBuilder[AuthenticatedRequest] with ActionFunction
   def getAuthenticationProvider(confidenceLevel: ConfidenceLevel): String
 }
 
-
-object AuthAction extends AuthActionImpl(AuthConnector)
-
+object AuthAction extends AuthActionImpl(AuthConnector, CitizenDetailsService)
 
 object AuthConnector extends PlayAuthConnector with ServicesConfig {
   override val serviceUrl: String = baseUrl("auth")
