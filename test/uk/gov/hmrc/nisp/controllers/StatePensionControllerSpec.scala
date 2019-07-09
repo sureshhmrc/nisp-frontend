@@ -187,61 +187,141 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
     }
   }
 
-    "when there is a Fill Gaps Scenario" when {
-      "the future config is set to off" should {
-        "show year information when there is multiple years" in {
-          val result = mockStatePensionController(TestAccountBuilder.fillGapsMultiple).show()(authenticatedFakeRequest(mockUserIdFillGapsMultiple))
-          contentAsString(result) should include("You have years on your National Insurance record where you did not contribute enough.")
-          contentAsString(result) should include("filling years can improve your forecast")
-          contentAsString(result) should include("you only need to fill 7 years to get the most you can")
-          contentAsString(result) should include("The most you can get by filling any 7 years in your record is")
-        }
-        "show specific text when is only one payable gap" in {
-          val result = mockStatePensionController(TestAccountBuilder.fillGapSingle).show()(authenticatedFakeRequest(mockUserIdFillGapsSingle))
-          contentAsString(result) should include("You have a year on your National Insurance record where you did not contribute enough. You only need to fill this year to get the most you can.")
-          contentAsString(result) should include("The most you can get by filling this year in your record is")
-        }
+  "when there is a Fill Gaps Scenario" when {
+    "the future config is set to off" should {
+      "show year information when there is multiple years" in {
+        val result = mockStatePensionController(TestAccountBuilder.fillGapsMultiple).show()(authenticatedFakeRequest(mockUserIdFillGapsMultiple))
+        contentAsString(result) should include("You have years on your National Insurance record where you did not contribute enough.")
+        contentAsString(result) should include("filling years can improve your forecast")
+        contentAsString(result) should include("you only need to fill 7 years to get the most you can")
+        contentAsString(result) should include("The most you can get by filling any 7 years in your record is")
       }
-
-      "the future proof config is set to true" should {
-        val controller = new MockStatePensionController {
-          override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.fillGapsMultiple)
-          override val applicationConfig: ApplicationConfig = new ApplicationConfig {
-            override val assetsPrefix: String = ""
-            override val reportAProblemNonJSUrl: String = ""
-            override val ssoUrl: Option[String] = None
-            override val betaFeedbackUnauthenticatedUrl: String = ""
-            override val contactFrontendPartialBaseUrl: String = ""
-            override val govUkFinishedPageUrl: String = "govukdone"
-            override val showGovUkDonePage: Boolean = true
-            override val analyticsHost: String = ""
-            override val analyticsToken: Option[String] = None
-            override val betaFeedbackUrl: String = ""
-            override val reportAProblemPartialUrl: String = ""
-            override val verifySignIn: String = ""
-            override val verifySignInContinue: Boolean = false
-            override val postSignInRedirectUrl: String = ""
-            override val notAuthorisedRedirectUrl: String = ""
-            override val identityVerification: Boolean = false
-            override val ivUpliftUrl: String = "ivuplift"
-            override val ggSignInUrl: String = "ggsignin"
-            override val pertaxFrontendUrl: String = ""
-            override val contactFormServiceIdentifier: String = ""
-            override val breadcrumbPartialUrl: String = ""
-            override lazy val showFullNI: Boolean = false
-            override val futureProofPersonalMax: Boolean = true
-            override val isWelshEnabled = false
-            override val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
-            override val feedbackFrontendUrl: String = "/foo"
-          }
-          override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
-        }
-          "show new personal max text when there are multiple/single year" in {
-          val result = controller.show()(authenticatedFakeRequest(mockUserIdFillGapsMultiple))
-          contentAsString(result) should include("You have shortfalls in your National Insurance record that you can fill and make count towards your State Pension.")
-          contentAsString(result) should include("The most you can increase your forecast to is")
-        }
+      "show specific text when is only one payable gap" in {
+        val result = mockStatePensionController(TestAccountBuilder.fillGapSingle).show()(authenticatedFakeRequest(mockUserIdFillGapsSingle))
+        contentAsString(result) should include("You have a year on your National Insurance record where you did not contribute enough. You only need to fill this year to get the most you can.")
+        contentAsString(result) should include("The most you can get by filling this year in your record is")
       }
     }
+
+    "the future proof config is set to true" should {
+      val controller = new MockStatePensionController {
+        override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.fillGapsMultiple)
+        override val applicationConfig: ApplicationConfig = new ApplicationConfig {
+          override val assetsPrefix: String = ""
+          override val reportAProblemNonJSUrl: String = ""
+          override val ssoUrl: Option[String] = None
+          override val betaFeedbackUnauthenticatedUrl: String = ""
+          override val contactFrontendPartialBaseUrl: String = ""
+          override val govUkFinishedPageUrl: String = "govukdone"
+          override val showGovUkDonePage: Boolean = true
+          override val analyticsHost: String = ""
+          override val analyticsToken: Option[String] = None
+          override val betaFeedbackUrl: String = ""
+          override val reportAProblemPartialUrl: String = ""
+          override val verifySignIn: String = ""
+          override val verifySignInContinue: Boolean = false
+          override val postSignInRedirectUrl: String = ""
+          override val notAuthorisedRedirectUrl: String = ""
+          override val identityVerification: Boolean = false
+          override val ivUpliftUrl: String = "ivuplift"
+          override val ggSignInUrl: String = "ggsignin"
+          override val pertaxFrontendUrl: String = ""
+          override val contactFormServiceIdentifier: String = ""
+          override val breadcrumbPartialUrl: String = ""
+          override lazy val showFullNI: Boolean = false
+          override val futureProofPersonalMax: Boolean = true
+          override val isWelshEnabled = false
+          override val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
+          override val feedbackFrontendUrl: String = "/foo"
+        }
+        override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
+      }
+      "show new personal max text when there are multiple/single year" in {
+        val result = controller.show()(authenticatedFakeRequest(mockUserIdFillGapsMultiple))
+        contentAsString(result) should include("You have shortfalls in your National Insurance record that you can fill and make count towards your State Pension.")
+        contentAsString(result) should include("The most you can increase your forecast to is")
+      }
+    }
+
+    "redirect to the gov.uk done page when govuk done page is enabled" in {
+      val controller = new MockStatePensionController {
+        override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.regularNino)
+        override val applicationConfig: ApplicationConfig = new ApplicationConfig {
+          override val assetsPrefix: String = ""
+          override val reportAProblemNonJSUrl: String = ""
+          override val ssoUrl: Option[String] = None
+          override val betaFeedbackUnauthenticatedUrl: String = ""
+          override val contactFrontendPartialBaseUrl: String = ""
+          override val govUkFinishedPageUrl: String = "govukdone"
+          override val showGovUkDonePage: Boolean = true
+          override val analyticsHost: String = ""
+          override val analyticsToken: Option[String] = None
+          override val betaFeedbackUrl: String = ""
+          override val reportAProblemPartialUrl: String = ""
+          override val verifySignIn: String = ""
+          override val verifySignInContinue: Boolean = false
+          override val postSignInRedirectUrl: String = ""
+          override val notAuthorisedRedirectUrl: String = ""
+          override val identityVerification: Boolean = false
+          override val ivUpliftUrl: String = "ivuplift"
+          override val ggSignInUrl: String = "ggsignin"
+          override val pertaxFrontendUrl: String = ""
+          override val contactFormServiceIdentifier: String = ""
+          override val breadcrumbPartialUrl: String = ""
+          override lazy val showFullNI: Boolean = false
+          override val futureProofPersonalMax: Boolean = false
+          override val isWelshEnabled = false
+          override val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
+          override val feedbackFrontendUrl: String = "/foo"
+        }
+        override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
+      }
+      val result = controller.signOut(fakeRequest)
+
+      redirectLocation(result).get shouldBe "/foo"
+    }
+  }
+
+
+  "GET /signout" should {
+    "redirect to the questionnaire page when govuk done page is disabled" in {
+      val controller = new MockStatePensionController {
+        override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.regularNino)
+        override val applicationConfig: ApplicationConfig = new ApplicationConfig {
+          override val assetsPrefix: String = ""
+          override val reportAProblemNonJSUrl: String = ""
+          override val ssoUrl: Option[String] = None
+          override val betaFeedbackUnauthenticatedUrl: String = ""
+          override val contactFrontendPartialBaseUrl: String = ""
+          override val govUkFinishedPageUrl: String = "govukdone"
+          override val showGovUkDonePage: Boolean = false
+          override val analyticsHost: String = ""
+          override val analyticsToken: Option[String] = None
+          override val betaFeedbackUrl: String = ""
+          override val reportAProblemPartialUrl: String = ""
+          override val verifySignIn: String = ""
+          override val verifySignInContinue: Boolean = false
+          override val postSignInRedirectUrl: String = ""
+          override val notAuthorisedRedirectUrl: String = ""
+          override val identityVerification: Boolean = false
+          override val ivUpliftUrl: String = "ivuplift"
+          override val ggSignInUrl: String = "ggsignin"
+          override val pertaxFrontendUrl: String = ""
+          override val contactFormServiceIdentifier: String = ""
+          override val breadcrumbPartialUrl: String = ""
+          override lazy val showFullNI: Boolean = false
+          override val futureProofPersonalMax: Boolean = false
+          override val isWelshEnabled = false
+          override val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
+          override val feedbackFrontendUrl: String = "/foo"
+        }
+        override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
+      }
+      val result = controller.signOut(fakeRequest)
+
+      redirectLocation(result).get shouldBe "/foo"
+    }
+  }
+
 
 }

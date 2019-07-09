@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nisp.controllers.connectors
 
 import uk.gov.hmrc.nisp.config.wiring.{NispAuditConnector, NispAuthConnector}
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import uk.gov.hmrc.auth.core.AuthConnector
 
 trait AuthenticationConnectors {
 

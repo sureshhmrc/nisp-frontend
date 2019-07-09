@@ -24,9 +24,9 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.redirectLocation
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
-import uk.gov.hmrc.auth.core.{AuthConnector, SessionRecordNotFound}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException, SessionRecordNotFound}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.nisp.helpers.MockCitizenDetailsService
+import uk.gov.hmrc.nisp.helpers.{MockAuthConnector, MockCitizenDetailsService, MockNIRecordControllerImpl, MockStatePensionControllerImpl, TestAccountBuilder}
 import uk.gov.hmrc.nisp.services.{CitizenDetailsService, CitizenDetailsServiceImpl}
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -111,9 +111,9 @@ class AuthActionSpec extends UnitSpec with OneAppPerSuite {
 //          }
 
     //TODO: How much data do we need to allow people into the service?
-          "return error for blank user" ignore {
+    "return error for blank user" in {
       val cds: CitizenDetailsService = new CitizenDetailsServiceImpl
-      val authAction = new AuthActionImpl(???, MockCitizenDetailsService) with MockAuthorisedFunctions {
+      val authAction = new AuthActionImpl(MockAuthConnector, MockCitizenDetailsService) with MockAuthorisedFunctions {
           override def authorised(): AuthorisedFunction = new MockAuthorisedFunction(EmptyPredicate)
 
           override def authorised(predicate: Predicate): AuthorisedFunction = new MockAuthorisedFunction(predicate)
@@ -122,123 +122,6 @@ class AuthActionSpec extends UnitSpec with OneAppPerSuite {
       val result = controller.onPageLoad()(FakeRequest("", ""))
             status(result) shouldBe INTERNAL_SERVER_ERROR
           }
-
-
-    // TODO: Need to look in to this
-    //    "GET /signout" should {
-    //      "redirect to the questionnaire page when govuk done page is disabled" in {
-    //        val controller = new MockStatePensionController {
-    //          override val authenticate: AuthAction = MockAuthAction
-    //          override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
-    //          override val applicationConfig: ApplicationConfig = new ApplicationConfig {
-    //            override val assetsPrefix: String = ""
-    //            override val reportAProblemNonJSUrl: String = ""
-    //            override val ssoUrl: Option[String] = None
-    //            override val betaFeedbackUnauthenticatedUrl: String = ""
-    //            override val contactFrontendPartialBaseUrl: String = ""
-    //            override val govUkFinishedPageUrl: String = "govukdone"
-    //            override val showGovUkDonePage: Boolean = false
-    //            override val analyticsHost: String = ""
-    //            override val analyticsToken: Option[String] = None
-    //            override val betaFeedbackUrl: String = ""
-    //            override val reportAProblemPartialUrl: String = ""
-    //            override val verifySignIn: String = ""
-    //            override val verifySignInContinue: Boolean = false
-    //            override val postSignInRedirectUrl: String = ""
-    //            override val notAuthorisedRedirectUrl: String = ""
-    //            override val identityVerification: Boolean = false
-    //            override val ivUpliftUrl: String = "ivuplift"
-    //            override val ggSignInUrl: String = "ggsignin"
-    //            override val pertaxFrontendUrl: String = ""
-    //            override val contactFormServiceIdentifier: String = ""
-    //            override val breadcrumbPartialUrl: String = ""
-    //            override lazy val showFullNI: Boolean = false
-    //            override val futureProofPersonalMax: Boolean = false
-    //            override val isWelshEnabled = false
-    //            override val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
-    //            override val feedbackFrontendUrl: String = "/foo"
-    //          }
-    //          override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
-    //        }
-    //        val result = controller.signOut(fakeRequest)
-    //
-    //        redirectLocation(result).get shouldBe "/foo"
-    //      }
-    //
-    //      "redirect to the gov.uk done page when govuk done page is enabled" in {
-    //        val controller = new MockStatePensionController {
-    //          override val authenticate: AuthAction = MockAuthAction
-    //          override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
-    //          override val applicationConfig: ApplicationConfig = new ApplicationConfig {
-    //            override val assetsPrefix: String = ""
-    //            override val reportAProblemNonJSUrl: String = ""
-    //            override val ssoUrl: Option[String] = None
-    //            override val betaFeedbackUnauthenticatedUrl: String = ""
-    //            override val contactFrontendPartialBaseUrl: String = ""
-    //            override val govUkFinishedPageUrl: String = "govukdone"
-    //            override val showGovUkDonePage: Boolean = true
-    //            override val analyticsHost: String = ""
-    //            override val analyticsToken: Option[String] = None
-    //            override val betaFeedbackUrl: String = ""
-    //            override val reportAProblemPartialUrl: String = ""
-    //            override val verifySignIn: String = ""
-    //            override val verifySignInContinue: Boolean = false
-    //            override val postSignInRedirectUrl: String = ""
-    //            override val notAuthorisedRedirectUrl: String = ""
-    //            override val identityVerification: Boolean = false
-    //            override val ivUpliftUrl: String = "ivuplift"
-    //            override val ggSignInUrl: String = "ggsignin"
-    //            override val pertaxFrontendUrl: String = ""
-    //            override val contactFormServiceIdentifier: String = ""
-    //            override val breadcrumbPartialUrl: String = ""
-    //            override lazy val showFullNI: Boolean = false
-    //            override val futureProofPersonalMax: Boolean = false
-    //            override val isWelshEnabled = false
-    //            override val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
-    //            override val feedbackFrontendUrl: String = "/foo"
-    //          }
-    //          override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
-    //        }
-    //        val result = controller.signOut(fakeRequest)
-    //
-    //        redirectLocation(result).get shouldBe "/foo"
-    //      }
-    //    }
-
-    //    "GET /timeout" should {
-    //      "return the timeout page" in {
-    //        val result = MockStatePensionController.timeout(fakeRequest)
-    //        contentType(result) shouldBe Some("text/html")
-    //        contentAsString(result).contains("For your security we signed you out because you didn't use the service for 15 minutes or more.")
-    //      }
-
-    //    "return redirect for unauthenticated user" in {
-    //      val result = MockNIRecordControllerImpl.showGaps(fakeRequest)
-    //      redirectLocation(result) shouldBe Some(ggSignInUrl)
-    //    }
-
-    //TODO testing blank data for auth retrieval
-    //    "return error page for blank response NINO" ignore{
-    //      val result = new MockNIRecordControllerImpl(TestAccountBuilder.blankNino)
-    //        .showGaps(authenticatedFakeRequest(mockBlankUserId))
-    //      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-    //    }
-
-    //    "return redirect for unauthenticated user" in {
-    //      val result = MockNIRecordControllerImpl.showFull(fakeRequest)
-    //      redirectLocation(result) shouldBe Some(ggSignInUrl)
-    //    }
-
-
-    //    "return redirect for unauthenticated user" in {
-    //      val result = MockNIRecordControllerImpl.showGapsAndHowToCheckThem(fakeRequest)
-    //      redirectLocation(result) shouldBe Some(ggSignInUrl)
-    //    }
-
-    //    "return redirect for unauthenticated user" in {
-    //      val result = MockNIRecordControllerImpl.showVoluntaryContributions(fakeRequest)
-    //      redirectLocation(result) shouldBe Some(ggSignInUrl)
-    //    }
 
   }
 }

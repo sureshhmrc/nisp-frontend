@@ -23,11 +23,11 @@ import play.api.mvc._
 import play.api.{Configuration, Play}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Name, ~}
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, ConfidenceLevel, NoActiveSession, PlayAuthConnector}
+import uk.gov.hmrc.auth.core.{AuthorisedFunctions, ConfidenceLevel, NoActiveSession, PlayAuthConnector}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{CorePost, HeaderCarrier, InternalServerException}
 import uk.gov.hmrc.nisp.config.ApplicationConfig
-import uk.gov.hmrc.nisp.config.wiring.WSHttp
+import uk.gov.hmrc.nisp.config.wiring.{NispAuthConnector, WSHttp}
 import uk.gov.hmrc.nisp.models.UserName
 import uk.gov.hmrc.nisp.models.citizen.CitizenDetailsResponse
 import uk.gov.hmrc.nisp.services.{CitizenDetailsService, CitizenDetailsServiceImpl}
@@ -42,7 +42,7 @@ case class AuthenticatedRequest[A](request: Request[A],
                                    nispAuthedUser: NispAuthedUser
                                   ) extends WrappedRequest[A](request)
 
-class AuthActionImpl @Inject()(override val authConnector: AuthConnector,
+class AuthActionImpl @Inject()(override val authConnector: NispAuthConnector,
                                cds: CitizenDetailsService)
                               (implicit ec: ExecutionContext) extends AuthAction with AuthorisedFunctions {
 
@@ -88,14 +88,23 @@ trait AuthAction extends ActionBuilder[AuthenticatedRequest] with ActionFunction
   def getAuthenticationProvider(confidenceLevel: ConfidenceLevel): String
 }
 
-object AuthAction extends AuthActionImpl(AuthConnector, new CitizenDetailsServiceImpl)
+//object AuthAction extends AuthActionImpl(NispAuthConnector, new CitizenDetailsServiceImpl)
 
-object AuthConnector extends PlayAuthConnector with ServicesConfig {
-  override val serviceUrl: String = baseUrl("auth")
+//object AuthConnector extends PlayAuthConnector with ServicesConfig {
+//  override val serviceUrl: String = baseUrl("auth")
+//
+//  override def http: CorePost = WSHttp
+//
+//  override protected def mode: Mode = Play.current.mode
+//
+//  override protected def runModeConfiguration: Configuration = Play.current.configuration
+//}
 
-  override def http: CorePost = WSHttp
+class NispAuthConnector @Inject()(val http: WSHttp, configuration: Configuration) extends PlayAuthConnector {
 
-  override protected def mode: Mode = Play.current.mode
+  val host = configuration.getString("microservice.services.auth.host").get
+  val port = configuration.getString("microservice.services.auth.port").get
 
-  override protected def runModeConfiguration: Configuration = Play.current.configuration
+  override val serviceUrl: String = s"http://$host:$port"
+
 }
