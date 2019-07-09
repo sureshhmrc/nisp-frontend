@@ -25,7 +25,7 @@ import uk.gov.hmrc.nisp.connectors.{IdentityVerificationConnector, IdentityVerif
 import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
 import uk.gov.hmrc.nisp.controllers.connectors.AuthenticationConnectors
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
-import uk.gov.hmrc.nisp.services.CitizenDetailsService
+import uk.gov.hmrc.nisp.services.{CitizenDetailsService, CitizenDetailsServiceImpl}
 import uk.gov.hmrc.nisp.views.html.iv.failurepages.{locked_out, not_authorised, technical_issue, timeout}
 import uk.gov.hmrc.nisp.views.html.{identity_verification_landing, landing}
 import uk.gov.hmrc.play.frontend.auth.Actions
@@ -34,7 +34,7 @@ import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
 import scala.concurrent.Future
 
 object LandingController extends LandingController with AuthenticationConnectors with PartialRetriever {
-  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
+  override val citizenDetailsService: CitizenDetailsService = new CitizenDetailsServiceImpl
   override val applicationConfig: ApplicationConfig = ApplicationConfig
   override val identityVerificationConnector: IdentityVerificationConnector = IdentityVerificationConnector
 }

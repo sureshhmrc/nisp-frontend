@@ -27,7 +27,7 @@ import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.auth.core.{AuthConnector, SessionRecordNotFound}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nisp.helpers.MockCitizenDetailsService
-import uk.gov.hmrc.nisp.services.CitizenDetailsService
+import uk.gov.hmrc.nisp.services.{CitizenDetailsService, CitizenDetailsServiceImpl}
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits._
@@ -112,7 +112,7 @@ class AuthActionSpec extends UnitSpec with OneAppPerSuite {
 
     //TODO: How much data do we need to allow people into the service?
           "return error for blank user" ignore {
-      val cds: CitizenDetailsService = CitizenDetailsService
+      val cds: CitizenDetailsService = new CitizenDetailsServiceImpl
       val authAction = new AuthActionImpl(???, MockCitizenDetailsService) with MockAuthorisedFunctions {
           override def authorised(): AuthorisedFunction = new MockAuthorisedFunction(EmptyPredicate)
 

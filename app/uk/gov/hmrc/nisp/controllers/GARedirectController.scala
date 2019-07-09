@@ -16,22 +16,18 @@
 
 package uk.gov.hmrc.nisp.controllers
 
-import play.api.Logger
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.nisp.config.ApplicationConfig
-import uk.gov.hmrc.nisp.connectors.{IdentityVerificationConnector, IdentityVerificationSuccessResponse}
+import uk.gov.hmrc.nisp.connectors.IdentityVerificationConnector
 import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
 import uk.gov.hmrc.nisp.controllers.connectors.AuthenticationConnectors
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
-import uk.gov.hmrc.nisp.services.CitizenDetailsService
+import uk.gov.hmrc.nisp.services.{CitizenDetailsService, CitizenDetailsServiceImpl}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
-import scala.concurrent.Future
 
 object GARedirectController extends GARedirectController with AuthenticationConnectors with PartialRetriever {
-  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
+  override val citizenDetailsService: CitizenDetailsService = new CitizenDetailsServiceImpl
   override val applicationConfig: ApplicationConfig = ApplicationConfig
   override val identityVerificationConnector: IdentityVerificationConnector = IdentityVerificationConnector
 }

@@ -29,7 +29,7 @@ import uk.gov.hmrc.nisp.services._
 import uk.gov.hmrc.nisp.views.html._
 
 object ExclusionController extends ExclusionController with AuthenticationConnectors with PartialRetriever with NispFrontendController {
-  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
+  override val citizenDetailsService: CitizenDetailsService = new CitizenDetailsServiceImpl
   override val applicationConfig: ApplicationConfig = ApplicationConfig
   override val statePensionService: StatePensionService = StatePensionService
   override val nationalInsuranceService: NationalInsuranceService = NationalInsuranceService

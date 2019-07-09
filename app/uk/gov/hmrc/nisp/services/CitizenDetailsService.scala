@@ -26,7 +26,7 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier, NotFoundException, Upstream4xxResponse }
 
-object CitizenDetailsService extends CitizenDetailsService {
+class CitizenDetailsServiceImpl extends CitizenDetailsService {
   override val citizenDetailsConnector = CitizenDetailsConnector
 }
 

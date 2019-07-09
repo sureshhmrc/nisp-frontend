@@ -29,14 +29,15 @@ import uk.gov.hmrc.nisp.config.wiring.{NispFormPartialRetriever, NispHeaderCarri
 import uk.gov.hmrc.nisp.controllers.auth.AuthorisedForNisp
 import uk.gov.hmrc.nisp.controllers.connectors.AuthenticationConnectors
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
-import uk.gov.hmrc.nisp.services.CitizenDetailsService
+import uk.gov.hmrc.nisp.services.{CitizenDetailsService, CitizenDetailsServiceImpl}
 import uk.gov.hmrc.nisp.views.html.feedback_thankyou
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.UnauthorisedAction
 import uk.gov.hmrc.play.partials.FormPartialRetriever
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpPost, HttpReads, HttpResponse }
+import uk.gov.hmrc.http.{HeaderCarrier, HttpPost, HttpReads, HttpResponse}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object FeedbackController extends FeedbackController with AuthenticationConnectors with PartialRetriever {
@@ -49,7 +50,7 @@ object FeedbackController extends FeedbackController with AuthenticationConnecto
 
   override def localSubmitUrl(implicit request: Request[AnyContent]): String = routes.FeedbackController.submit().url
 
-  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
+  override val citizenDetailsService: CitizenDetailsService = new CitizenDetailsServiceImpl
   override val applicationConfig: ApplicationConfig = ApplicationConfig
 }
 

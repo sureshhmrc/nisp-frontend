@@ -30,7 +30,7 @@ import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.config.wiring.WSHttp
 import uk.gov.hmrc.nisp.models.UserName
 import uk.gov.hmrc.nisp.models.citizen.CitizenDetailsResponse
-import uk.gov.hmrc.nisp.services.CitizenDetailsService
+import uk.gov.hmrc.nisp.services.{CitizenDetailsService, CitizenDetailsServiceImpl}
 import uk.gov.hmrc.nisp.utils.Constants
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -88,7 +88,7 @@ trait AuthAction extends ActionBuilder[AuthenticatedRequest] with ActionFunction
   def getAuthenticationProvider(confidenceLevel: ConfidenceLevel): String
 }
 
-object AuthAction extends AuthActionImpl(AuthConnector, CitizenDetailsService)
+object AuthAction extends AuthActionImpl(AuthConnector, new CitizenDetailsServiceImpl)
 
 object AuthConnector extends PlayAuthConnector with ServicesConfig {
   override val serviceUrl: String = baseUrl("auth")

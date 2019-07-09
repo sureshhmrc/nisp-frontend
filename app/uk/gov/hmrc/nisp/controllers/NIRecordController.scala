@@ -39,7 +39,7 @@ import uk.gov.hmrc.time.TaxYear
 // override val sessionCache: SessionCache = NispSessionCache
 
 object NIRecordController extends NIRecordController with AuthenticationConnectors with PartialRetriever {
-  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
+  override val citizenDetailsService: CitizenDetailsService = new CitizenDetailsServiceImpl
   override val applicationConfig: ApplicationConfig = ApplicationConfig
   override val customAuditConnector: CustomAuditConnector = CustomAuditConnector
   override val sessionCache: SessionCache = NispSessionCache
