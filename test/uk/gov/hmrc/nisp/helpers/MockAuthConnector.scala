@@ -16,25 +16,22 @@
 
 package uk.gov.hmrc.nisp.helpers
 
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.auth.core.authorise.Predicate
+import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import uk.gov.hmrc.http.{HeaderCarrier, UserId}
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L500
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.{Accounts, Authority, CredentialStrength, PayeAccount}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, UserId}
 
 object MockAuthConnector extends AuthConnector {
-  override val serviceUrl: String = ""
-
-  override def http: HttpGet = ???
-
-  val mockUserId = userID("mockuser")
+  val mockUserId: UserId = userID("mockuser")
 
   def userID(username: String): UserId = UserId(s"/auth/oid/$username")
 
-  val usernameToNino = Map(
+  val usernameToNino: Map[UserId, Nino] = Map(
     userID("mockuser") -> TestAccountBuilder.regularNino,
     userID("mockfulluser") -> TestAccountBuilder.fullUserNino,
     userID("mockblank") -> TestAccountBuilder.blankNino,
@@ -78,6 +75,5 @@ object MockAuthConnector extends AuthConnector {
   private def testCredentialStrength(nino: Nino): CredentialStrength =
     if (nino == TestAccountBuilder.weakNino) CredentialStrength.Weak else CredentialStrength.Strong
 
-  override def currentAuthority(implicit hc: HeaderCarrier,ec:ExecutionContext): Future[Option[Authority]] =
-    Future(payeAuthority(hc.userId.getOrElse(mockUserId).value, usernameToNino(hc.userId.getOrElse(mockUserId))))
+  override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[A] = Future.failed(new RuntimeException("shouldn't be called directly"))
 }

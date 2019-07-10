@@ -34,18 +34,17 @@ import uk.gov.hmrc.nisp.builders.NationalInsuranceTaxYearBuilder
 import uk.gov.hmrc.nisp.config.wiring.NispFormPartialRetriever
 import uk.gov.hmrc.nisp.controllers.auth.AuthAction
 import uk.gov.hmrc.nisp.controllers.connectors.CustomAuditConnector
+import uk.gov.hmrc.nisp.fixtures.NispAuthedUserFixture
 import uk.gov.hmrc.nisp.helpers._
 import uk.gov.hmrc.nisp.models.enums.Exclusion
 import uk.gov.hmrc.nisp.models.{NationalInsuranceRecord, StatePensionExclusionFiltered}
-import uk.gov.hmrc.nisp.services.{CitizenDetailsService, MetricsService, NationalInsuranceService, StatePensionService}
+import uk.gov.hmrc.nisp.services.{MetricsService, NationalInsuranceService, StatePensionService}
 import uk.gov.hmrc.nisp.utils.{Constants, MockTemplateRenderer}
 import uk.gov.hmrc.play.frontend.auth.AuthenticationProviderIds
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.language.LanguageUtils._
 import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.renderer.TemplateRenderer
 import uk.gov.hmrc.time.DateTimeUtils.now
-import uk.gov.hmrc.nisp.fixtures.NispAuthedUserFixture
 
 import scala.concurrent.Future
 
@@ -76,12 +75,10 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter wi
 
   "Render Ni Record UR banner" should {
     lazy val controller = new MockNIRecordController {
-      override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
       override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
       override val sessionCache: SessionCache = MockSessionCache
       override lazy val showFullNI = true
       override val currentDate = new LocalDate(2016, 9, 9)
-      override protected def authConnector: AuthConnector = MockAuthConnector
       override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
       override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
       override val metricsService: MetricsService = MockMetricsService
@@ -126,12 +123,10 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter wi
 
   "Render Ni Record to view all the years" should {
     lazy val controller = new MockNIRecordController {
-      override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
       override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
       override val sessionCache: SessionCache = MockSessionCache
       override lazy val showFullNI = true
       override val currentDate = new LocalDate(2016, 9, 9)
-      override protected def authConnector: AuthConnector = MockAuthConnector
       override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
       override implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
       override val metricsService: MetricsService = MockMetricsService
@@ -255,12 +250,10 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter wi
   "Render Ni Record view Gaps Only" should {
 
     lazy val controller = new MockNIRecordController {
-      override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
       override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
       override val sessionCache: SessionCache = MockSessionCache
       override lazy val showFullNI = true
       override val currentDate = new LocalDate(2016, 9, 9)
-      override protected def authConnector: AuthConnector = MockAuthConnector
       override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
       override val metricsService: MetricsService = MockMetricsService
       override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.regularNino)
@@ -543,12 +536,10 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter wi
 
   "Render Ni Record without gap and has pre75years" should {
     lazy val controller = new MockNIRecordController {
-      override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
       override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
       override val sessionCache: SessionCache = MockSessionCache
       override lazy val showFullNI = true
       override val currentDate = new LocalDate(2016, 9, 9)
-      override protected def authConnector: AuthConnector = MockAuthConnector
       override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
       override val metricsService: MetricsService = MockMetricsService
       override val nationalInsuranceService: NationalInsuranceService = mock[NationalInsuranceService]
@@ -629,12 +620,10 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter wi
 
   "Render Ni Record without gap and has gaps pre75years" should {
     lazy val controller = new MockNIRecordController {
-      override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
       override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
       override val sessionCache: SessionCache = MockSessionCache
       override lazy val showFullNI = true
       override val currentDate = new LocalDate(2016, 9, 9)
-      override protected def authConnector: AuthConnector = MockAuthConnector
       override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
       override val metricsService: MetricsService = MockMetricsService
       override val nationalInsuranceService: NationalInsuranceService = mock[NationalInsuranceService]
@@ -724,12 +713,10 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter wi
 
   "Render Ni Record without gap and has gaps pre75years with Years to contribute " should {
     lazy val controller = new MockNIRecordController {
-      override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
       override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
       override val sessionCache: SessionCache = MockSessionCache
       override lazy val showFullNI = true
       override val currentDate = new LocalDate(2016, 9, 9)
-      override protected def authConnector: AuthConnector = MockAuthConnector
       override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
       override val metricsService: MetricsService = MockMetricsService
       override val nationalInsuranceService: NationalInsuranceService = mock[NationalInsuranceService]
@@ -849,12 +836,10 @@ class NIRecordViewSpec extends HtmlSpec with MockitoSugar with BeforeAndAfter wi
 
   "Render Ni Record with Single weeks in self ,contribution and paid -and a abroad User" should {
     lazy val controller = new MockNIRecordController {
-      override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
       override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
       override val sessionCache: SessionCache = MockSessionCache
       override lazy val showFullNI = true
       override val currentDate = new LocalDate(2016, 9, 9)
-      override protected def authConnector: AuthConnector = MockAuthConnector
       override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
       override val metricsService: MetricsService = MockMetricsService
       override val nationalInsuranceService: NationalInsuranceService = mock[NationalInsuranceService]

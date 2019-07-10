@@ -21,6 +21,7 @@ import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.{EmptyRetrieval, Retrieval}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.nisp.helpers.TestAccountBuilder
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -45,7 +46,7 @@ trait MockAuthorisedFunctions extends AuthorisedFunctions {
 
   class MockAuthorisedFunctionWithResult[A](predicate: Predicate, retrieval: Retrieval[A]) extends AuthorisedFunctionWithResult(predicate, retrieval){
 
-  val fr: Future[A] = Future.successful(new ~(Some(""), ConfidenceLevel.L100)).asInstanceOf[Future[A]]
+  val fr: Future[A] = Future.successful(new ~(Some(TestAccountBuilder.blankNino.nino), ConfidenceLevel.L100)).asInstanceOf[Future[A]]
 
     override def apply[B](body: A => Future[B])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[B] =
       fr.flatMap(body)

@@ -21,22 +21,20 @@ import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.nisp.config.ApplicationConfig
+import uk.gov.hmrc.nisp.connectors.CitizenDetailsConnector
 import uk.gov.hmrc.nisp.controllers.auth.{AuthAction, AuthorisedForNisp}
-import uk.gov.hmrc.nisp.controllers.connectors.AuthenticationConnectors
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
 import uk.gov.hmrc.nisp.models.enums.Exclusion
 import uk.gov.hmrc.nisp.services._
 import uk.gov.hmrc.nisp.views.html._
 
-object ExclusionController extends ExclusionController with AuthenticationConnectors with PartialRetriever with NispFrontendController {
-  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
-  override val applicationConfig: ApplicationConfig = ApplicationConfig
+object ExclusionController extends ExclusionController with PartialRetriever with NispFrontendController {
   override val statePensionService: StatePensionService = StatePensionService
   override val nationalInsuranceService: NationalInsuranceService = NationalInsuranceService
   override val authenticate: AuthAction = AuthAction
 }
 
-trait ExclusionController extends NispFrontendController with AuthorisedForNisp {
+trait ExclusionController extends NispFrontendController {
 
   val statePensionService: StatePensionService
   val nationalInsuranceService: NationalInsuranceService

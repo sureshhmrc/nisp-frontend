@@ -23,19 +23,18 @@ import org.scalatestplus.play.OneAppPerSuite
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.http.cache.client.SessionCache
+import uk.gov.hmrc.nisp.controllers.auth.AuthAction
 import uk.gov.hmrc.nisp.controllers.connectors.CustomAuditConnector
 import uk.gov.hmrc.nisp.helpers._
-import uk.gov.hmrc.nisp.services.{CitizenDetailsService, MetricsService}
+import uk.gov.hmrc.nisp.services.MetricsService
 import uk.gov.hmrc.nisp.utils.MockTemplateRenderer
 import uk.gov.hmrc.play.frontend.auth.AuthenticationProviderIds
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.renderer.TemplateRenderer
 import uk.gov.hmrc.time.DateTimeUtils._
-import uk.gov.hmrc.http.SessionKeys
-import uk.gov.hmrc.nisp.controllers.auth.AuthAction
 
 class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
   val mockUserId = "/auth/oid/mockuser"
@@ -149,14 +148,10 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
   "GET /account/nirecord (full)" should {
     "return NI record page with details for full years - when showFullNI is true" in {
       val controller = new MockNIRecordController {
-        override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
         override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
         override val sessionCache: SessionCache = MockSessionCache
         override lazy val showFullNI = true
         override val currentDate = new LocalDate(2016, 9, 9)
-
-        override protected def authConnector: AuthConnector = MockAuthConnector
-
         override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
         override val metricsService: MetricsService = MockMetricsService
         override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.fullUserNino)
@@ -167,13 +162,9 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
 
     "return NI record page with no details for full years - when showFullNI is false" in {
       val controller = new MockNIRecordController {
-        override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
         override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
         override val sessionCache: SessionCache = MockSessionCache
         override val currentDate = new LocalDate(2016, 9, 9)
-
-        override protected def authConnector: AuthConnector = MockAuthConnector
-
         override lazy val showFullNI = false
         override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
         override val metricsService: MetricsService = MockMetricsService
@@ -186,14 +177,10 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
     "return NI record when number of qualifying years is 0" in {
       // Unit test for bug NISP-2436
       val controller = new MockNIRecordController {
-        override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
         override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
         override val sessionCache: SessionCache = MockSessionCache
         override lazy val showFullNI = true
         override val currentDate = new LocalDate(2016, 9, 9)
-
-        override protected def authConnector: AuthConnector = MockAuthConnector
-
         override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
         override val metricsService: MetricsService = MockMetricsService
         override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.noQualifyingYears)
@@ -206,14 +193,10 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
   "GET /account/nirecord (Gaps)" should {
     "return NI record page - gap details should not show shortfall may increase messages - if current date is after 5 April 2019" in {
       val controller = new MockNIRecordController {
-        override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
         override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
         override val sessionCache: SessionCache = MockSessionCache
         override lazy val showFullNI = false
         override val currentDate = new LocalDate(2019, 4, 6)
-
-        override protected def authConnector: AuthConnector = MockAuthConnector
-
         override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
         override val metricsService: MetricsService = MockMetricsService
         override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.fillGapsMultiple)
@@ -224,14 +207,10 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
 
     "return NI record page - gap details should show shortfall may increase messages - if current date is before 5 April 2019" in {
       val controller = new MockNIRecordController {
-        override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
         override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
         override val sessionCache: SessionCache = MockSessionCache
         override lazy val showFullNI = false
         override val currentDate = new LocalDate(2019, 4, 4)
-
-        override protected def authConnector: AuthConnector = MockAuthConnector
-
         override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
         override val metricsService: MetricsService = MockMetricsService
         override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.fillGapsMultiple)
@@ -242,14 +221,10 @@ class NIRecordControllerSpec extends UnitSpec with OneAppPerSuite {
 
     "return NI record page - gap details should show shortfall may increase messages - if current date is same 5 April 2019" in {
       val controller = new MockNIRecordController {
-        override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
         override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
         override val sessionCache: SessionCache = MockSessionCache
         override lazy val showFullNI = false
         override val currentDate = new LocalDate(2019, 4, 5)
-
-        override protected def authConnector: AuthConnector = MockAuthConnector
-
         override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
         override val metricsService: MetricsService = MockMetricsService
         override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.fillGapsMultiple)

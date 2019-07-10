@@ -23,7 +23,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.config.wiring.NispSessionCache
-import uk.gov.hmrc.nisp.controllers.auth.{AuthAction, NispAuthedUser}
+import uk.gov.hmrc.nisp.controllers.LandingController.applicationConfig
+import uk.gov.hmrc.nisp.controllers.auth.{AuthAction, AuthActionSelector, NispAuthedUser}
 import uk.gov.hmrc.nisp.controllers.connectors.CustomAuditConnector
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
 import uk.gov.hmrc.nisp.controllers.pertax.PertaxHelper
@@ -46,7 +47,7 @@ object StatePensionController extends StatePensionController {
   override val metricsService: MetricsService = MetricsService
   override val statePensionService: StatePensionService = StatePensionService
   override val nationalInsuranceService: NationalInsuranceService = NationalInsuranceService
-  override val authenticate: AuthAction = AuthAction
+  override val authenticate: AuthAction = AuthActionSelector.decide(applicationConfig)
 
 }
 
@@ -187,13 +188,11 @@ trait StatePensionController extends NispFrontendController with PertaxHelper wi
               ))
               Redirect(routes.ExclusionController.showSP()).withSession(storeUserInfoInSession(user, contractedOut = false))
             case _ => {
-              println("$$$$$$$$$$$$$$$$$$$$$ got here 1")
               throw new RuntimeException("StatePensionController: SP and NIR are unmatchable. This is probably a logic error.")
             }
           }
         }).recover {
           case ex: Exception => {
-            println("$$$$$$$$$$$$$$$$$$$$$ got here 2")
             onError(ex)
           }
         }

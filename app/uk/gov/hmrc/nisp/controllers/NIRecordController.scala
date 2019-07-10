@@ -25,8 +25,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.config.wiring.NispSessionCache
-import uk.gov.hmrc.nisp.controllers.auth.{AuthAction, AuthorisedForNisp}
-import uk.gov.hmrc.nisp.controllers.connectors.{AuthenticationConnectors, CustomAuditConnector}
+import uk.gov.hmrc.nisp.controllers.LandingController.applicationConfig
+import uk.gov.hmrc.nisp.controllers.auth.{AuthAction, AuthActionSelector}
+import uk.gov.hmrc.nisp.controllers.connectors.CustomAuditConnector
 import uk.gov.hmrc.nisp.controllers.partial.PartialRetriever
 import uk.gov.hmrc.nisp.controllers.pertax.PertaxHelper
 import uk.gov.hmrc.nisp.events.{AccountExclusionEvent, NIRecordEvent}
@@ -38,9 +39,7 @@ import uk.gov.hmrc.time.TaxYear
 
 // override val sessionCache: SessionCache = NispSessionCache
 
-object NIRecordController extends NIRecordController with AuthenticationConnectors with PartialRetriever {
-  override val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
-  override val applicationConfig: ApplicationConfig = ApplicationConfig
+object NIRecordController extends NIRecordController with PartialRetriever {
   override val customAuditConnector: CustomAuditConnector = CustomAuditConnector
   override val sessionCache: SessionCache = NispSessionCache
   override lazy val showFullNI: Boolean = ApplicationConfig.showFullNI
@@ -48,10 +47,10 @@ object NIRecordController extends NIRecordController with AuthenticationConnecto
   override val metricsService: MetricsService = MetricsService
   override val nationalInsuranceService: NationalInsuranceService = NationalInsuranceService
   override val statePensionService: StatePensionService = StatePensionService
-  override val authenticate: AuthAction = AuthAction
+  override val authenticate: AuthAction = AuthActionSelector.decide(applicationConfig)
 }
 
-trait NIRecordController extends NispFrontendController with AuthorisedForNisp with PertaxHelper {
+trait NIRecordController extends NispFrontendController with PertaxHelper {
   val customAuditConnector: CustomAuditConnector
   val authenticate: AuthAction
   val nationalInsuranceService: NationalInsuranceService

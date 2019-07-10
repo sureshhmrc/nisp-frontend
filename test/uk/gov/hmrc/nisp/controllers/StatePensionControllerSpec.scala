@@ -244,4 +244,81 @@ class StatePensionControllerSpec extends UnitSpec with MockitoSugar with OneAppP
       }
     }
 
+      "GET /signout" should {
+        "redirect to the questionnaire page when govuk done page is disabled" in {
+          val controller = new MockStatePensionController {
+            override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.regularNino)
+            override val applicationConfig: ApplicationConfig = new ApplicationConfig {
+              override val assetsPrefix: String = ""
+              override val reportAProblemNonJSUrl: String = ""
+              override val ssoUrl: Option[String] = None
+              override val betaFeedbackUnauthenticatedUrl: String = ""
+              override val contactFrontendPartialBaseUrl: String = ""
+              override val govUkFinishedPageUrl: String = "govukdone"
+              override val showGovUkDonePage: Boolean = false
+              override val analyticsHost: String = ""
+              override val analyticsToken: Option[String] = None
+              override val betaFeedbackUrl: String = ""
+              override val reportAProblemPartialUrl: String = ""
+              override val verifySignIn: String = ""
+              override val verifySignInContinue: Boolean = false
+              override val postSignInRedirectUrl: String = ""
+              override val notAuthorisedRedirectUrl: String = ""
+              override val identityVerification: Boolean = false
+              override val ivUpliftUrl: String = "ivuplift"
+              override val ggSignInUrl: String = "ggsignin"
+              override val pertaxFrontendUrl: String = ""
+              override val contactFormServiceIdentifier: String = ""
+              override val breadcrumbPartialUrl: String = ""
+              override lazy val showFullNI: Boolean = false
+              override val futureProofPersonalMax: Boolean = false
+              override val isWelshEnabled = false
+              override val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
+              override val feedbackFrontendUrl: String = "/foo"
+            }
+            override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
+          }
+          val result = controller.signOut(fakeRequest)
+
+          redirectLocation(result).get shouldBe "/foo"
+        }
+
+        "redirect to the feedback questionnaire page when govuk done page is enabled" in {
+            val controller = new MockStatePensionController {
+              override val authenticate: AuthAction = new MockAuthAction(TestAccountBuilder.regularNino)
+              override val applicationConfig: ApplicationConfig = new ApplicationConfig {
+                override val assetsPrefix: String = ""
+                override val reportAProblemNonJSUrl: String = ""
+                override val ssoUrl: Option[String] = None
+                override val betaFeedbackUnauthenticatedUrl: String = ""
+                override val contactFrontendPartialBaseUrl: String = ""
+                override val govUkFinishedPageUrl: String = "govukdone"
+                override val showGovUkDonePage: Boolean = true
+                override val analyticsHost: String = ""
+                override val analyticsToken: Option[String] = None
+                override val betaFeedbackUrl: String = ""
+                override val reportAProblemPartialUrl: String = ""
+                override val verifySignIn: String = ""
+                override val verifySignInContinue: Boolean = false
+                override val postSignInRedirectUrl: String = ""
+                override val notAuthorisedRedirectUrl: String = ""
+                override val identityVerification: Boolean = false
+                override val ivUpliftUrl: String = "ivuplift"
+                override val ggSignInUrl: String = "ggsignin"
+                override val pertaxFrontendUrl: String = ""
+                override val contactFormServiceIdentifier: String = ""
+                override val breadcrumbPartialUrl: String = ""
+                override lazy val showFullNI: Boolean = false
+                override val futureProofPersonalMax: Boolean = false
+                override val isWelshEnabled = false
+                override val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
+                override val feedbackFrontendUrl: String = "/foo"
+              }
+              override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = MockCachedStaticHtmlPartialRetriever
+            }
+            val result = controller.signOut(fakeRequest)
+
+            redirectLocation(result).get shouldBe "/foo"
+          }
+        }
 }

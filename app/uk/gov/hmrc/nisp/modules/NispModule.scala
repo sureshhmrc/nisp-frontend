@@ -17,11 +17,11 @@
 package uk.gov.hmrc.nisp.modules
 
 import com.google.inject.AbstractModule
-import uk.gov.hmrc.nisp.services.CitizenDetailsService
+import uk.gov.hmrc.nisp.connectors.CitizenDetailsConnector
 
-class NispModule  extends AbstractModule {
+class NispModule extends AbstractModule {
 
   override def configure(): Unit = {
-    bind(classOf[CitizenDetailsService]).toInstance(CitizenDetailsService)
+    bind(classOf[CitizenDetailsConnector]).toInstance(CitizenDetailsConnector)
   }
 }
