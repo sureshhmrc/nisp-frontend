@@ -42,7 +42,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 object StatePensionController extends StatePensionController {
 
   override val sessionCache: SessionCache = NispSessionCache
-  override val customAuditConnector = CustomAuditConnector
+  override val customAuditConnector: CustomAuditConnector.type = CustomAuditConnector
   override val applicationConfig: ApplicationConfig = ApplicationConfig
   override val metricsService: MetricsService = MetricsService
   override val statePensionService: StatePensionService = StatePensionService

@@ -26,7 +26,6 @@ import uk.gov.hmrc.auth.core.retrieve.{Name, ~}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, ConfidenceLevel, NoActiveSession, PlayAuthConnector}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{CorePost, HeaderCarrier, InternalServerException}
-import uk.gov.hmrc.nisp.auth.NispCompositePageVisibilityPredicate
 import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.config.wiring.WSHttp
 import uk.gov.hmrc.nisp.connectors.CitizenDetailsConnector
@@ -43,7 +42,7 @@ case class AuthenticatedRequest[A](request: Request[A],
                                    nispAuthedUser: NispAuthedUser
                                   ) extends WrappedRequest[A](request)
 
-class AuthActionImpl @Inject()(override val authConnector: AuthConnector,
+class AuthActionImpl @Inject()(override val authConnector: NispAuthConnector,
                                cds: CitizenDetailsService)
                               (implicit ec: ExecutionContext) extends AuthAction with AuthorisedFunctions {
 
@@ -51,7 +50,7 @@ class AuthActionImpl @Inject()(override val authConnector: AuthConnector,
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    //Add authorisation parameters
+    //TODO: Add authorisation parameters
     authorised().
       retrieve(Retrievals.nino and Retrievals.confidenceLevel) {
         case Some(nino) ~ confidenceLevel => {
@@ -86,10 +85,10 @@ trait AuthAction extends ActionBuilder[AuthenticatedRequest] with ActionFunction
   def getAuthenticationProvider(confidenceLevel: ConfidenceLevel): String
 }
 
-object AuthAction extends AuthActionImpl(AuthConnector, new CitizenDetailsService(CitizenDetailsConnector))
+// object AuthAction extends AuthActionImpl(new NispAuthConnector, new CitizenDetailsService(CitizenDetailsConnector))
 
-object AuthConnector extends PlayAuthConnector with ServicesConfig {
-  override val serviceUrl: String = baseUrl("auth")
+class NispAuthConnector extends PlayAuthConnector with ServicesConfig {
+  override lazy val serviceUrl: String = baseUrl("auth")
 
   override def http: CorePost = WSHttp
 
@@ -98,9 +97,9 @@ object AuthConnector extends PlayAuthConnector with ServicesConfig {
   override protected def runModeConfiguration: Configuration = Play.current.configuration
 }
 
-class VerifyAuthActionImpl @Inject()(override val authConnector: AuthConnector,
-                               cds: CitizenDetailsService)
-                              (implicit ec: ExecutionContext) extends AuthAction with AuthorisedFunctions {
+class VerifyAuthActionImpl @Inject()(override val authConnector: NispAuthConnector,
+                                     cds: CitizenDetailsService)
+                                    (implicit ec: ExecutionContext) extends AuthAction with AuthorisedFunctions {
 
   override def invokeBlock[A](request: Request[A], block: AuthenticatedRequest[A] => Future[Result]): Future[Result] = {
 
@@ -132,7 +131,7 @@ class VerifyAuthActionImpl @Inject()(override val authConnector: AuthConnector,
 
   def parameters: Map[String, Seq[String]] = {
 
-    val continueUrl = Map("origin" -> Seq("nisp-frontend"), "accountType" -> Seq("individual"))
+    val continueUrl = Map[String, Seq[String]]()
 
     if (ApplicationConfig.verifySignInContinue) {
       continueUrl + ("continue" -> Seq(ApplicationConfig.postSignInRedirectUrl))
@@ -144,14 +143,12 @@ class VerifyAuthActionImpl @Inject()(override val authConnector: AuthConnector,
   }
 }
 
-object VerifyAuthAction extends VerifyAuthActionImpl(AuthConnector, new CitizenDetailsService(CitizenDetailsConnector))
-
 object AuthActionSelector {
-  def decide(applicationConfig: ApplicationConfig)(implicit app: Application): AuthAction ={
+  def decide(applicationConfig: ApplicationConfig)(implicit app: Application): AuthAction = {
     if (applicationConfig.identityVerification) {
       app.injector.instanceOf[AuthActionImpl]
-      } else {
+    } else {
       app.injector.instanceOf[VerifyAuthActionImpl]
-      }
+    }
   }
 }

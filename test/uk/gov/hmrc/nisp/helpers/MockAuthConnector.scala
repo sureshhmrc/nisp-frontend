@@ -21,12 +21,13 @@ import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, UserId}
+import uk.gov.hmrc.nisp.controllers.auth.NispAuthConnector
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L500
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.{Accounts, Authority, CredentialStrength, PayeAccount}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object MockAuthConnector extends AuthConnector {
+object MockAuthConnector extends NispAuthConnector {
   val mockUserId: UserId = userID("mockuser")
 
   def userID(username: String): UserId = UserId(s"/auth/oid/$username")
@@ -68,12 +69,14 @@ object MockAuthConnector extends AuthConnector {
     userID("mockexcludedabroad") -> TestAccountBuilder.excludedAbroad
   )
 
-  private def payeAuthority(id: String, nino: Nino): Option[Authority] =
-    Some(Authority(id, Accounts(paye = Some(PayeAccount(s"/paye/$nino", nino))), None, None,
-      testCredentialStrength(nino), L500, None, None, None, "test oid"))
+//  private def payeAuthority(id: String, nino: Nino): Option[Authority] =
+//    Some(Authority(id, Accounts(paye = Some(PayeAccount(s"/paye/$nino", nino))), None, None,
+//      testCredentialStrength(nino), L500, None, None, None, "test oid"))
 
   private def testCredentialStrength(nino: Nino): CredentialStrength =
     if (nino == TestAccountBuilder.weakNino) CredentialStrength.Weak else CredentialStrength.Strong
 
-  override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[A] = Future.failed(new RuntimeException("shouldn't be called directly"))
+  override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[A] = {
+    ???
+  }
 }

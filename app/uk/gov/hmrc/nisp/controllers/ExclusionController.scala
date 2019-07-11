@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nisp.controllers
 
-import play.api.Logger
+import play.api.{Logger, Play}
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent}
@@ -31,7 +31,7 @@ import uk.gov.hmrc.nisp.views.html._
 object ExclusionController extends ExclusionController with PartialRetriever with NispFrontendController {
   override val statePensionService: StatePensionService = StatePensionService
   override val nationalInsuranceService: NationalInsuranceService = NationalInsuranceService
-  override val authenticate: AuthAction = AuthAction
+  override val authenticate: AuthAction = Play.current.injector.instanceOf[AuthAction]
 }
 
 trait ExclusionController extends NispFrontendController {

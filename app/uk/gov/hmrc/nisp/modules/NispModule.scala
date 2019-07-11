@@ -16,12 +16,18 @@
 
 package uk.gov.hmrc.nisp.modules
 
-import com.google.inject.AbstractModule
+import play.api.inject.{Binding, Module}
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.nisp.connectors.CitizenDetailsConnector
+import uk.gov.hmrc.nisp.services.CitizenDetailsService
 
-class NispModule extends AbstractModule {
+class NispModule extends Module {
 
-  override def configure(): Unit = {
-    bind(classOf[CitizenDetailsConnector]).toInstance(CitizenDetailsConnector)
-  }
+    override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = Seq(
+    bind[AuthConnector].to(classOf[AuthConnector]),
+    bind[CitizenDetailsConnector].to(classOf[CitizenDetailsConnector]),
+    bind[CitizenDetailsService].to(classOf[CitizenDetailsService])
+  )
+
 }
