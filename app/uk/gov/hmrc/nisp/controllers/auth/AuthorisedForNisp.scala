@@ -32,7 +32,7 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import scala.concurrent.Future
 import uk.gov.hmrc.http.{ HeaderCarrier, SessionKeys }
 
-trait AuthorisedForNisp extends Actions {
+trait AuthorisedForNisp extends DelegationAwareActions {
   val citizenDetailsService: CitizenDetailsService
   val applicationConfig: ApplicationConfig
 

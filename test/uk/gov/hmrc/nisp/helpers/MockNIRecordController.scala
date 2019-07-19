@@ -17,26 +17,30 @@
 package uk.gov.hmrc.nisp.helpers
 
 import org.joda.time.LocalDate
+import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.nisp.config.{ApplicationConfig, ApplicationGlobalTrait}
 import uk.gov.hmrc.nisp.controllers.NIRecordController
 import uk.gov.hmrc.nisp.controllers.connectors.CustomAuditConnector
 import uk.gov.hmrc.nisp.services.{CitizenDetailsService, MetricsService, NationalInsuranceService, StatePensionService}
 import uk.gov.hmrc.nisp.utils.MockTemplateRenderer
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import uk.gov.hmrc.play.frontend.auth.connectors.{AuthConnector, DelegationConnector}
 import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.renderer.TemplateRenderer
 
-object MockNIRecordController extends MockNIRecordController {
+object MockNIRecordController extends MockNIRecordController with MockitoSugar {
   override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
   override val customAuditConnector: CustomAuditConnector = MockCustomAuditConnector
   override val sessionCache: SessionCache = MockSessionCache
   override val showFullNI: Boolean = true
   override val currentDate = new LocalDate(2016,9,9)
   override val metricsService: MetricsService = MockMetricsService
+
+  override protected def delegationConnector = mock[DelegationConnector]
 }
 
-trait MockNIRecordController extends NIRecordController {
+trait MockNIRecordController extends NIRecordController with MockitoSugar {
+  override protected def delegationConnector = mock[DelegationConnector]
   override protected def authConnector: AuthConnector = MockAuthConnector
   override val nationalInsuranceService: NationalInsuranceService = MockNationalInsuranceServiceViaNationalInsurance
   override val statePensionService: StatePensionService = MockStatePensionServiceViaStatePension

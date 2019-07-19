@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.nisp.controllers.connectors
 
-import uk.gov.hmrc.nisp.config.wiring.{NispAuditConnector, NispAuthConnector}
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import uk.gov.hmrc.nisp.config.wiring.{NispAuditConnector, NispAuthConnector, NispDelegationConnector}
+import uk.gov.hmrc.play.frontend.auth.connectors.{AuthConnector, DelegationConnector}
 
 trait AuthenticationConnectors {
 
@@ -25,4 +25,5 @@ trait AuthenticationConnectors {
 
   def authConnector: AuthConnector = NispAuthConnector
 
+  def delegationConnector: DelegationConnector = NispDelegationConnector
 }

@@ -22,7 +22,7 @@ import play.api.Mode.Mode
 import play.api.{Configuration, Play}
 import uk.gov.hmrc.http.HttpGet
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import uk.gov.hmrc.play.frontend.auth.connectors.{AuthConnector, DelegationConnector}
 
 object NispAuthConnector extends AuthConnector with ServicesConfig {
   override val serviceUrl: String = baseUrl("auth")
@@ -35,4 +35,12 @@ object NispAuthConnector extends AuthConnector with ServicesConfig {
 
   override protected def mode: Mode = Play.current.mode
   override protected def runModeConfiguration: Configuration = Play.current.configuration
+}
+
+
+object NispDelegationConnector extends DelegationConnector with ServicesConfig {
+  override protected def mode = Play.current.mode
+  override protected def runModeConfiguration = Play.current.configuration
+  val serviceUrl = baseUrl("delegation")
+  lazy val http = WSHttp
 }

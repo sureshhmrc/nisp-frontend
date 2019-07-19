@@ -27,12 +27,12 @@ import play.api.i18n.Messages.Implicits._
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.nisp.config.wiring.NispFormPartialRetriever
-import uk.gov.hmrc.nisp.config.{ApplicationConfig}
+import uk.gov.hmrc.nisp.config.ApplicationConfig
 import uk.gov.hmrc.nisp.connectors.IdentityVerificationConnector
 import uk.gov.hmrc.nisp.helpers.{MockAuthConnector, MockCachedStaticHtmlPartialRetriever, MockCitizenDetailsService, MockIdentityVerificationConnector}
 import uk.gov.hmrc.nisp.services.CitizenDetailsService
 import uk.gov.hmrc.nisp.views.html.{identity_verification_landing, landing}
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import uk.gov.hmrc.play.frontend.auth.connectors.{AuthConnector, DelegationConnector}
 import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.time.DateTimeUtils._
 import uk.gov.hmrc.renderer.TemplateRenderer
@@ -49,6 +49,8 @@ class LandingControllerSpec  extends PlaySpec with MockitoSugar with OneAppPerSu
   implicit val templateRenderer: TemplateRenderer = MockTemplateRenderer
 
   val testLandingController = new LandingController {
+    override protected def delegationConnector = mock[DelegationConnector]
+
     override val citizenDetailsService: CitizenDetailsService = MockCitizenDetailsService
 
     override val applicationConfig: ApplicationConfig = mock[ApplicationConfig]
