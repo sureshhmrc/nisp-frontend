@@ -23,6 +23,13 @@
   .printable .niRecordPage a, .printable .panel-indent {
      display: none;
   }
+  .printable .mainpage .graph .amount {
+    text-align: left;
+  }
+
+    #print-sp-link {
+        display: none;
+    }
 
   .printable .content__body .accordion a {
      display: block;
