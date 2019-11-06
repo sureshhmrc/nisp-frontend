@@ -49,6 +49,7 @@ partialRetriever: CachedStaticHtmlPartialRetriever, application: Application, fo
         printableDocument = true,
         pageTitle = Some(Messages(if(user.livesAbroad) "nisp.nirecord.heading.uk" else "nisp.nirecord.heading")),
         h1Class = Some("titleWithPageInfo"),
+        articleClasses = Some("niRecordPage"),
         gaDimensions = Some(analyticsAdditionalJs),
         showUrBanner = true
     )) {
