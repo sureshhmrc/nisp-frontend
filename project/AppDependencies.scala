@@ -11,6 +11,7 @@ object AppDependencies {
     "uk.gov.hmrc" %% "play-conditional-form-mapping" % "1.2.0-play-25",
     "uk.gov.hmrc" %% "local-template-renderer"  % "2.8.0-play-25",
     "uk.gov.hmrc" %% "play-breadcrumb"  % "1.0.0",
+    "uk.gov.hmrc" %% "play-ui" % "8.15.0-play-26",
     "uk.gov.hmrc" %% "auth-client"  %  "2.31.0-play-25"
   )
 

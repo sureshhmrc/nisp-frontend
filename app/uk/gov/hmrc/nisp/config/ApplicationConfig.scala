@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ trait ApplicationConfig {
   val betaFeedbackUrl: String
   val betaFeedbackUnauthenticatedUrl: String
   val analyticsToken: Option[String]
-  val googleTagManagerId: String
-  val isGtmEnabled: Boolean
   val analyticsHost: String
   val ssoUrl: Option[String]
   val contactFormServiceIdentifier: String
@@ -71,8 +69,6 @@ object ApplicationConfig extends ApplicationConfig with ServicesConfig {
   override lazy val ssoUrl: Option[String] = configuration.getString(s"portal.ssoUrl")
   lazy val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
 
-  override lazy val googleTagManagerId = loadConfig("google-tag-manager.id")
-  override lazy val isGtmEnabled = configuration.getBoolean("google-tag-manager.enabled").getOrElse(false)
   override val contactFormServiceIdentifier = "NISP"
   override lazy val contactFrontendPartialBaseUrl = s"$contactFrontendService"
   override lazy val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"

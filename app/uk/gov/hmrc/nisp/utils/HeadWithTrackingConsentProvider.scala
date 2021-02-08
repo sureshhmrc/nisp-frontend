@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import play.api.i18n.Messages
+package uk.gov.hmrc.nisp.utils
 
-@()(implicit messages: Messages)
+import play.api.Play
+import uk.gov.hmrc.play.views.html.layouts.HeadWithTrackingConsent
 
-@****************************@
-@*                          *@
-@*  Exclusion template for  *@
-@*  living overseas         *@
-@*                          *@
-@****************************@
-
-    <p> @Html(messages("nisp.excluded.overseas")) </p>
+object HeadWithTrackingConsentProvider {
+  lazy val get =
+    Play.current.injector.instanceOf[HeadWithTrackingConsent]
+}
