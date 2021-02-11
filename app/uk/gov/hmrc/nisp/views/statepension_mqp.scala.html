@@ -54,31 +54,12 @@ application: Application, formPartialRetriever: uk.gov.hmrc.play.partials.FormPa
 </div>
 }
 
-@analyticsAdditionalJs = @{
-    Map[String, Any](
-        "scenarioType" -> statePension.forecastScenario,
-        "forecastValue" -> statePension.amounts.forecast.weeklyAmount,
-        "qualifyingYears" -> statePension.numberOfQualifyingYears,
-        "gaps" -> numberOfGaps,
-        "payableGaps" -> numberOfPayableGaps,
-        "yearsToContribute" -> yearsToContributeUntilPensionAge,
-        "contractedOut" -> statePension.contractedOut,
-        "statePensionAge" -> statePension.pensionAge,
-        "copeAmount" -> statePension.amounts.cope.weeklyAmount,
-        "authenticationProvider" -> authDetails.authProvider.getOrElse("N/A").toLowerCase(),
-        "authProvider" -> authDetails.authProvider.getOrElse("N/A").toLowerCase(),
-        "confidenceLevel" -> authDetails.confidenceLevel,
-        "ageOnVisit" -> customerAge
-    )
-}
-
 @defining(Some(user)) { implicit userOption =>
 @main(MainTemplateParams(
     userLoggedIn = true,
     browserTitle = Some(messages("nisp.main.title")),
     pageTitle = Some(messages("nisp.main.h1.title")),
-    sidebarLinks = Some(sidebar),
-    gaDimensions = Some(analyticsAdditionalJs)
+    sidebarLinks = Some(sidebar)
 )) {
 
     <div class="panel-indent panel-border-wide panel-indent--info">

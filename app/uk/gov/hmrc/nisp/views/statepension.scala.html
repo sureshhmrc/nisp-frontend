@@ -56,24 +56,6 @@ application: Application, formPartialRetriever: uk.gov.hmrc.play.partials.FormPa
 </div>
 }
 
-@analyticsAdditionalJs = @{
-    Map[String, Any](
-    "scenarioType" -> statePension.forecastScenario,
-    "forecastValue" -> statePension.amounts.forecast.weeklyAmount,
-    "qualifyingYears" -> statePension.numberOfQualifyingYears,
-    "gaps" -> numberOfGaps,
-    "payableGaps" -> numberOfGapsPayable,
-    "yearsToContribute" -> yearsToContributeUntilPensionAge,
-    "contractedOut" -> statePension.contractedOut,
-    "statePensionAge" -> statePension.pensionAge,
-    "copeAmount" -> statePension.amounts.cope.weeklyAmount,
-    "authenticationProvider" -> authDetails.authProvider.getOrElse("N/A").toLowerCase(),
-    "authProvider" -> authDetails.authProvider.getOrElse("N/A").toLowerCase(),
-    "confidenceLevel" -> authDetails.confidenceLevel,
-    "ageOnVisit" -> customerAge
-    )
-}
-
 @defining(Some(user)) { implicit userOption =>
     @main(MainTemplateParams(
         userLoggedIn = true,
@@ -84,8 +66,7 @@ application: Application, formPartialRetriever: uk.gov.hmrc.play.partials.FormPa
         pageTitle = Some(messages("nisp.main.h1.title")),
         h1Class = Some("titleWithPageInfo"),
         sidebarLinks = Some(sidebar),
-        articleClasses = Some("mainpage"),
-        gaDimensions = Some(analyticsAdditionalJs)
+        articleClasses = Some("mainpage")
     )) {
 
 

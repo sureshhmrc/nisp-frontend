@@ -31,21 +31,11 @@ statePensionAge: Option[Int])(
         templateRenderer: uk.gov.hmrc.renderer.TemplateRenderer
 )
 
-@analyticsAdditionalJs = @{
-    Map[String, Any](
-    "nispExclusionType" -> exclusion.toString,
-    "statePensionAge" -> statePensionAge,
-    "authProvider" -> authDetails.authProvider.getOrElse("N/A").toLowerCase(),
-    "confidenceLevel" -> authDetails.confidenceLevel
-    )
-}
-
 @unauthenticatedMain(MainTemplateParams(
         userLoggedIn = true,
         browserTitle = Some(messages("nisp.main.title")),
         pageTitle = Some(messages("nisp.excluded.mci.title")),
         articleClasses = Some("mainpage"),
-        gaDimensions = Some(analyticsAdditionalJs),
         hideBreadcrumb = true
 )) {
     <p class="lede">@Html(messages("nisp.excluded.mci.info"))</p>

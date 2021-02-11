@@ -27,8 +27,6 @@ trait ApplicationConfig {
   val assetsPrefix: String
   val betaFeedbackUrl: String
   val betaFeedbackUnauthenticatedUrl: String
-  val analyticsToken: Option[String]
-  val analyticsHost: String
   val ssoUrl: Option[String]
   val contactFormServiceIdentifier: String
   val contactFrontendPartialBaseUrl: String
@@ -64,8 +62,6 @@ object ApplicationConfig extends ApplicationConfig with ServicesConfig {
   override lazy val assetsPrefix: String = loadConfig(s"assets.url") + loadConfig(s"assets.version") + "/"
   override lazy val betaFeedbackUrl = s"${Constants.baseUrl}/feedback"
   override lazy val betaFeedbackUnauthenticatedUrl = betaFeedbackUrl
-  override lazy val analyticsToken: Option[String] = configuration.getString(s"google-analytics.token")
-  override lazy val analyticsHost: String = configuration.getString(s"google-analytics.host").getOrElse("auto")
   override lazy val ssoUrl: Option[String] = configuration.getString(s"portal.ssoUrl")
   lazy val frontendTemplatePath: String = configuration.getString("microservice.services.frontend-template-provider.path").getOrElse("/template/mustache")
 

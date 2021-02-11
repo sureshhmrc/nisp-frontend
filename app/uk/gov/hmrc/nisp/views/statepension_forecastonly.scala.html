@@ -46,26 +46,6 @@ formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever, templateRe
 </div>
 }
 
-@analyticsAdditionalJs(implicit request: AuthenticatedRequest[_], user: NispAuthedUser, partialRetriever: CachedStaticHtmlPartialRetriever) = @{
-    Map[String, Any](
-        "scenarioType" -> statePension.forecastScenario,
-        "forecastValue" -> statePension.amounts.forecast.annualAmount,
-        "qualifyingYears" -> statePension.numberOfQualifyingYears,
-        "gaps" -> numberOfGaps,
-        "payableGaps" -> numberOfGapsPayable,
-
-        "yearsToContribute" -> yearsToContributeUntilPensionAge,
-        "contractedOut" -> statePension.contractedOut,
-        "statePensionAge" -> statePension.pensionAge,
-        "copeAmount" -> statePension.amounts.cope.weeklyAmount,
-        "authenticationProvider" -> authDetails.authProvider.getOrElse("N/A").toLowerCase(),
-        "authProvider" -> authDetails.authProvider.getOrElse("N/A").toLowerCase(),
-        "confidenceLevel" -> authDetails.confidenceLevel,
-        "ageOnVisit" -> customerAge
-    )
-}
-
-
 @pageTitle = { @messages("nisp.main.h1.title") }
 
 @defining(Some(user)) { implicit userOption =>
@@ -75,7 +55,6 @@ formPartialRetriever: uk.gov.hmrc.play.partials.FormPartialRetriever, templateRe
     pageInfo = Some(user.name.getOrElse("")),
     pageTitle = Some(messages("nisp.main.h1.title")),
     h1Class = Some("titleWithPAgeInfo"),
-    gaDimensions = Some(analyticsAdditionalJs),
     sidebarLinks = Some(sidebar),
     showUrBanner = true
 )) {

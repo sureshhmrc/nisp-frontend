@@ -31,20 +31,10 @@
         templateRenderer: uk.gov.hmrc.renderer.TemplateRenderer
 )
 
-@analyticsAdditionalJs = @{
-    Map[String, Any](
-    "nispExclusionType" -> exclusion.toString,
-    "statePensionAge" -> statePensionAge,
-    "authProvider" -> request.authDetails.authProvider,
-    "confidenceLevel" -> request.authDetails.confidenceLevel
-    )
-}
-
 @unauthenticatedMain(MainTemplateParams(
     Some(messages("nisp.main.title")),
     userLoggedIn = true,
-    pageTitle = Some(messages("nisp.excluded.title")),
-    gaDimensions = Some(analyticsAdditionalJs)
+    pageTitle = Some(messages("nisp.excluded.title"))
 )) {
     @exclusions.dead()
 }

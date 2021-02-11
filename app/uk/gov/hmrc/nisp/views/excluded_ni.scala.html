@@ -30,11 +30,6 @@
         templateRenderer: uk.gov.hmrc.renderer.TemplateRenderer
 )
 
-@analyticsAdditionalJs = @{
-    Map[String, Any](
-        "nispExclusionType" -> exclusion.toString
-    )
-}
 
 @excludeUrPanel(showUrBannerOn: Exclusion) = @{
     showUrBannerOn == PostStatePensionAge | showUrBannerOn == IsleOfMan
@@ -44,7 +39,6 @@
     browserTitle=Some(messages("nisp.main.title")),
     pageTitle = Some(messages("nisp.nirecord.heading")),
     userLoggedIn = true,
-    gaDimensions = Some(analyticsAdditionalJs),
     showUrBanner = excludeUrPanel(exclusion)
 )) {
     <div class="panel-indent">
